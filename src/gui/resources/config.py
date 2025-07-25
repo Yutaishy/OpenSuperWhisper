@@ -5,10 +5,11 @@
 
 from __future__ import annotations
 
-from pathlib import Path
+# from pathlib import Path  # Unused; remove
 from typing import Any, Dict
 
-from ...core.logging_helper import LOG_DIR_DEFAULT
+# Use absolute import to ensure PyInstaller compatibility
+from core.logging_helper import LOG_DIR_DEFAULT
 
 # Settings key → default value
 DEFAULTS: Dict[str, Any] = {

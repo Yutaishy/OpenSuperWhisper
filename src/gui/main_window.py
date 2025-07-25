@@ -36,17 +36,18 @@ from .components.dialogs.post_formatter_settings_dialog import PostFormatterSett
 from .components.dialogs.style_guide_dialog import StyleGuideDialog
 from .components.dialogs.vocabulary_review_dialog import VocabularyReviewDialog
 
-from ..core.asr_openai import OpenAIASRClient
-from ..core.logging_helper import (
+# Absolute imports for frozen env compatibility
+from core.asr_openai import OpenAIASRClient
+from core.logging_helper import (
     create_session_dir,
     save_formatted_json,
     save_meta,
     save_prompt_text,
     save_raw_text,
 )
-from ..core.post_formatter import PostFormatter
-from ..core.style_loader import load_style
-from ..core.vocab_extractor import VocabularyExtractor
+from core.post_formatter import PostFormatter
+from core.style_loader import load_style
+from core.vocab_extractor import VocabularyExtractor
 
 
 class MainWindow(QMainWindow):
