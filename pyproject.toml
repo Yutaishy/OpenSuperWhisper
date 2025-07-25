@@ -1,0 +1,29 @@
+[project]
+name = "open-super-whisper"
+version = "0.2.0"
+description = "Voice input and formatting tool implementing 2-stage architecture (ASR → o4-mini)"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "openai",
+    "janome",
+    "pyyaml",
+    "jsonschema",
+    "PyQt6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "black",
+    "pytest",
+    "pre-commit",
+]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+line-length = 88
+target-version = ["py312"] 
