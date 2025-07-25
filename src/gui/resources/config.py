@@ -24,6 +24,8 @@ DEFAULTS: Dict[str, Any] = {
     "post_formatter/system_prompt": "assets/prompts/formatter_system_prompt.txt",
     # Style guide
     "style_guide/path": "",
+    # OpenAI
+    "openai/api_key": "",
     # Vocabulary
     "vocabulary/list": [],
     # Log base directory

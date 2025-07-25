@@ -27,6 +27,8 @@ from PyQt6.QtWidgets import (
     QStatusBar,
     QTabWidget,
     QToolBar,
+    QInputDialog,
+    QLineEdit,
 )
 
 import os
@@ -64,11 +66,23 @@ class MainWindow(QMainWindow):
         self.settings = QSettings(self.SETTINGS_ORG, self.SETTINGS_APP)
         _apply_default_settings(self.settings)
 
-        # Core components (API keyは環境変数 OPENAI_API_KEY とする)
-        api_key = os.environ.get("OPENAI_API_KEY", "")
+        # Core components: get API key from env, settings, or prompt
+        api_key = (
+            os.environ.get("OPENAI_API_KEY")
+            or self.settings.value("openai/api_key", "")
+        )
+
         if not api_key:
-            QMessageBox.critical(self, "API Key Missing", "環境変数 OPENAI_API_KEY が設定されていません。")
-            sys.exit(1)
+            api_key, ok = QInputDialog.getText(
+                self,
+                "OpenAI API Key",
+                "OpenAI API キーを入力してください:",
+                QLineEdit.Password,
+            )
+            if not ok or not api_key:
+                QMessageBox.critical(self, "API Key Missing", "API キーが設定されていません。")
+                sys.exit(1)
+            self.settings.setValue("openai/api_key", api_key)
 
         self.asr_client = OpenAIASRClient(api_key=api_key)
         self.post_formatter = PostFormatter(api_key=api_key)
@@ -100,6 +114,9 @@ class MainWindow(QMainWindow):
 
         sg_action = settings_menu.addAction("Load Style Guide…")
         sg_action.triggered.connect(self._open_style_guide_dialog)
+
+        api_action = settings_menu.addAction("API Key…")
+        api_action.triggered.connect(self._edit_api_key)
 
         self.vocab_action = settings_menu.addAction("Review Vocabulary…")
         self.vocab_action.setEnabled(False)
@@ -204,6 +221,19 @@ class MainWindow(QMainWindow):
             # Clear candidate list after review
             self.candidate_vocab = []
             self.vocab_action.setEnabled(False)
+
+    # ------------------------------------------------------------------
+    # API Key edit helper
+    # ------------------------------------------------------------------
+
+    def _edit_api_key(self) -> None:  # noqa: D401
+        current = self.settings.value("openai/api_key", "")
+        key, ok = QInputDialog.getText(
+            self, "OpenAI API Key", "API キーを入力:", QLineEdit.Password, current
+        )
+        if ok and key:
+            self.settings.setValue("openai/api_key", key)
+            QMessageBox.information(self, "API Key", "API キーを更新しました。")
 
 
 # ----------------------------------------------------------------------
