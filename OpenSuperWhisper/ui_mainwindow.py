@@ -12,9 +12,13 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayo
                                QDialog, QListWidget, QListWidgetItem, QMenuBar, QMenu,
                                QProgressBar, QLineEdit, QInputDialog)
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QShortcut, QKeySequence, QAction
+from PySide6.QtGui import QShortcut, QKeySequence, QAction, QClipboard
 
 from . import asr_api, formatter_api, vocabulary, config, logger
+from .recording_indicator import GlobalRecordingIndicator
+from .global_hotkey import GlobalHotkeyManager
+from .simple_hotkey import get_hotkey_monitor
+from .direct_hotkey import get_direct_monitor
 
 DEFAULT_PROMPT = "Please format the following transcribed text with proper punctuation, capitalization, and clear structure."
 
@@ -75,6 +79,7 @@ class MainWindow(QMainWindow):
         self.setup_ui()
         self.setup_menu()
         self.setup_shortcuts()
+        self.setup_global_features()
         self.load_settings()
         
     def setup_ui(self):
@@ -163,6 +168,10 @@ class MainWindow(QMainWindow):
         self.post_format_toggle.setChecked(True)
         record_layout.addWidget(self.post_format_toggle)
         
+        self.auto_copy_toggle = QCheckBox("Auto-copy to Clipboard")
+        self.auto_copy_toggle.setChecked(True)
+        record_layout.addWidget(self.auto_copy_toggle)
+        
         layout.addLayout(record_layout)
         
         # Tab widget for results
@@ -214,6 +223,8 @@ class MainWindow(QMainWindow):
             lambda text: config.save_setting(config.KEY_CHAT_MODEL, text))
         self.post_format_toggle.toggled.connect(
             lambda state: config.save_setting(config.KEY_POST_FORMAT, state))
+        self.auto_copy_toggle.toggled.connect(
+            lambda state: config.save_setting("auto_copy_clipboard", state))
     
     def setup_menu(self):
         menubar = self.menuBar()
@@ -258,11 +269,119 @@ class MainWindow(QMainWindow):
         about_action = QAction("About", self)
         about_action.triggered.connect(self.show_about)
         help_menu.addAction(about_action)
+        
+        help_menu.addSeparator()
+        
+        shortcuts_action = QAction("Keyboard Shortcuts", self)
+        shortcuts_action.triggered.connect(self.show_shortcuts)
+        help_menu.addAction(shortcuts_action)
     
     def setup_shortcuts(self):
-        # Ctrl+Space for record/stop toggle
+        # Ctrl+Space for record/stop toggle (local only - global handled separately)
         self.record_shortcut = QShortcut(QKeySequence("Ctrl+Space"), self)
-        self.record_shortcut.activated.connect(self.toggle_recording)
+        self.record_shortcut.activated.connect(self.toggle_recording_unified)
+    
+    def setup_global_features(self):
+        """Setup global hotkeys and overlay indicator"""
+        # Initialize global recording indicator
+        self.global_indicator = GlobalRecordingIndicator.get_instance()
+        self.global_indicator.set_parent_window(self)
+        
+        # Setup global hotkey manager with fallback
+        self.hotkey_manager = None
+        self.simple_hotkey_monitor = None
+        
+        try:
+            # Use direct keyboard polling for maximum reliability
+            logger.logger.info("Using direct keyboard polling for hotkey monitoring")
+            self.setup_direct_hotkey()
+                
+        except Exception as e:
+            logger.logger.error(f"Global hotkey setup failed: {e}")
+            self.hotkey_manager = None
+            self.simple_hotkey_monitor = None
+            self.direct_monitor = None
+    
+    def setup_fallback_hotkey(self):
+        """Setup fallback hotkey monitoring using SimpleHotkeyMonitor"""
+        try:
+            self.simple_hotkey_monitor = get_hotkey_monitor()
+            self.simple_hotkey_monitor.hotkey_pressed.connect(self.handle_global_hotkey)
+            
+            # Register Ctrl+Space
+            success = self.simple_hotkey_monitor.register_hotkey(
+                "global_record_toggle",
+                "ctrl+space"
+            )
+            
+            if success:
+                logger.logger.info("Global hotkey Ctrl+Space registered with fallback monitor")
+            else:
+                logger.logger.error("Fallback hotkey registration also failed")
+                
+        except Exception as e:
+            logger.logger.error(f"Fallback hotkey setup failed: {e}")
+            self.simple_hotkey_monitor = None
+    
+    def setup_direct_hotkey(self):
+        """Setup direct keyboard polling hotkey monitoring"""
+        try:
+            self.direct_monitor = get_direct_monitor()
+            self.direct_monitor.hotkey_pressed.connect(self.handle_direct_hotkey)
+            
+            success = self.direct_monitor.start_monitoring()
+            
+            if success:
+                logger.logger.info("Direct keyboard monitoring started successfully")
+            else:
+                logger.logger.error("Direct keyboard monitoring failed to start")
+                
+        except Exception as e:
+            logger.logger.error(f"Direct hotkey setup failed: {e}")
+            self.direct_monitor = None
+    
+    def handle_global_hotkey(self, hotkey_id: str):
+        """Handle global hotkey activation"""
+        print(f"DEBUG: Global hotkey received: {hotkey_id}")
+        logger.logger.info(f"Global hotkey activated: {hotkey_id}")
+        if hotkey_id == "global_record_toggle":
+            print("DEBUG: Triggering recording toggle")
+            self.toggle_recording_unified()
+    
+    def handle_direct_hotkey(self, hotkey_id: str):
+        """Handle direct hotkey activation"""
+        print(f"DEBUG: Direct hotkey received: {hotkey_id}")
+        logger.logger.info(f"Direct hotkey activated: {hotkey_id}")
+        if hotkey_id == "ctrl_space":
+            print("DEBUG: Triggering recording toggle from direct hotkey")
+            self.toggle_recording_unified()
+            
+    def toggle_recording_unified(self):
+        """Unified recording toggle (works both locally and globally)"""
+        if self.is_recording:
+            self.stop_recording()
+        else:
+            self.start_recording()
+            
+        # Handle window state appropriately
+        if not self.isMinimized() and self.isVisible():
+            # If window is visible, give it focus
+            self.raise_()
+            self.activateWindow()
+        # If minimized, don't restore - just use indicator for feedback
+    
+    def restore_from_indicator(self):
+        """Restore main window when indicator is clicked"""
+        if self.isMinimized():
+            self.showNormal()
+        else:
+            self.show()
+        self.raise_()
+        self.activateWindow()
+        
+        # Stop recording if currently recording
+        if self.is_recording:
+            self.stop_recording()
         
     def load_settings(self):
         # Load saved settings
@@ -282,6 +401,11 @@ class MainWindow(QMainWindow):
             post_format_setting = post_format_setting.lower() == 'true'
         self.post_format_toggle.setChecked(bool(post_format_setting))
         
+        auto_copy_setting = config.load_setting("auto_copy_clipboard", True)
+        if isinstance(auto_copy_setting, str):
+            auto_copy_setting = auto_copy_setting.lower() == 'true'
+        self.auto_copy_toggle.setChecked(bool(auto_copy_setting))
+        
         prompt_text = config.load_setting(config.KEY_PROMPT_TEXT, DEFAULT_PROMPT)
         self.prompt_text_edit.setPlainText(prompt_text)
         
@@ -297,13 +421,25 @@ class MainWindow(QMainWindow):
         # Save settings on close
         config.save_setting(config.KEY_WINDOW_GEOMETRY, self.saveGeometry())
         config.save_setting(config.KEY_PROMPT_TEXT, self.prompt_text_edit.toPlainText())
+        
+        # Cleanup global features
+        if hasattr(self, 'hotkey_manager') and self.hotkey_manager:
+            self.hotkey_manager.unregister_all()
+        
+        if hasattr(self, 'simple_hotkey_monitor') and self.simple_hotkey_monitor:
+            self.simple_hotkey_monitor.unregister_all()
+        
+        if hasattr(self, 'direct_monitor') and self.direct_monitor:
+            self.direct_monitor.stop_monitoring()
+        
+        if hasattr(self, 'global_indicator'):
+            self.global_indicator.hide_recording()
+        
         super().closeEvent(event)
     
     def toggle_recording(self):
-        if self.is_recording:
-            self.stop_recording()
-        else:
-            self.start_recording()
+        """Legacy method - redirects to unified toggle"""
+        self.toggle_recording_unified()
     
     def update_recording_time(self):
         self.recording_time += 1
@@ -324,6 +460,10 @@ class MainWindow(QMainWindow):
         
         duration = 60  # max duration in seconds
         self.recording = sd.rec(int(duration * self.fs), samplerate=self.fs, channels=1, dtype='int16')
+        
+        # Show global recording indicator
+        if hasattr(self, 'global_indicator'):
+            self.global_indicator.show_recording()
         
     def stop_recording(self):
         if not self.is_recording:
@@ -379,6 +519,13 @@ class MainWindow(QMainWindow):
         # Format if enabled
         if self.post_format_toggle.isChecked():
             self.run_formatting(result_text)
+        else:
+            # Copy raw text to clipboard if formatting is disabled
+            self.copy_to_clipboard_if_enabled(result_text)
+        
+        # Hide global recording indicator
+        if hasattr(self, 'global_indicator'):
+            self.global_indicator.hide_recording()
         
         # Update status
         self.recording_status.setText("Ready")
@@ -400,6 +547,39 @@ class MainWindow(QMainWindow):
         logger.logger.info(f"Formatting prompt used: {user_prompt}")
         if style_text:
             logger.logger.info(f"Style guide used:\n{style_text}")
+        
+        # Copy formatted text to clipboard
+        self.copy_to_clipboard_if_enabled(formatted)
+    
+    def copy_to_clipboard_if_enabled(self, text: str):
+        """Copy text to clipboard if auto-copy is enabled"""
+        if not self.auto_copy_toggle.isChecked():
+            return
+            
+        if not text or not text.strip():
+            return
+            
+        try:
+            # Get the clipboard
+            clipboard = QApplication.clipboard()
+            clipboard.setText(text.strip())
+            
+            # Log and show brief notification
+            logger.logger.info(f"Copied to clipboard: {text[:50]}..." if len(text) > 50 else f"Copied to clipboard: {text}")
+            
+            # Show temporary status update
+            original_status = self.recording_status.text()
+            self.recording_status.setText("📋 Copied to clipboard!")
+            self.recording_status.setStyleSheet("color: #28a745; font-weight: 600;")
+            
+            # Reset status after 2 seconds
+            QTimer.singleShot(2000, lambda: (
+                self.recording_status.setText(original_status),
+                self.recording_status.setStyleSheet("")
+            ))
+            
+        except Exception as e:
+            logger.logger.error(f"Failed to copy to clipboard: {e}")
     
     def load_style_guide(self):
         path, _ = QFileDialog.getOpenFileName(
@@ -464,6 +644,7 @@ class MainWindow(QMainWindow):
             self.asr_model_combo.setCurrentText("whisper-1")
             self.chat_model_combo.setCurrentText("gpt-4o-mini")
             self.post_format_toggle.setChecked(True)
+            self.auto_copy_toggle.setChecked(True)
             self.prompt_text_edit.setPlainText(DEFAULT_PROMPT)
             self.loaded_style_text = ""
             self.style_path_label.setText("No style guide loaded")
@@ -492,6 +673,41 @@ class MainWindow(QMainWindow):
         <p>Licensed under MIT License</p>
         """
         QMessageBox.about(self, "About OpenSuperWhisper", about_text)
+    
+    def show_shortcuts(self):
+        shortcuts_text = """
+        <h3>🎹 Keyboard Shortcuts</h3>
+        
+        <h4>⌨️ Universal Shortcut:</h4>
+        <ul>
+        <li><b>Ctrl+Space</b> - Toggle recording (start/stop)</li>
+        <li>Works everywhere: active window, minimized, or background</li>
+        </ul>
+        
+        <h4>📱 Other Local Shortcuts:</h4>
+        <ul>
+        <li><b>Ctrl+S</b> - Save transcription to file</li>
+        <li><b>Ctrl+Q</b> - Quit application</li>
+        </ul>
+        
+        <h4>🔴 Recording Indicator:</h4>
+        <ul>
+        <li>Red blinking dot appears at bottom-right when recording</li>
+        <li>Click indicator to stop recording and restore window</li>
+        <li>Always visible on top of all applications</li>
+        </ul>
+        
+        <h4>💡 Usage Tips:</h4>
+        <ul>
+        <li>Press <b>Ctrl+Space</b> anywhere to start/stop recording instantly</li>
+        <li>Minimize the app and record while working in other programs</li>
+        <li>The red indicator shows recording status system-wide</li>
+        <li>Click the indicator for quick access to stop recording</li>
+        <li><b>Auto-copy enabled:</b> Results are automatically copied to clipboard</li>
+        <li>Just press <b>Ctrl+V</b> in any app to paste the transcribed text</li>
+        </ul>
+        """
+        QMessageBox.information(self, "Keyboard Shortcuts", shortcuts_text)
     
     def set_api_key(self):
         current_key = config.load_setting(config.KEY_API_KEY, "")
