@@ -78,13 +78,23 @@ class MainWindow(QMainWindow):
         self.load_settings()
         
     def setup_ui(self):
+        # Apply dark theme stylesheet
+        self.apply_dark_theme()
+        
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         layout = QVBoxLayout(central_widget)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
         
         # Model selection row
         model_layout = QHBoxLayout()
-        model_layout.addWidget(QLabel("ASR Model:"))
+        model_layout.setSpacing(15)
+        
+        # ASR Model section
+        asr_label = QLabel("ASR Model:")
+        asr_label.setStyleSheet("font-weight: 600; color: #0078d4;")
+        model_layout.addWidget(asr_label)
         self.asr_model_combo = QComboBox()
         self.asr_model_combo.addItems([
             # === Whisper シリーズ（音声専用）===
@@ -106,7 +116,13 @@ class MainWindow(QMainWindow):
         ])
         model_layout.addWidget(self.asr_model_combo)
         
-        model_layout.addWidget(QLabel("Formatting Model:"))
+        # Add spacer
+        model_layout.addSpacing(20)
+        
+        # Formatting Model section  
+        format_label = QLabel("Formatting Model:")
+        format_label.setStyleSheet("font-weight: 600; color: #0078d4;")
+        model_layout.addWidget(format_label)
         self.chat_model_combo = QComboBox()
         self.chat_model_combo.addItems([
             # === テキスト／マルチモーダル会話（Responses API推奨）===
@@ -128,14 +144,19 @@ class MainWindow(QMainWindow):
         
         # Record controls
         record_layout = QHBoxLayout()
+        record_layout.setSpacing(12)
+        
         self.record_btn = QPushButton("🎤 Record (Ctrl+Space)")
+        self.record_btn.setObjectName("record_btn")
         self.stop_btn = QPushButton("⏹ Stop")
+        self.stop_btn.setObjectName("stop_btn")
         self.stop_btn.setEnabled(False)
         record_layout.addWidget(self.record_btn)
         record_layout.addWidget(self.stop_btn)
         
         # Recording timer/status
         self.recording_status = QLabel("Ready")
+        self.recording_status.setObjectName("recording_status")
         record_layout.addWidget(self.recording_status)
         
         self.post_format_toggle = QCheckBox("Apply Formatting Stage")
@@ -166,9 +187,15 @@ class MainWindow(QMainWindow):
         
         # Style guide controls
         style_layout = QHBoxLayout()
+        style_layout.setSpacing(12)
+        
         self.load_style_btn = QPushButton("Load Style Guide...")
+        self.load_style_btn.setObjectName("load_style_btn")
         self.style_path_label = QLabel("No style guide loaded")
+        self.style_path_label.setObjectName("style_path_label")
         self.save_btn = QPushButton("💾 Save Transcription...")
+        self.save_btn.setObjectName("save_btn")
+        
         style_layout.addWidget(self.load_style_btn)
         style_layout.addWidget(self.style_path_label)
         style_layout.addWidget(self.save_btn)
@@ -496,6 +523,261 @@ class MainWindow(QMainWindow):
         elif ok:
             QMessageBox.warning(self, "Empty API Key", 
                               "Please enter a valid API key.")
+    
+    def apply_dark_theme(self):
+        """Apply sophisticated dark theme with high contrast and modern aesthetics"""
+        dark_style = """
+        /* Main Window */
+        QMainWindow {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        
+        /* Central Widget */
+        QWidget {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: 'Segoe UI', 'SF Pro Display', system-ui, sans-serif;
+            font-size: 11pt;
+        }
+        
+        /* Labels */
+        QLabel {
+            color: #e0e0e0;
+            font-weight: 500;
+            padding: 2px;
+        }
+        
+        /* Combo Boxes */
+        QComboBox {
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: #ffffff;
+            font-weight: 500;
+            min-width: 120px;
+        }
+        QComboBox:hover {
+            border: 1px solid #0078d4;
+            background-color: #333333;
+        }
+        QComboBox:focus {
+            border: 2px solid #0078d4;
+            background-color: #333333;
+        }
+        QComboBox::drop-down {
+            subcontrol-origin: padding;
+            subcontrol-position: top right;
+            width: 20px;
+            border-left: 1px solid #404040;
+            background-color: #2d2d2d;
+            border-radius: 0px 6px 6px 0px;
+        }
+        QComboBox::down-arrow {
+            image: none;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid #e0e0e0;
+        }
+        QComboBox QAbstractItemView {
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 6px;
+            selection-background-color: #0078d4;
+            color: #ffffff;
+            padding: 2px;
+        }
+        
+        /* Buttons */
+        QPushButton {
+            background-color: #0078d4;
+            border: none;
+            border-radius: 8px;
+            color: #ffffff;
+            font-weight: 600;
+            padding: 12px 20px;
+            font-size: 11pt;
+        }
+        QPushButton:hover {
+            background-color: #106ebe;
+        }
+        QPushButton:pressed {
+            background-color: #005a9e;
+        }
+        QPushButton:disabled {
+            background-color: #404040;
+            color: #808080;
+        }
+        
+        /* Record Button Special Styling */
+        QPushButton#record_btn {
+            background-color: #dc3545;
+            font-size: 12pt;
+            padding: 15px 25px;
+        }
+        QPushButton#record_btn:hover {
+            background-color: #c82333;
+        }
+        QPushButton#record_btn:pressed {
+            background-color: #bd2130;
+        }
+        
+        /* Stop Button */
+        QPushButton#stop_btn {
+            background-color: #6c757d;
+        }
+        QPushButton#stop_btn:hover {
+            background-color: #5a6268;
+        }
+        
+        /* Save Button */
+        QPushButton#save_btn {
+            background-color: #28a745;
+        }
+        QPushButton#save_btn:hover {
+            background-color: #218838;
+        }
+        
+        /* Load Style Button */
+        QPushButton#load_style_btn {
+            background-color: #6f42c1;
+        }
+        QPushButton#load_style_btn:hover {
+            background-color: #5a2d91;
+        }
+        
+        /* Text Edits */
+        QTextEdit {
+            background-color: #252525;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            color: #ffffff;
+            padding: 12px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 10pt;
+            line-height: 1.4;
+        }
+        QTextEdit:focus {
+            border: 2px solid #0078d4;
+            background-color: #2a2a2a;
+        }
+        
+        /* Tab Widget */
+        QTabWidget::pane {
+            border: 1px solid #404040;
+            border-radius: 8px;
+            background-color: #252525;
+            margin-top: 5px;
+        }
+        QTabBar::tab {
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            border-bottom: none;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            padding: 10px 20px;
+            color: #e0e0e0;
+            font-weight: 500;
+            margin-right: 2px;
+        }
+        QTabBar::tab:selected {
+            background-color: #0078d4;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        QTabBar::tab:hover:!selected {
+            background-color: #333333;
+            color: #ffffff;
+        }
+        
+        /* Checkbox */
+        QCheckBox {
+            color: #e0e0e0;
+            font-weight: 500;
+            spacing: 8px;
+        }
+        QCheckBox::indicator {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            border: 2px solid #404040;
+            background-color: #2d2d2d;
+        }
+        QCheckBox::indicator:checked {
+            background-color: #0078d4;
+            border: 2px solid #0078d4;
+            image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik04LjUgMUwzLjUgNkwxLjUgNCIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K);
+        }
+        QCheckBox::indicator:hover {
+            border: 2px solid #0078d4;
+        }
+        
+        /* Menu Bar */
+        QMenuBar {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            border-bottom: 1px solid #404040;
+            padding: 4px;
+        }
+        QMenuBar::item {
+            background-color: transparent;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+        QMenuBar::item:selected {
+            background-color: #2d2d2d;
+        }
+        QMenuBar::item:pressed {
+            background-color: #0078d4;
+        }
+        
+        /* Menu */
+        QMenu {
+            background-color: #2d2d2d;
+            border: 1px solid #404040;
+            border-radius: 6px;
+            color: #ffffff;
+            padding: 4px;
+        }
+        QMenu::item {
+            padding: 8px 20px;
+            border-radius: 4px;
+        }
+        QMenu::item:selected {
+            background-color: #0078d4;
+        }
+        QMenu::separator {
+            height: 1px;
+            background-color: #404040;
+            margin: 4px 0px;
+        }
+        
+        /* Status Label */
+        QLabel#recording_status {
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 12pt;
+            padding: 8px 12px;
+            background-color: #2d2d2d;
+            border-radius: 6px;
+            border: 1px solid #404040;
+        }
+        
+        /* Style Path Label */
+        QLabel#style_path_label {
+            color: #ffc107;
+            font-style: italic;
+            background-color: #2d2d2d;
+            padding: 6px 10px;
+            border-radius: 4px;
+            border: 1px solid #404040;
+        }
+        """
+        
+        self.setStyleSheet(dark_style)
     
     def show_error(self, message):
         QMessageBox.critical(self, "Error", message)
