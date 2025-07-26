@@ -1,0 +1,84 @@
+# Build and distribution
+build/
+dist/
+*.spec
+*.egg-info/
+__pycache__/
+
+# User data and logs
+logs/
+*.log
+user_dict.txt
+nul
+
+# Application data
+.opensuperwhisper/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.claude/
+
+# Virtual environments
+env/
+venv/
+.venv/
+ENV/
+.env
+
+# Testing
+.tox/
+.coverage
+.pytest_cache/
+htmlcov/
+.nox/
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.spyderproject
+.spyproject
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files and development artifacts
+*.tmp
+*.temp
+%APPDATA%/
+.claude/
+
+# Development artifacts
+nul
+
+# Audio files (testing artifacts)
+*.wav
+*.mp3
+*.m4a
+*.flac
+
+# PyInstaller
+*.manifest
+*.exe
+
+# Distribution / packaging
+pip-log.txt
+pip-delete-this-directory.txt
+
+# NPM cache and other cache directories
+%APPDATA%/
+npm-cache/
+.cache/
