@@ -3,33 +3,59 @@ build/
 dist/
 *.spec
 
-# Logs
+# Logs and user data
 logs/
 *.log
+user_dict.txt
 
-# Python cache
+# Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
+*.so
 .Python
 env/
 venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.pytest_cache/
+htmlcov/
+
+# Virtual environments
+ENV/
+env/
+venv/
+.venv/
 .env
 
-# IDE
+# IDE and editors
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
+.spyderproject
+.spyproject
 
-# OS
+# OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
-# Temp files
+# Temporary files
+*.tmp
+*.temp
 %APPDATA%/
 .claude/
 
-# User settings (contains API keys)
-user_dict.txt
+# Audio files (for testing)
+*.wav
+*.mp3
+*.m4a
