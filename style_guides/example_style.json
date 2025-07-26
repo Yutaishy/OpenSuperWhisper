@@ -1,0 +1,23 @@
+{
+  "tone": "professional",
+  "avoid": [
+    "filler words",
+    "repetition",
+    "unclear pronouns"
+  ],
+  "preferred_spelling": {
+    "email": "e-mail",
+    "website": "web site"
+  },
+  "formatting": [
+    "Use numbered lists for procedures",
+    "Use bullet points for items",
+    "Bold important terms",
+    "Use clear paragraph breaks"
+  ],
+  "terminology": {
+    "customer": "client",
+    "buy": "purchase",
+    "get": "obtain"
+  }
+}

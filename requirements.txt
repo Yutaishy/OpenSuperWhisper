@@ -1,0 +1,7 @@
+PySide6
+openai
+janome
+sounddevice
+numpy
+pytest
+PyYAML

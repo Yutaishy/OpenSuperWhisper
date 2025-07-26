@@ -1,0 +1,35 @@
+# Build directories
+build/
+dist/
+*.spec
+
+# Logs
+logs/
+*.log
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp files
+%APPDATA%/
+.claude/
+
+# User settings (contains API keys)
+user_dict.txt

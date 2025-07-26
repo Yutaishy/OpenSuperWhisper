@@ -1,0 +1,15 @@
+tone: formal
+avoid:
+  - slang
+  - contractions
+preferred_spelling:
+  colour: color
+  behaviour: behavior
+formatting:
+  - Use Oxford commas
+  - Avoid passive voice
+  - Use full sentences
+  - Capitalize proper nouns
+terminology:
+  - Use "application" instead of "app"
+  - Use "user interface" instead of "UI"
