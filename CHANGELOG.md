@@ -1,22 +1,29 @@
 # CHANGELOG
 
-## [0.3.0] - 2025-07-27
+## [0.3.0] - 2025-07-27 (GitHub Release Ready)
 ### Added
+- **Enhanced Recording Indicator:** Clear text display showing "Recording", "Processing", and "Completed" states
+- **Improved UX:** Larger indicator (160x50) with professional styling and better visibility
 - **Background Processing:** Heavy transcription/formatting now runs in separate threads to prevent GUI freezing
 - **Improved Audio Quality:** Enhanced audio format handling and normalization for better transcription accuracy
 - **Robust Hotkey System:** Multi-layer debouncing prevents accidental double-triggers
 - **Clean Output Processing:** Automatic removal of unwanted formatting artifacts (TRANSCRIPT tags)
+- **Professional Dark Theme:** Clean, modern UI design replacing previous cluttered interface
+- **GitHub CI/CD:** Automated testing and building pipeline with multi-platform support
+- **Production Structure:** Proper project structure with separated requirements and development tools
 
 ### Fixed
 - **GUI Responsiveness:** Eliminated freezing when using global hotkeys
 - **Audio Format Issues:** Proper float64 to int16 conversion prevents corrupted audio files
 - **Hotkey Reliability:** Resolved duplicate triggering and immediate stop issues
 - **Output Cleanliness:** Ensured formatted text contains no processing artifacts
+- **Import Issues:** Fixed relative import problems for proper module loading
 
 ### Changed
 - **Removed Debug Output:** Production-ready code with minimal console output
 - **Optimized Performance:** Better resource management and cleanup
 - **Enhanced Error Handling:** More graceful failure recovery
+- **Clean Project Structure:** Organized files for GitHub publication with proper documentation
 
 ## [0.2.0] - 2025-07-26
 ### Added

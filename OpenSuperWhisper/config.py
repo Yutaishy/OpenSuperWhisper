@@ -11,6 +11,8 @@ KEY_PROMPT_TEXT = "formatting/prompt_text"
 KEY_STYLE_GUIDE_PATH = "formatting/styleguide_path"
 KEY_WINDOW_GEOMETRY = "ui/window_geometry"
 KEY_API_KEY = "api/openai_key"
+KEY_PROMPT_PRESETS = "formatting/prompt_presets"
+KEY_CURRENT_PRESET = "formatting/current_preset"
 
 def save_setting(key: str, value):
     settings.setValue(key, value)

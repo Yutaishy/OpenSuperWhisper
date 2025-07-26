@@ -3,12 +3,16 @@ build/
 dist/
 *.spec
 *.egg-info/
+__pycache__/
 
 # User data and logs
-logs/*.log
+logs/
 *.log
 user_dict.txt
 nul
+
+# Application data
+.opensuperwhisper/
 
 # Python
 __pycache__/
@@ -73,3 +77,8 @@ nul
 # Distribution / packaging
 pip-log.txt
 pip-delete-this-directory.txt
+
+# NPM cache and other cache directories
+%APPDATA%/
+npm-cache/
+.cache/

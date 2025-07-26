@@ -37,8 +37,8 @@ class RecordingIndicator(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
         self.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground, True)
         
-        # Fixed size for compact indicator
-        self.setFixedSize(120, 40)
+        # Fixed size for expanded indicator with clear text
+        self.setFixedSize(160, 50)
         
         # Layout
         layout = QHBoxLayout()
@@ -57,12 +57,12 @@ class RecordingIndicator(QWidget):
         """)
         
         # Status text
-        self.status_label = QLabel("REC")
+        self.status_label = QLabel("Recording")
         self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.status_label.setStyleSheet("""
             QLabel {
                 color: #ffffff;
-                font-size: 10pt;
+                font-size: 12pt;
                 font-weight: 600;
                 font-family: 'Segoe UI', system-ui, sans-serif;
             }
@@ -105,7 +105,7 @@ class RecordingIndicator(QWidget):
             return
             
         self.is_recording = True
-        self.status_label.setText("REC")
+        self.status_label.setText("Recording")
         self.dot_label.setStyleSheet("""
             QLabel {
                 color: #dc3545;
@@ -122,6 +122,24 @@ class RecordingIndicator(QWidget):
         # Start blinking animation
         self.blink_timer.start(1000)  # Blink every 1 second
         
+    def show_processing(self):
+        """Show processing state"""
+        self.blink_timer.stop()
+        self.status_label.setText("Processing")
+        self.dot_label.setStyleSheet("""
+            QLabel {
+                color: #ffc107;
+                font-size: 16pt;
+                font-weight: bold;
+            }
+        """)
+        
+        # Show with fade-in if not already visible
+        if not self.isVisible():
+            self.setWindowOpacity(0.0)
+            self.show()
+            self.animate_fade_in()
+        
     def hide_recording(self):
         """Hide recording indicator with animation"""
         if not self.is_recording:
@@ -131,7 +149,7 @@ class RecordingIndicator(QWidget):
         self.blink_timer.stop()
         
         # Show completion state briefly
-        self.status_label.setText("STOP")
+        self.status_label.setText("Completed")
         self.dot_label.setStyleSheet("""
             QLabel {
                 color: #28a745;
@@ -241,6 +259,11 @@ class GlobalRecordingIndicator:
         """Show recording indicator"""
         if self._indicator:
             self._indicator.show_recording()
+    
+    def show_processing(self):
+        """Show processing indicator"""
+        if self._indicator:
+            self._indicator.show_processing()
     
     def hide_recording(self):
         """Hide recording indicator"""

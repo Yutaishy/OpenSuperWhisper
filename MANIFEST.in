@@ -1,0 +1,28 @@
+# Include documentation
+include README.md
+include LICENSE
+include CHANGELOG.md
+include CONTRIBUTING.md
+include SECURITY.md
+
+# Include requirements
+include requirements.txt
+include requirements-dev.txt
+
+# Include style guides
+recursive-include style_guides *.json *.yaml *.yml
+
+# Include tests
+recursive-include tests *.py
+
+# Include CI/CD
+recursive-include .github *.yml *.yaml
+
+# Exclude development artifacts
+exclude .gitignore
+exclude pyproject.toml
+exclude setup.py
+global-exclude *.pyc
+global-exclude __pycache__
+global-exclude .DS_Store
+global-exclude *.log

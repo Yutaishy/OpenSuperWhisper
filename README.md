@@ -55,7 +55,7 @@ OpenSuperWhisper is a cross-platform desktop application that transforms speech 
 ### Option 2: Run from Source
 ```bash
 # Clone repository
-git clone https://github.com/YOUR_USERNAME/OpenSuperWhisper.git
+git clone https://github.com/your-username/OpenSuperWhisper.git
 cd OpenSuperWhisper
 
 # Install dependencies
@@ -139,7 +139,7 @@ terminology:
 ### Running Tests
 ```bash
 # Install development dependencies
-pip install pytest black ruff
+pip install -r requirements-dev.txt
 
 # Run comprehensive test suite
 pytest tests/ -v
@@ -150,11 +150,11 @@ pytest tests/ --cov=OpenSuperWhisper
 
 ### Building Executable
 ```bash
-# Install PyInstaller
-pip install pyinstaller
+# Install development dependencies
+pip install -r requirements-dev.txt
 
 # Build single-file executable
-pyinstaller --onefile --windowed run.py --name OpenSuperWhisper
+pyinstaller --onefile --windowed run_app.py --name OpenSuperWhisper
 ```
 
 ### Code Quality

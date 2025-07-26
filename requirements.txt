@@ -7,8 +7,3 @@ pynput>=1.7.6         # Global hotkey monitoring
 
 # Language processing
 PyYAML>=6.0           # YAML style guide support
-
-# Development dependencies (optional)
-pytest>=7.0.0         # Testing framework
-black>=23.0.0         # Code formatting
-ruff>=0.1.0           # Linting
