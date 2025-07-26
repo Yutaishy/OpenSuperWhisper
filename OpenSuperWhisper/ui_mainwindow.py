@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayo
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QShortcut, QKeySequence, QAction, QClipboard
 
-from . import asr_api, formatter_api, vocabulary, config, logger
+from . import asr_api, formatter_api, config, logger
 from .recording_indicator import GlobalRecordingIndicator
 from .global_hotkey import GlobalHotkeyManager
 from .simple_hotkey import get_hotkey_monitor
@@ -22,40 +22,6 @@ from .direct_hotkey import get_direct_monitor
 
 DEFAULT_PROMPT = "Please format the following transcribed text with proper punctuation, capitalization, and clear structure."
 
-class VocabDialog(QDialog):
-    def __init__(self, words, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("New Vocabulary Found")
-        self.resize(300, 200)
-        layout = QVBoxLayout(self)
-        label = QLabel("The following new words were found. Add to custom vocabulary?")
-        layout.addWidget(label)
-        
-        self.listWidget = QListWidget()
-        for w in words:
-            item = QListWidgetItem(w)
-            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
-            item.setCheckState(Qt.CheckState.Checked)
-            self.listWidget.addItem(item)
-        layout.addWidget(self.listWidget)
-        
-        btn_layout = QHBoxLayout()
-        ok_btn = QPushButton("OK")
-        cancel_btn = QPushButton("Skip")
-        btn_layout.addWidget(ok_btn)
-        btn_layout.addWidget(cancel_btn)
-        layout.addLayout(btn_layout)
-        
-        ok_btn.clicked.connect(self.accept)
-        cancel_btn.clicked.connect(self.reject)
-
-    def get_selected_words(self):
-        selected = []
-        for i in range(self.listWidget.count()):
-            item = self.listWidget.item(i)
-            if item.checkState() == Qt.CheckState.Checked:
-                selected.append(item.text())
-        return selected
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -69,7 +35,6 @@ class MainWindow(QMainWindow):
         self.fs = 16000
         
         self.loaded_style_text = ""
-        self.known_words = vocabulary.load_user_dictionary("user_dict.txt")
         
         # Timer for recording duration display
         self.recording_timer = QTimer()
@@ -291,13 +256,18 @@ class MainWindow(QMainWindow):
         self.hotkey_manager = None
         self.simple_hotkey_monitor = None
         
+        # Delay hotkey setup to ensure Qt is fully initialized
+        QTimer.singleShot(1000, self.delayed_hotkey_setup)  # 1 second delay
+    
+    def delayed_hotkey_setup(self):
+        """Setup hotkeys after Qt initialization delay"""
         try:
             # Use direct keyboard polling for maximum reliability
-            logger.logger.info("Using direct keyboard polling for hotkey monitoring")
+            logger.logger.info("Setting up delayed hotkey monitoring")
             self.setup_direct_hotkey()
                 
         except Exception as e:
-            logger.logger.error(f"Global hotkey setup failed: {e}")
+            logger.logger.error(f"Delayed hotkey setup failed: {e}")
             self.hotkey_manager = None
             self.simple_hotkey_monitor = None
             self.direct_monitor = None
@@ -500,21 +470,11 @@ class MainWindow(QMainWindow):
             result_text = asr_api.transcribe_audio(wav_path, model=selected_asr_model)
         except Exception as e:
             self.show_error(f"Transcription failed:\n{e}")
+            self.complete_processing()  # Reset UI even on error
             return
             
         self.raw_text_edit.setPlainText(result_text)
         logger.logger.info(f"Transcribed with {selected_asr_model}: {result_text}")
-        
-        # Check vocabulary
-        new_words = vocabulary.extract_new_vocabulary(result_text, self.known_words)
-        if new_words:
-            dlg = VocabDialog(new_words, parent=self)
-            if dlg.exec():
-                selected = dlg.get_selected_words()
-                if selected:
-                    self.known_words.update(selected)
-                    vocabulary.save_user_dictionary("user_dict.txt", self.known_words)
-                    logger.logger.info(f"Added new vocab: {selected}")
         
         # Format if enabled
         if self.post_format_toggle.isChecked():
@@ -522,13 +482,10 @@ class MainWindow(QMainWindow):
         else:
             # Copy raw text to clipboard if formatting is disabled
             self.copy_to_clipboard_if_enabled(result_text)
+            # Complete processing for raw text only
+            self.complete_processing()
         
-        # Hide global recording indicator
-        if hasattr(self, 'global_indicator'):
-            self.global_indicator.hide_recording()
-        
-        # Update status
-        self.recording_status.setText("Ready")
+        # Note: for formatted text, complete_processing() is called in run_formatting()
             
     def run_formatting(self, raw_text: str):
         user_prompt = self.prompt_text_edit.toPlainText().strip()
@@ -540,6 +497,7 @@ class MainWindow(QMainWindow):
                                                   style_guide=style_text, model=model)
         except Exception as e:
             self.show_error(f"Formatting failed:\n{e}")
+            self.complete_processing()  # Reset UI even on formatting error
             return
             
         self.formatted_text_edit.setPlainText(formatted)
@@ -550,6 +508,21 @@ class MainWindow(QMainWindow):
         
         # Copy formatted text to clipboard
         self.copy_to_clipboard_if_enabled(formatted)
+        
+        # Complete processing after formatting
+        self.complete_processing()
+    
+    def complete_processing(self):
+        """Complete the processing and update UI/indicators"""
+        # Hide global recording indicator
+        if hasattr(self, 'global_indicator'):
+            self.global_indicator.hide_recording()
+        
+        # Update status to Ready
+        self.recording_status.setText("Ready")
+        self.recording_status.setStyleSheet("")  # Reset any temporary styling
+        
+        logger.logger.info("Processing completed - UI updated to Ready state")
     
     def copy_to_clipboard_if_enabled(self, text: str):
         """Copy text to clipboard if auto-copy is enabled"""
@@ -567,16 +540,17 @@ class MainWindow(QMainWindow):
             # Log and show brief notification
             logger.logger.info(f"Copied to clipboard: {text[:50]}..." if len(text) > 50 else f"Copied to clipboard: {text}")
             
-            # Show temporary status update
-            original_status = self.recording_status.text()
-            self.recording_status.setText("📋 Copied to clipboard!")
-            self.recording_status.setStyleSheet("color: #28a745; font-weight: 600;")
-            
-            # Reset status after 2 seconds
-            QTimer.singleShot(2000, lambda: (
-                self.recording_status.setText(original_status),
-                self.recording_status.setStyleSheet("")
-            ))
+            # Show temporary status update only if not in processing state
+            if self.recording_status.text() != "Processing...":
+                original_status = self.recording_status.text()
+                self.recording_status.setText("📋 Copied to clipboard!")
+                self.recording_status.setStyleSheet("color: #28a745; font-weight: 600;")
+                
+                # Reset status after 2 seconds
+                QTimer.singleShot(2000, lambda: (
+                    self.recording_status.setText(original_status),
+                    self.recording_status.setStyleSheet("")
+                ))
             
         except Exception as e:
             logger.logger.error(f"Failed to copy to clipboard: {e}")
@@ -667,7 +641,7 @@ class MainWindow(QMainWindow):
         <li>Real-time audio recording and transcription</li>
         <li>Two-stage transcription pipeline (ASR → Formatting)</li>
         <li>Custom formatting prompts & style guides</li>
-        <li>Japanese vocabulary extraction with Janome</li>
+        <li>Global hotkeys and automatic clipboard copy</li>
         <li>Persistent settings and logging</li>
         </ul>
         <p>Licensed under MIT License</p>

@@ -1,5 +1,33 @@
 # CHANGELOG
 
+## [0.2.0] - 2025-07-26
+### Added
+- **Global Hotkey System:** `Ctrl+Space` now works everywhere (even when app is minimized)
+  - Multi-layer fallback system: Windows API → pynput → direct polling
+  - Cross-platform keyboard monitoring with 50ms response time
+- **Auto-Clipboard Integration:** Results automatically copied to clipboard for instant `Ctrl+V` paste
+  - Smart selection: formatted text when available, raw when formatting disabled
+  - Visual feedback with "📋 Copied to clipboard!" notifications
+- **Always-On-Top Recording Indicator:** Blinking red dot overlay during recording
+  - Visible on all monitors and applications
+  - Click-to-stop functionality with window restoration
+  - Smooth fade animations and hover effects
+- **Modern Dark Theme:** High-contrast UI with accessibility focus
+  - Professional color scheme with blue accent highlights
+  - Enhanced button styling and visual hierarchy
+  - Improved text editor fonts and spacing
+
+### Changed
+- **Removed Vocabulary System:** Eliminated Janome dependency and vocabulary dialogs for streamlined workflow
+- **Enhanced UI State Management:** Fixed processing status synchronization issues
+- **Updated Dependencies:** Added pynput for reliable cross-platform hotkey support
+- **Improved Error Handling:** UI state properly resets on transcription/formatting errors
+
+### Fixed
+- **Processing Status:** UI now correctly shows "Ready" state after completion
+- **Recording Indicator Sync:** Indicator properly hides when processing completes
+- **Hotkey Reliability:** Multiple fallback systems ensure shortcuts always work
+
 ## [0.1.0] - 2025-07-26
 ### Added
 - Two-stage transcription pipeline:

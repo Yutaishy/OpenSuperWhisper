@@ -14,8 +14,9 @@ OpenSuperWhisper is a cross-platform desktop application that transforms speech 
 ## ✨ Key Features
 
 ### 🎙️ **Smart Audio Recording**
-- **Real-time recording** with visual timer and status indicators
-- **Keyboard shortcuts** (`Ctrl+Space` to record, `Ctrl+S` to save)
+- **Global hotkey support** (`Ctrl+Space` works everywhere, even when minimized)
+- **Real-time recording** with visual timer and status indicators  
+- **Always-on-top recording indicator** with blinking animation
 - **High-quality audio capture** (16kHz, mono, int16 format)
 - **Cross-platform compatibility** with sounddevice integration
 
@@ -25,13 +26,15 @@ OpenSuperWhisper is a cross-platform desktop application that transforms speech 
 - **Customizable prompts** for specific use cases (meetings, articles, notes)
 - **YAML/JSON style guides** for consistent formatting rules
 
-### 🌐 **Japanese Language Support**
-- **Morphological analysis** with Janome for vocabulary extraction
-- **Custom dictionary building** with user approval workflow
-- **Automatic terminology management** for technical terms
+### 📋 **Seamless Workflow Integration**
+- **Automatic clipboard copy** - results instantly available with `Ctrl+V`
+- **Smart result selection** - copies formatted text when available, raw when not
+- **Background operation** - record anywhere while working in other apps
+- **Visual feedback** - "📋 Copied to clipboard!" notifications
 
 ### 💾 **Professional UI & Settings**
-- **Modern PySide6 interface** with tabbed results view
+- **Modern dark theme** with high contrast and accessibility
+- **Dual monitor support** with always-on-top indicators
 - **Persistent settings** via QSettings (Windows Registry integration)
 - **API key management** through secure UI dialogs
 - **Comprehensive logging** for debugging and analysis
@@ -59,7 +62,7 @@ cd voice_input
 pip install -r requirements.txt
 
 # Run application
-python run.py
+python run_app.py
 ```
 
 ## 📋 System Requirements
@@ -77,10 +80,10 @@ Input: "Um, so today we discussed the, uh, quarterly budget and..."
 Output: "Today we discussed the quarterly budget and identified three key priorities for cost optimization."
 ```
 
-### 📚 **Academic Writing**
+### 💻 **Coding & Development**
 ```
-Input: "The research shows that machine learning algorithms can..."
-Output: "The research demonstrates that machine learning algorithms possess the capability to..."
+Input: "I need to create a function that checks if a user is authenticated..."
+Output: "Create an authentication validation function that verifies user credentials and returns authorization status."
 ```
 
 ### 🎤 **Content Creation**
@@ -88,6 +91,12 @@ Output: "The research demonstrates that machine learning algorithms possess the 
 Input: "Hey guys, welcome back to my channel..."
 Output: "Welcome to today's episode where we'll explore innovative approaches to..."
 ```
+
+### 🚀 **Real-time Workflow Integration**
+1. **Press `Ctrl+Space`** anywhere (even in other apps)
+2. **Speak your thoughts** while working
+3. **Press `Ctrl+Space`** again to stop
+4. **Press `Ctrl+V`** to instantly paste polished text
 
 ## ⚙️ Configuration
 

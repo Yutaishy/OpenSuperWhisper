@@ -1,5 +1,4 @@
 from openai import OpenAI
-from .prompt_manager import PromptManager
 
 client = None
 
@@ -42,27 +41,3 @@ def format_text(raw_text: str, prompt: str, style_guide: str = "", model: str = 
     formatted_text = response.choices[0].message.content
     return formatted_text.strip()
 
-def format_text_with_manager(raw_text: str, prompt_manager: PromptManager, model: str = "gpt-4o-mini") -> str:
-    """
-    Use PromptManager to format text with managed prompt and style guide.
-    :param raw_text: The raw transcript string from ASR.
-    :param prompt_manager: PromptManager instance with loaded prompt and style guide.
-    :param model: The chat model to use for formatting.
-    :return: Formatted text.
-    :raises: Exception if API call fails.
-    """
-    system_instructions = prompt_manager.get_combined_instructions()
-    system_message = {"role": "system", "content": system_instructions}
-    user_message = {"role": "user", "content": raw_text}
-    
-    try:
-        client = get_client()
-        response = client.chat.completions.create(
-            model=model,
-            messages=[system_message, user_message]
-        )
-    except Exception as e:
-        raise Exception(f"Formatting API call failed: {e}")
-    
-    formatted_text = response.choices[0].message.content
-    return formatted_text.strip()

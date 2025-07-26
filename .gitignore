@@ -5,9 +5,10 @@ dist/
 *.egg-info/
 
 # User data and logs
-logs/
+logs/*.log
 *.log
 user_dict.txt
+nul
 
 # Python
 __pycache__/
@@ -15,6 +16,8 @@ __pycache__/
 *$py.class
 *.so
 .Python
+.pytest_cache/
+.claude/
 
 # Virtual environments
 env/
