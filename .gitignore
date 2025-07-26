@@ -57,6 +57,9 @@ Thumbs.db
 %APPDATA%/
 .claude/
 
+# Development artifacts
+nul
+
 # Audio files (testing artifacts)
 *.wav
 *.mp3

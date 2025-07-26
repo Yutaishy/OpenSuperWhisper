@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## [0.3.0] - 2025-07-27
+### Added
+- **Background Processing:** Heavy transcription/formatting now runs in separate threads to prevent GUI freezing
+- **Improved Audio Quality:** Enhanced audio format handling and normalization for better transcription accuracy
+- **Robust Hotkey System:** Multi-layer debouncing prevents accidental double-triggers
+- **Clean Output Processing:** Automatic removal of unwanted formatting artifacts (TRANSCRIPT tags)
+
+### Fixed
+- **GUI Responsiveness:** Eliminated freezing when using global hotkeys
+- **Audio Format Issues:** Proper float64 to int16 conversion prevents corrupted audio files
+- **Hotkey Reliability:** Resolved duplicate triggering and immediate stop issues
+- **Output Cleanliness:** Ensured formatted text contains no processing artifacts
+
+### Changed
+- **Removed Debug Output:** Production-ready code with minimal console output
+- **Optimized Performance:** Better resource management and cleanup
+- **Enhanced Error Handling:** More graceful failure recovery
+
 ## [0.2.0] - 2025-07-26
 ### Added
 - **Global Hotkey System:** `Ctrl+Space` now works everywhere (even when app is minimized)

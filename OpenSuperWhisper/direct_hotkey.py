@@ -33,14 +33,14 @@ class DirectHotkeyMonitor(QObject):
                 import ctypes
                 self.user32 = ctypes.windll.user32
                 self.api_available = True
-                print("DEBUG: Windows API available for direct hotkey monitoring")
+                pass  # Windows API available
             except Exception as e:
-                print(f"DEBUG: Windows API not available: {e}")
+                pass  # Windows API not available
     
     def start_monitoring(self):
         """Start monitoring keyboard state"""
         if not self.api_available:
-            print("DEBUG: Cannot start monitoring - Windows API not available")
+            pass  # Cannot start monitoring
             return False
             
         if self.is_monitoring:
@@ -48,7 +48,7 @@ class DirectHotkeyMonitor(QObject):
             
         self.is_monitoring = True
         self.poll_timer.start(50)  # Check every 50ms
-        print("DEBUG: Started direct keyboard monitoring")
+        pass  # Started monitoring
         return True
     
     def stop_monitoring(self):
@@ -58,7 +58,7 @@ class DirectHotkeyMonitor(QObject):
             
         self.is_monitoring = False
         self.poll_timer.stop()
-        print("DEBUG: Stopped direct keyboard monitoring")
+        pass  # Stopped monitoring
     
     def check_keys(self):
         """Check for Ctrl+Space combination"""
@@ -80,13 +80,13 @@ class DirectHotkeyMonitor(QObject):
             
             # Only trigger on new press (not held)
             if current_state and not self.last_state:
-                print("DEBUG: Ctrl+Space detected!")
+                pass  # Hotkey detected
                 self.hotkey_pressed.emit("ctrl_space")
                 
             self.last_state = current_state
             
         except Exception as e:
-            print(f"DEBUG: Error checking keys: {e}")
+            pass  # Error checking keys
 
 # Global instance
 _direct_monitor = None

@@ -118,15 +118,14 @@ class SimpleHotkeyMonitor(QObject):
         sorted_keys = sorted(list(self.current_keys))
         combination = '+'.join(sorted_keys)
         
-        print(f"DEBUG: Current keys pressed: {self.current_keys}")
-        print(f"DEBUG: Checking combination: {combination}")
+        pass  # Key monitoring
         
         # Check all possible combinations (order may vary)
         for registered_combo, hotkey_id in self.registered_hotkeys.items():
             registered_keys = set(registered_combo.split('+'))
-            print(f"DEBUG: Checking against registered: {registered_combo} -> {registered_keys}")
+            pass  # Checking registered combination
             if registered_keys.issubset(self.current_keys):
-                print(f"DEBUG: MATCH! Emitting hotkey signal for: {hotkey_id}")
+                pass  # Hotkey match found
                 # Emit signal and clear keys to prevent repeated firing
                 self.hotkey_pressed.emit(hotkey_id)
                 self.current_keys.clear()

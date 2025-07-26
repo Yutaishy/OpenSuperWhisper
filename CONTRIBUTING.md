@@ -8,8 +8,8 @@ Thank you for your interest in contributing to OpenSuperWhisper! This document p
 
 1. **Fork and clone the repository**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/voice_input.git
-   cd voice_input
+   git clone https://github.com/YOUR_USERNAME/OpenSuperWhisper.git
+   cd OpenSuperWhisper
    ```
 
 2. **Set up development environment**
@@ -62,10 +62,10 @@ pre-commit run --all-files
 ### Testing Your Changes
 ```bash
 # Test the application
-python run.py
+python run_app.py
 
 # Build and test executable
-pyinstaller --onefile --windowed run.py --name OpenSuperWhisper
+pyinstaller --onefile --windowed run_app.py --name OpenSuperWhisper
 ./dist/OpenSuperWhisper.exe
 ```
 
@@ -235,7 +235,7 @@ OpenSuperWhisper/
 ├── tests/               # Test suite
 ├── style_guides/        # Example style guides
 ├── requirements.txt     # Dependencies
-└── run.py              # Entry point
+└── run_app.py          # Entry point
 ```
 
 ## 🤝 Community

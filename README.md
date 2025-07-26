@@ -55,8 +55,8 @@ OpenSuperWhisper is a cross-platform desktop application that transforms speech 
 ### Option 2: Run from Source
 ```bash
 # Clone repository
-git clone https://github.com/Yutaishy/voice_input.git
-cd voice_input
+git clone https://github.com/YOUR_USERNAME/OpenSuperWhisper.git
+cd OpenSuperWhisper
 
 # Install dependencies
 pip install -r requirements.txt
