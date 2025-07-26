@@ -1,9 +1,10 @@
-# Build directories
+# Build and distribution
 build/
 dist/
 *.spec
+*.egg-info/
 
-# Logs and user data
+# User data and logs
 logs/
 *.log
 user_dict.txt
@@ -14,22 +15,20 @@ __pycache__/
 *$py.class
 *.so
 .Python
+
+# Virtual environments
 env/
 venv/
 .venv/
-pip-log.txt
-pip-delete-this-directory.txt
+ENV/
+.env
+
+# Testing
 .tox/
 .coverage
 .pytest_cache/
 htmlcov/
-
-# Virtual environments
-ENV/
-env/
-venv/
-.venv/
-.env
+.nox/
 
 # IDE and editors
 .vscode/
@@ -49,13 +48,22 @@ venv/
 ehthumbs.db
 Thumbs.db
 
-# Temporary files
+# Temporary files and development artifacts
 *.tmp
 *.temp
 %APPDATA%/
 .claude/
 
-# Audio files (for testing)
+# Audio files (testing artifacts)
 *.wav
 *.mp3
 *.m4a
+*.flac
+
+# PyInstaller
+*.manifest
+*.exe
+
+# Distribution / packaging
+pip-log.txt
+pip-delete-this-directory.txt

@@ -86,12 +86,42 @@ class MainWindow(QMainWindow):
         model_layout = QHBoxLayout()
         model_layout.addWidget(QLabel("ASR Model:"))
         self.asr_model_combo = QComboBox()
-        self.asr_model_combo.addItems(["whisper-1", "gpt-4o-transcribe", "gpt-4o-mini-transcribe"])
+        self.asr_model_combo.addItems([
+            # === Whisper シリーズ（音声専用）===
+            "whisper-1",             # 標準Whisper（推奨）
+            
+            # === GPT-4o 音声転写シリーズ ===  
+            "gpt-4o-audio-preview",  # GPT-4o音声プレビュー（最新）
+            "gpt-4o-transcribe",     # GPT-4o音声転写
+            "gpt-4o-mini-transcribe", # GPT-4o-mini音声転写
+            
+            # === TTS/音声生成対応モデル ===
+            "tts-1",                 # 音声合成（参考）
+            "tts-1-hd",              # 高品質音声合成（参考）
+            
+            # === 実験的モデル ===
+            "whisper-large-v3",      # Whisper大型版（カスタム）
+            "whisper-medium",        # Whisper中型版（カスタム）
+            "whisper-small"          # Whisper小型版（カスタム）
+        ])
         model_layout.addWidget(self.asr_model_combo)
         
         model_layout.addWidget(QLabel("Formatting Model:"))
         self.chat_model_combo = QComboBox()
-        self.chat_model_combo.addItems(["gpt-4o-mini", "gpt-4", "gpt-3.5-turbo"])
+        self.chat_model_combo.addItems([
+            # === テキスト／マルチモーダル会話（Responses API推奨）===
+            "gpt-4.1",               # 汎用フラッグシップ
+            "gpt-4.1-mini",          # 速度・コスト重視の軽量版
+            "gpt-4.1-nano",          # 最小・最安の4.1系
+            "gpt-4o",                # omni系・高性能
+            "gpt-4o-mini",           # 4oの廉価・高速版
+            
+            # === 推論特化（Reasoning系）===
+            "o3-pro",                # 思考計算量を増やした高精度版
+            "o3",                    # 汎用かつ強力な推論モデル
+            "o3-mini",               # 小型・低コストの推論モデル
+            "o4-mini"                # 最新の小型o系・効率重視
+        ])
         model_layout.addWidget(self.chat_model_combo)
         
         layout.addLayout(model_layout)

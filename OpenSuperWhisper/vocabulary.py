@@ -1,12 +1,26 @@
-from janome.tokenizer import Tokenizer
-
-tokenizer = Tokenizer()
+try:
+    from janome.tokenizer import Tokenizer
+    tokenizer = Tokenizer()
+    JANOME_AVAILABLE = True
+except ImportError:
+    tokenizer = None
+    JANOME_AVAILABLE = False
 
 def extract_new_vocabulary(text: str, known_words: set) -> list:
     """
     Extract candidate vocabulary (unique nouns) from text that are not in known_words.
     Returns a list of new words.
     """
+    if not JANOME_AVAILABLE:
+        # Fallback: simple word extraction without morphological analysis
+        import re
+        words = re.findall(r'\b\w+\b', text)
+        new_words = set()
+        for word in words:
+            if len(word) > 1 and word not in known_words:
+                new_words.add(word)
+        return sorted(list(new_words))
+    
     tokens = tokenizer.tokenize(text)
     new_words = set()
     for token in tokens:
