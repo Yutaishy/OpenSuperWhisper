@@ -51,6 +51,13 @@ def main():
             '--exclude-module=matplotlib',
             '--exclude-module=test',
             '--exclude-module=unittest',
+            '--exclude-module=IPython',
+            '--exclude-module=jupyter',
+            '--exclude-module=notebook',
+            '--exclude-module=scipy',
+            '--exclude-module=pandas',
+            '--exclude-module=sklearn',
+            '--noupx',  # Disable UPX compression to save memory
         ])
     
     # Platform-specific adjustments
@@ -71,6 +78,30 @@ def main():
             if os.path.exists(path):
                 args.append(f'--add-binary={path}:.')
                 break
+    
+    elif platform.system() == 'Darwin':  # macOS
+        print("macOS platform detected - adding macOS-specific settings")
+        args.extend([
+            '--osx-bundle-identifier=com.yutaishy.opensuperwhisper',
+            '--collect-all=sounddevice',
+        ])
+    
+    elif platform.system() == 'Windows':
+        print("Windows platform detected - adding Windows-specific settings")
+        args.extend([
+            '--collect-all=sounddevice',
+        ])
+        # Add win32 imports if available
+        try:
+            import win32api
+            args.extend([
+                '--hidden-import=win32api',
+                '--hidden-import=win32con', 
+                '--hidden-import=win32gui',
+            ])
+            print("Added win32 imports")
+        except ImportError:
+            print("win32 modules not available, skipping")
     
     print(f"Building executable: {executable_name}")
     print(f"Platform: {platform.system()}")
