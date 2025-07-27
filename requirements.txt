@@ -1,0 +1,21 @@
+# OpenSuperWhisper Dependencies
+# Core runtime dependencies for voice transcription pipeline
+
+# GUI Framework
+PySide6>=6.6.0
+
+# AI/ML APIs
+openai>=1.50.0
+
+# Audio Processing
+sounddevice>=0.4.6
+numpy>=1.24.0
+
+# System Integration
+pynput>=1.7.6
+
+# Configuration
+PyYAML>=6.0
+
+# Optional: Enhanced Security (uncomment to enable API key encryption)
+# cryptography>=41.0.0

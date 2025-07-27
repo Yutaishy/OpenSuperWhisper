@@ -10,6 +10,8 @@ from PySide6.QtCore import QEasingCurve, QPropertyAnimation, Qt, QTimer
 from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QApplication, QHBoxLayout, QLabel, QWidget
 
+from . import logger
+
 
 class RecordingIndicator(QWidget):
     """
@@ -118,7 +120,7 @@ class RecordingIndicator(QWidget):
         if self.is_recording:
             return
 
-        print("DEBUG: RecordingIndicator.show_recording() called")
+        logger.logger.debug("RecordingIndicator.show_recording() called")
         self.is_recording = True
         self.status_label.setText("Recording")
         self.dot_label.setStyleSheet("""
@@ -133,14 +135,14 @@ class RecordingIndicator(QWidget):
         self.setWindowOpacity(0.0)
         self.show()
         self.animate_fade_in()
-        print(f"DEBUG: Indicator shown, visible: {self.isVisible()}, size: {self.size()}, pos: {self.pos()}")
+        logger.logger.debug(f"Indicator shown, visible: {self.isVisible()}, size: {self.size()}, pos: {self.pos()}")
 
         # Start blinking animation
         self.blink_timer.start(1000)  # Blink every 1 second
 
     def show_processing(self) -> None:
         """Show processing state"""
-        print("DEBUG: RecordingIndicator.show_processing() called")
+        logger.logger.debug("RecordingIndicator.show_processing() called")
         self.blink_timer.stop()
         self.status_label.setText("Processing")
         self.dot_label.setStyleSheet("""
@@ -153,13 +155,13 @@ class RecordingIndicator(QWidget):
 
         # Show with fade-in if not already visible
         if not self.isVisible():
-            print("DEBUG: Processing indicator not visible, showing now")
+            logger.logger.debug("Processing indicator not visible, showing now")
             self.setWindowOpacity(0.0)
             self.show()
             self.animate_fade_in()
         else:
-            print("DEBUG: Processing indicator already visible, updating state")
-        print(f"DEBUG: Processing indicator shown, visible: {self.isVisible()}, size: {self.size()}, pos: {self.pos()}")
+            logger.logger.debug("Processing indicator already visible, updating state")
+        logger.logger.debug(f"Processing indicator shown, visible: {self.isVisible()}, size: {self.size()}, pos: {self.pos()}")
 
     def hide_recording(self) -> None:
         """Hide recording indicator with animation"""
@@ -276,13 +278,13 @@ class GlobalRecordingIndicator:
     def __init__(self) -> None:
         """Initialize indicator"""
         if self._indicator is None:
-            print("DEBUG: Creating RecordingIndicator instance")
+            logger.logger.debug("Creating RecordingIndicator instance")
             app = QApplication.instance()
             if app is None:
-                print("DEBUG: No QApplication instance found!")
+                logger.logger.warning("No QApplication instance found!")
                 return  # Don't create indicator without QApplication
             else:
-                print(f"DEBUG: QApplication instance found: {app}")
+                logger.logger.debug(f"QApplication instance found: {app}")
             self._indicator = RecordingIndicator()
 
     def _ensure_indicator(self) -> None:
@@ -290,30 +292,30 @@ class GlobalRecordingIndicator:
         if self._indicator is None:
             app = QApplication.instance()
             if app is not None:
-                print("DEBUG: Creating RecordingIndicator (delayed initialization)")
+                logger.logger.debug("Creating RecordingIndicator (delayed initialization)")
                 self._indicator = RecordingIndicator()
             else:
-                print("DEBUG: QApplication still not available for delayed initialization")
+                logger.logger.debug("QApplication still not available for delayed initialization")
 
     def show_recording(self) -> None:
         """Show recording indicator"""
-        print("DEBUG: GlobalRecordingIndicator.show_recording() called")
+        logger.logger.debug("GlobalRecordingIndicator.show_recording() called")
         self._ensure_indicator()
         if self._indicator:
-            print("DEBUG: Calling RecordingIndicator.show_recording()")
+            logger.logger.debug("Calling RecordingIndicator.show_recording()")
             self._indicator.show_recording()
         else:
-            print("DEBUG: No _indicator instance available!")
+            logger.logger.warning("No _indicator instance available!")
 
     def show_processing(self) -> None:
         """Show processing indicator"""
-        print("DEBUG: GlobalRecordingIndicator.show_processing() called")
+        logger.logger.debug("GlobalRecordingIndicator.show_processing() called")
         self._ensure_indicator()
         if self._indicator:
-            print("DEBUG: Calling RecordingIndicator.show_processing()")
+            logger.logger.debug("Calling RecordingIndicator.show_processing()")
             self._indicator.show_processing()
         else:
-            print("DEBUG: No _indicator instance available for processing!")
+            logger.logger.warning("No _indicator instance available for processing!")
 
     def hide_recording(self) -> None:
         """Hide recording indicator"""

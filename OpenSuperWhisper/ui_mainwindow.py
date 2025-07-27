@@ -30,6 +30,7 @@ from PySide6.QtWidgets import (
 
 from . import asr_api, config, formatter_api, logger
 from .direct_hotkey import DirectHotkeyMonitor, get_direct_monitor
+from .first_run import show_first_run_wizard
 from .global_hotkey import GlobalHotkeyManager
 from .recording_indicator import GlobalRecordingIndicator
 from .simple_hotkey import SimpleHotkeyMonitor, get_hotkey_monitor
@@ -118,6 +119,9 @@ class MainWindow(QMainWindow):
         self.setup_global_features()
         self.load_settings()
         self.load_presets()
+        
+        # Show first run wizard if needed (delayed to ensure UI is ready)
+        QTimer.singleShot(500, self.check_first_run)
 
     def setup_ui(self) -> None:
         # Apply dark theme stylesheet
@@ -493,6 +497,18 @@ class MainWindow(QMainWindow):
             logger.logger.info("Loaded API key from settings")
         else:
             logger.logger.warning("No API key found in settings")
+    
+    def check_first_run(self) -> None:
+        """Check if first run wizard should be shown"""
+        try:
+            if show_first_run_wizard(self):
+                # First run completed successfully, reload settings
+                self.load_settings()
+                logger.logger.info("First run wizard completed successfully")
+            else:
+                logger.logger.info("First run wizard was cancelled or skipped")
+        except Exception as e:
+            logger.logger.error(f"Error showing first run wizard: {e}")
 
         # Load saved settings
         asr_model = config.load_setting(config.KEY_ASR_MODEL, "whisper-1")

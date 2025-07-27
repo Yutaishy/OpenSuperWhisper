@@ -7,7 +7,7 @@ name = "opensuperwhisper"
 version = "0.4.0"
 description = "Two-Stage Voice Transcription Pipeline with AI-Powered Text Formatting"
 readme = "README.md"
-authors = [{name = "OpenSuperWhisper Team"}]
+authors = [{name = "Yutaishy", email = ""}]
 license = "MIT"
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -40,9 +40,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Yutaishy/voice_input"
-Repository = "https://github.com/Yutaishy/voice_input.git"
-Issues = "https://github.com/Yutaishy/voice_input/issues"
+Homepage = "https://github.com/Yutaishy/OpenSuperWhisper"
+Repository = "https://github.com/Yutaishy/OpenSuperWhisper.git"
+Issues = "https://github.com/Yutaishy/OpenSuperWhisper/issues"
 
 [project.scripts]
 opensuperwhisper = "run_app:main"
