@@ -4,6 +4,7 @@ Simple and reliable hotkey detection using direct Windows API polling
 """
 
 import sys
+from typing import Any, Optional
 
 from PySide6.QtCore import QObject, QTimer, Signal
 
@@ -29,6 +30,7 @@ class DirectHotkeyMonitor(QObject):
 
         # Try to import Windows API
         self.api_available = False
+        self.user32: Optional[Any] = None
         if sys.platform == "win32":
             try:
                 import ctypes
@@ -63,7 +65,7 @@ class DirectHotkeyMonitor(QObject):
 
     def check_keys(self) -> None:
         """Check for Ctrl+Space combination"""
-        if not self.api_available:
+        if not self.api_available or self.user32 is None:
             return
 
         try:
