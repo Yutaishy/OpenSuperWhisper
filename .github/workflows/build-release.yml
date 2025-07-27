@@ -203,7 +203,8 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    if: (startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch') && always()
+    # Continue even if some build jobs failed, as long as we have some artifacts
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
