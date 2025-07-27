@@ -1,28 +1,37 @@
+import json
 import os
 import sys
 import tempfile
 import time
-import sounddevice as sd
-import numpy as np
 import wave
-import yaml
-import json
-from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, 
-                               QWidget, QPushButton, QTextEdit, QComboBox, QLabel, 
-                               QTabWidget, QCheckBox, QMessageBox, QFileDialog,
-                               QDialog, QListWidget, QListWidgetItem, QMenuBar, QMenu,
-                               QProgressBar, QLineEdit, QInputDialog)
-from PySide6.QtCore import Qt, QTimer, QThread, Signal
-from PySide6.QtGui import QShortcut, QKeySequence, QAction, QClipboard
 
-from . import asr_api
-from . import formatter_api
-from . import config
-from . import logger
-from .recording_indicator import GlobalRecordingIndicator
-from .global_hotkey import GlobalHotkeyManager
-from .simple_hotkey import get_hotkey_monitor
+import numpy as np
+import sounddevice as sd
+import yaml
+from PySide6.QtCore import QThread, QTimer, Signal
+from PySide6.QtGui import QAction
+from PySide6.QtWidgets import (
+    QApplication,
+    QCheckBox,
+    QComboBox,
+    QFileDialog,
+    QHBoxLayout,
+    QInputDialog,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QMessageBox,
+    QPushButton,
+    QTabWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+
+from . import asr_api, config, formatter_api, logger
 from .direct_hotkey import get_direct_monitor
+from .recording_indicator import GlobalRecordingIndicator
+from .simple_hotkey import get_hotkey_monitor
 
 DEFAULT_PROMPT = """# 役割
 あなたは「編集専用」の書籍編集者である。以下の <TRANSCRIPT> ... </TRANSCRIPT> に囲まれた本文だけを機械的に整形する。
@@ -47,7 +56,7 @@ class TranscriptionWorker(QThread):
     transcription_completed = Signal(str)  # raw text
     formatting_completed = Signal(str)     # formatted text
     error_occurred = Signal(str)           # error message
-    
+
     def __init__(self, audio_path, asr_model, should_format, chat_model, prompt, style_guide):
         super().__init__()
         self.audio_path = audio_path
@@ -56,7 +65,7 @@ class TranscriptionWorker(QThread):
         self.chat_model = chat_model
         self.prompt = prompt
         self.style_guide = style_guide
-    
+
     def run(self):
         try:
             # Step 1: Transcription
@@ -64,7 +73,7 @@ class TranscriptionWorker(QThread):
             raw_text = asr_api.transcribe_audio(self.audio_path, model=self.asr_model)
             logger.logger.info(f"Transcribed with {self.asr_model}: {raw_text}")
             self.transcription_completed.emit(raw_text)
-            
+
             # Step 2: Formatting (if enabled)
             if self.should_format:
                 logger.logger.info(f"Starting formatting with {self.chat_model}")
@@ -73,7 +82,7 @@ class TranscriptionWorker(QThread):
                 )
                 logger.logger.info(f"Formatted with {self.chat_model}: {formatted_text}")
                 self.formatting_completed.emit(formatted_text)
-            
+
         except Exception as e:
             logger.logger.error(f"Worker error: {e}")
             self.error_occurred.emit(str(e))
@@ -84,45 +93,45 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("OpenSuperWhisper")
         self.resize(800, 600)
-        
+
         self.temp_dir = tempfile.mkdtemp()
         self.is_recording = False
         self.recording = None
         self.fs = 16000
-        
+
         # Hotkey debouncing
         self.last_hotkey_time = 0
         self.hotkey_debounce_ms = 500  # 500ms debounce
         self.is_processing_toggle = False  # Prevent multiple toggles
-        
+
         self.loaded_style_text = ""
-        
+
         # Timer for recording duration display
         self.recording_timer = QTimer()
         self.recording_time = 0
         self.recording_timer.timeout.connect(self.update_recording_time)
-        
+
         self.setup_ui()
         self.setup_menu()
         self.setup_shortcuts()
         self.setup_global_features()
         self.load_settings()
         self.load_presets()
-        
+
     def setup_ui(self):
         # Apply dark theme stylesheet
         self.apply_dark_theme()
-        
+
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         layout = QVBoxLayout(central_widget)
         layout.setSpacing(25)
         layout.setContentsMargins(30, 30, 30, 30)
-        
+
         # Model selection row
         model_layout = QHBoxLayout()
         model_layout.setSpacing(25)
-        
+
         # ASR Model section
         asr_label = QLabel("ASR Model:")
         model_layout.addWidget(asr_label)
@@ -130,27 +139,27 @@ class MainWindow(QMainWindow):
         self.asr_model_combo.addItems([
             # === Whisper シリーズ（音声専用）===
             "whisper-1",             # 標準Whisper（推奨）
-            
-            # === GPT-4o 音声転写シリーズ ===  
+
+            # === GPT-4o 音声転写シリーズ ===
             "gpt-4o-audio-preview",  # GPT-4o音声プレビュー（最新）
             "gpt-4o-transcribe",     # GPT-4o音声転写
             "gpt-4o-mini-transcribe", # GPT-4o-mini音声転写
-            
+
             # === TTS/音声生成対応モデル ===
             "tts-1",                 # 音声合成（参考）
             "tts-1-hd",              # 高品質音声合成（参考）
-            
+
             # === 実験的モデル ===
             "whisper-large-v3",      # Whisper大型版（カスタム）
             "whisper-medium",        # Whisper中型版（カスタム）
             "whisper-small"          # Whisper小型版（カスタム）
         ])
         model_layout.addWidget(self.asr_model_combo)
-        
+
         # Add spacer
         model_layout.addSpacing(20)
-        
-        # Formatting Model section  
+
+        # Formatting Model section
         format_label = QLabel("Formatting Model:")
         model_layout.addWidget(format_label)
         self.chat_model_combo = QComboBox()
@@ -161,7 +170,7 @@ class MainWindow(QMainWindow):
             "gpt-4.1-nano",          # 最小・最安の4.1系
             "gpt-4o",                # omni系・高性能
             "gpt-4o-mini",           # 4oの廉価・高速版
-            
+
             # === 推論特化（Reasoning系）===
             "o3-pro",                # 思考計算量を増やした高精度版
             "o3",                    # 汎用かつ強力な推論モデル
@@ -169,13 +178,13 @@ class MainWindow(QMainWindow):
             "o4-mini"                # 最新の小型o系・効率重視
         ])
         model_layout.addWidget(self.chat_model_combo)
-        
+
         layout.addLayout(model_layout)
-        
+
         # Record controls
         record_layout = QHBoxLayout()
         record_layout.setSpacing(12)
-        
+
         self.record_btn = QPushButton("🎤 Record (Ctrl+Space)")
         self.record_btn.setObjectName("record_btn")
         self.stop_btn = QPushButton("⏹ Stop")
@@ -183,107 +192,107 @@ class MainWindow(QMainWindow):
         self.stop_btn.setEnabled(False)
         record_layout.addWidget(self.record_btn)
         record_layout.addWidget(self.stop_btn)
-        
+
         # Recording timer/status
         self.recording_status = QLabel("Ready")
         self.recording_status.setObjectName("recording_status")
         record_layout.addWidget(self.recording_status)
-        
+
         self.post_format_toggle = QCheckBox("Apply Formatting Stage")
         self.post_format_toggle.setChecked(True)
         record_layout.addWidget(self.post_format_toggle)
-        
+
         self.auto_copy_toggle = QCheckBox("Auto-copy to Clipboard")
         self.auto_copy_toggle.setChecked(True)
         record_layout.addWidget(self.auto_copy_toggle)
-        
+
         layout.addLayout(record_layout)
-        
+
         # Tab widget for results
         self.tab_widget = QTabWidget()
-        
+
         self.raw_text_edit = QTextEdit()
         self.raw_text_edit.setPlaceholderText("Raw transcription will appear here...")
         self.tab_widget.addTab(self.raw_text_edit, "Raw Transcription")
-        
+
         self.formatted_text_edit = QTextEdit()
         self.formatted_text_edit.setPlaceholderText("Formatted text will appear here...")
         self.tab_widget.addTab(self.formatted_text_edit, "Formatted Text")
-        
+
         layout.addWidget(self.tab_widget)
-        
+
         # Prompt editor with preset management
         prompt_header_layout = QHBoxLayout()
         prompt_header_layout.addWidget(QLabel("Formatting Prompt:"))
         prompt_header_layout.addStretch()
-        
+
         # Preset dropdown
         self.preset_combo = QComboBox()
         self.preset_combo.setMinimumWidth(150)
         prompt_header_layout.addWidget(QLabel("Preset:"))
         prompt_header_layout.addWidget(self.preset_combo)
-        
+
         # Preset management buttons
         self.add_preset_btn = QPushButton("➕")
         self.add_preset_btn.setToolTip("Add new preset")
         self.add_preset_btn.setProperty("class", "icon-btn")
         self.add_preset_btn.setMaximumWidth(35)
         prompt_header_layout.addWidget(self.add_preset_btn)
-        
+
         self.edit_preset_btn = QPushButton("✏️")
         self.edit_preset_btn.setToolTip("Edit preset name")
         self.edit_preset_btn.setProperty("class", "icon-btn")
         self.edit_preset_btn.setMaximumWidth(35)
         prompt_header_layout.addWidget(self.edit_preset_btn)
-        
+
         self.save_preset_btn = QPushButton("💾")
         self.save_preset_btn.setToolTip("Save current prompt as preset")
         self.save_preset_btn.setProperty("class", "icon-btn")
         self.save_preset_btn.setMaximumWidth(35)
         prompt_header_layout.addWidget(self.save_preset_btn)
-        
+
         self.delete_preset_btn = QPushButton("🗑️")
         self.delete_preset_btn.setToolTip("Delete selected preset")
         self.delete_preset_btn.setProperty("class", "icon-btn")
         self.delete_preset_btn.setMaximumWidth(35)
         prompt_header_layout.addWidget(self.delete_preset_btn)
-        
+
         layout.addLayout(prompt_header_layout)
-        
+
         self.prompt_text_edit = QTextEdit()
         self.prompt_text_edit.setPlainText(DEFAULT_PROMPT)
         self.prompt_text_edit.setMaximumHeight(100)
         layout.addWidget(self.prompt_text_edit)
-        
+
         # Style guide controls
         style_layout = QHBoxLayout()
         style_layout.setSpacing(12)
-        
+
         self.load_style_btn = QPushButton("Load Style Guide...")
         self.load_style_btn.setObjectName("load_style_btn")
         self.style_path_label = QLabel("No style guide loaded")
         self.style_path_label.setObjectName("style_path_label")
         self.save_btn = QPushButton("💾 Save Transcription...")
         self.save_btn.setObjectName("save_btn")
-        
+
         style_layout.addWidget(self.load_style_btn)
         style_layout.addWidget(self.style_path_label)
         style_layout.addWidget(self.save_btn)
         layout.addLayout(style_layout)
-        
+
         # Connect signals
         self.record_btn.clicked.connect(self.start_recording)
         self.stop_btn.clicked.connect(self.stop_recording)
         self.load_style_btn.clicked.connect(self.load_style_guide)
         self.save_btn.clicked.connect(self.save_transcription)
-        
+
         # Preset management signals
         self.preset_combo.currentTextChanged.connect(self.load_preset)
         self.add_preset_btn.clicked.connect(self.add_preset)
         self.edit_preset_btn.clicked.connect(self.edit_preset)
         self.save_preset_btn.clicked.connect(self.save_preset)
         self.delete_preset_btn.clicked.connect(self.delete_preset)
-        
+
         # Connect settings save signals
         self.asr_model_combo.currentTextChanged.connect(
             lambda text: config.save_setting(config.KEY_ASR_MODEL, text))
@@ -293,155 +302,155 @@ class MainWindow(QMainWindow):
             lambda state: config.save_setting(config.KEY_POST_FORMAT, state))
         self.auto_copy_toggle.toggled.connect(
             lambda state: config.save_setting("auto_copy_clipboard", state))
-    
+
     def setup_menu(self):
         menubar = self.menuBar()
-        
+
         # File menu
         file_menu = menubar.addMenu("File")
-        
+
         save_action = QAction("Save Transcription...", self)
         save_action.setShortcut("Ctrl+S")
         save_action.triggered.connect(self.save_transcription)
         file_menu.addAction(save_action)
-        
+
         file_menu.addSeparator()
-        
+
         load_style_action = QAction("Load Style Guide...", self)
         load_style_action.triggered.connect(self.load_style_guide)
         file_menu.addAction(load_style_action)
-        
+
         file_menu.addSeparator()
-        
+
         exit_action = QAction("Exit", self)
         exit_action.setShortcut("Ctrl+Q")
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
-        
+
         # Settings menu
         settings_menu = menubar.addMenu("Settings")
-        
+
         api_key_action = QAction("Set OpenAI API Key...", self)
         api_key_action.triggered.connect(self.set_api_key)
         settings_menu.addAction(api_key_action)
-        
+
         settings_menu.addSeparator()
-        
+
         reset_action = QAction("Reset to Defaults", self)
         reset_action.triggered.connect(self.reset_to_defaults)
         settings_menu.addAction(reset_action)
-        
+
         # Help menu
         help_menu = menubar.addMenu("Help")
-        
+
         about_action = QAction("About", self)
         about_action.triggered.connect(self.show_about)
         help_menu.addAction(about_action)
-        
+
         help_menu.addSeparator()
-        
+
         shortcuts_action = QAction("Keyboard Shortcuts", self)
         shortcuts_action.triggered.connect(self.show_shortcuts)
         help_menu.addAction(shortcuts_action)
-    
+
     def setup_shortcuts(self):
         # Disable local shortcut since we're using global hotkey for Ctrl+Space
         # self.record_shortcut = QShortcut(QKeySequence("Ctrl+Space"), self)
         # self.record_shortcut.activated.connect(self.toggle_recording_unified)
         pass
-    
+
     def setup_global_features(self):
         """Setup global hotkeys and overlay indicator"""
         # Initialize global recording indicator
         self.global_indicator = GlobalRecordingIndicator.get_instance()
         self.global_indicator.set_parent_window(self)
-        
+
         # Setup global hotkey manager with fallback
         self.hotkey_manager = None
         self.simple_hotkey_monitor = None
-        
+
         # Delay hotkey setup to ensure Qt is fully initialized
         QTimer.singleShot(1000, self.delayed_hotkey_setup)  # 1 second delay
-    
+
     def delayed_hotkey_setup(self):
         """Setup hotkeys after Qt initialization delay"""
         try:
             # Use direct keyboard polling for maximum reliability
             logger.logger.info("Setting up delayed hotkey monitoring")
             self.setup_direct_hotkey()
-                
+
         except Exception as e:
             logger.logger.error(f"Delayed hotkey setup failed: {e}")
             self.hotkey_manager = None
             self.simple_hotkey_monitor = None
             self.direct_monitor = None
-    
+
     def setup_fallback_hotkey(self):
         """Setup fallback hotkey monitoring using SimpleHotkeyMonitor"""
         try:
             self.simple_hotkey_monitor = get_hotkey_monitor()
             self.simple_hotkey_monitor.hotkey_pressed.connect(self.handle_global_hotkey)
-            
+
             # Register Ctrl+Space
             success = self.simple_hotkey_monitor.register_hotkey(
                 "global_record_toggle",
                 "ctrl+space"
             )
-            
+
             if success:
                 logger.logger.info("Global hotkey Ctrl+Space registered with fallback monitor")
             else:
                 logger.logger.error("Fallback hotkey registration also failed")
-                
+
         except Exception as e:
             logger.logger.error(f"Fallback hotkey setup failed: {e}")
             self.simple_hotkey_monitor = None
-    
+
     def setup_direct_hotkey(self):
         """Setup direct keyboard polling hotkey monitoring"""
         try:
             self.direct_monitor = get_direct_monitor()
             self.direct_monitor.hotkey_pressed.connect(self.handle_direct_hotkey)
-            
+
             success = self.direct_monitor.start_monitoring()
-            
+
             if success:
                 logger.logger.info("Direct keyboard monitoring started successfully")
             else:
                 logger.logger.error("Direct keyboard monitoring failed to start")
-                
+
         except Exception as e:
             logger.logger.error(f"Direct hotkey setup failed: {e}")
             self.direct_monitor = None
-    
+
     def handle_global_hotkey(self, hotkey_id: str):
         """Handle global hotkey activation"""
         logger.logger.info(f"Global hotkey activated: {hotkey_id}")
         if hotkey_id == "global_record_toggle":
             self.toggle_recording_unified()
-    
+
     def handle_direct_hotkey(self, hotkey_id: str):
         """Handle direct hotkey activation with debouncing"""
         current_time = time.time() * 1000  # Convert to milliseconds
-        
+
         # Check debounce
         if current_time - self.last_hotkey_time < self.hotkey_debounce_ms:
             return
-            
+
         self.last_hotkey_time = current_time
-        
+
         logger.logger.info(f"Direct hotkey activated: {hotkey_id}")
         if hotkey_id == "ctrl_space":
             # Ensure we're on the main thread for GUI operations
             QTimer.singleShot(0, self.toggle_recording_unified)
-            
+
     def toggle_recording_unified(self):
         """Unified recording toggle (works both locally and globally)"""
         if self.is_processing_toggle:
             return
-            
+
         self.is_processing_toggle = True
-        
+
         try:
             if self.is_recording:
                 self.stop_recording()
@@ -450,17 +459,17 @@ class MainWindow(QMainWindow):
         finally:
             # Reset after a short delay to prevent rapid toggles
             QTimer.singleShot(200, lambda: setattr(self, 'is_processing_toggle', False))
-            
+
         # Handle window state appropriately
         if not self.isMinimized() and self.isVisible():
             # If window is visible, give it focus
             self.raise_()
             self.activateWindow()
-        
+
         # Force GUI update
         self.update()
         # If minimized, don't restore - just use indicator for feedback
-    
+
     def restore_from_indicator(self):
         """Restore main window when indicator is clicked"""
         if self.isMinimized():
@@ -469,11 +478,11 @@ class MainWindow(QMainWindow):
             self.show()
         self.raise_()
         self.activateWindow()
-        
+
         # Stop recording if currently recording
         if self.is_recording:
             self.stop_recording()
-        
+
     def load_settings(self):
         # Load saved API key and set environment variable
         api_key = config.load_setting(config.KEY_API_KEY, "")
@@ -482,109 +491,109 @@ class MainWindow(QMainWindow):
             logger.logger.info("Loaded API key from settings")
         else:
             logger.logger.warning("No API key found in settings")
-        
+
         # Load saved settings
         asr_model = config.load_setting(config.KEY_ASR_MODEL, "whisper-1")
         idx = self.asr_model_combo.findText(asr_model)
         if idx != -1:
             self.asr_model_combo.setCurrentIndex(idx)
-            
+
         chat_model = config.load_setting(config.KEY_CHAT_MODEL, "gpt-4o-mini")
         idx = self.chat_model_combo.findText(chat_model)
         if idx != -1:
             self.chat_model_combo.setCurrentIndex(idx)
-            
+
         post_format_setting = config.load_setting(config.KEY_POST_FORMAT, True)
         # QSettings may return string "true"/"false", convert to bool
         if isinstance(post_format_setting, str):
             post_format_setting = post_format_setting.lower() == 'true'
         self.post_format_toggle.setChecked(bool(post_format_setting))
-        
+
         auto_copy_setting = config.load_setting("auto_copy_clipboard", True)
         if isinstance(auto_copy_setting, str):
             auto_copy_setting = auto_copy_setting.lower() == 'true'
         self.auto_copy_toggle.setChecked(bool(auto_copy_setting))
-        
+
         prompt_text = config.load_setting(config.KEY_PROMPT_TEXT, DEFAULT_PROMPT)
         self.prompt_text_edit.setPlainText(prompt_text)
-        
+
         style_path = config.load_setting(config.KEY_STYLE_GUIDE_PATH, "")
         if style_path and os.path.exists(style_path):
             self.load_style_guide_from_file(style_path)
-            
+
         geom = config.load_setting(config.KEY_WINDOW_GEOMETRY)
         if geom:
             self.restoreGeometry(geom)
-    
+
     def closeEvent(self, event):
         # Save settings on close
         config.save_setting(config.KEY_WINDOW_GEOMETRY, self.saveGeometry())
         config.save_setting(config.KEY_PROMPT_TEXT, self.prompt_text_edit.toPlainText())
-        
+
         # Cleanup global features
         if hasattr(self, 'hotkey_manager') and self.hotkey_manager:
             self.hotkey_manager.unregister_all()
-        
+
         if hasattr(self, 'simple_hotkey_monitor') and self.simple_hotkey_monitor:
             self.simple_hotkey_monitor.unregister_all()
-        
+
         if hasattr(self, 'direct_monitor') and self.direct_monitor:
             self.direct_monitor.stop_monitoring()
-        
+
         if hasattr(self, 'global_indicator'):
             self.global_indicator.hide_recording()
-        
+
         super().closeEvent(event)
-    
+
     def toggle_recording(self):
         """Legacy method - redirects to unified toggle"""
         self.toggle_recording_unified()
-    
+
     def update_recording_time(self):
         self.recording_time += 1
         mins = self.recording_time // 60
         secs = self.recording_time % 60
         self.recording_status.setText(f"🔴 Recording... {mins:02d}:{secs:02d}")
-        
+
     def start_recording(self):
         if self.is_recording:
             return
         self.is_recording = True
         self.record_btn.setEnabled(False)
         self.stop_btn.setEnabled(True)
-        
+
         # Start recording timer
         self.recording_time = 0
         self.recording_timer.start(1000)  # Update every second
-        
+
         duration = 60  # max duration in seconds
         self.recording = sd.rec(int(duration * self.fs), samplerate=self.fs, channels=1, dtype='float64')
-        
+
         # Show global recording indicator
         if hasattr(self, 'global_indicator'):
             self.global_indicator.show_recording()
-        
+
     def stop_recording(self):
         if not self.is_recording:
             return
-        
+
         sd.stop()
         sd.wait()
         self.is_recording = False
         self.record_btn.setEnabled(True)
         self.stop_btn.setEnabled(False)
-        
+
         # Stop recording timer
         self.recording_timer.stop()
         self.recording_status.setText("Processing...")
-        
+
         # Trim recording to actual length
         recording = self.recording[:,0]
-        
+
         # Use amplitude threshold for better audio detection
         amplitude_threshold = 0.001  # Adjust based on your microphone sensitivity
         significant_indices = np.where(np.abs(recording) > amplitude_threshold)[0]
-        
+
         if len(significant_indices) > 0:
             # Keep some padding before first and after last significant audio
             padding_samples = int(0.1 * self.fs)  # 100ms padding
@@ -597,18 +606,18 @@ class MainWindow(QMainWindow):
             if len(nonzero_indices) > 0:
                 last_index = nonzero_indices[-1]
                 recording = recording[:last_index+1]
-        
+
         # Validate recording data
         if len(recording) == 0:
             self.show_error("Recording failed: No audio data captured")
             self.complete_processing()
             return
-            
+
         # Convert to int16 format for WAV (proper normalization)
         # Normalize to [-1, 1] range first, then convert to int16
         recording_normalized = np.clip(recording, -1.0, 1.0)
         recording_int16 = (recording_normalized * 32767).astype(np.int16)
-        
+
         # Save to WAV file
         wav_path = os.path.join(self.temp_dir, "recorded.wav")
         with wave.open(wav_path, 'wb') as wf:
@@ -616,19 +625,19 @@ class MainWindow(QMainWindow):
             wf.setsampwidth(2)
             wf.setframerate(self.fs)
             wf.writeframes(recording_int16.tobytes())
-        
+
         # Validate WAV file
         file_size = os.path.getsize(wav_path)
         if file_size < 1000:  # Less than 1KB suggests empty or corrupted file
             self.show_error(f"Recording failed: Audio file too small ({file_size} bytes)")
             self.complete_processing()
             return
-            
+
         logger.logger.info(f"Audio file created: {file_size} bytes, duration: {len(recording)/self.fs:.2f}s")
-        
+
         # Start background transcription
         self.start_transcription_worker(wav_path)
-    
+
     def start_transcription_worker(self, wav_path):
         """Start background worker for transcription and formatting"""
         selected_asr_model = self.asr_model_combo.currentText()
@@ -636,55 +645,55 @@ class MainWindow(QMainWindow):
         chat_model = self.chat_model_combo.currentText()
         prompt = self.prompt_text_edit.toPlainText().strip()
         style_guide = self.loaded_style_text
-        
+
         # Show processing indicator
         if hasattr(self, 'global_indicator'):
             self.global_indicator.show_processing()
-        
+
         # Create and configure worker
         self.worker = TranscriptionWorker(
             wav_path, selected_asr_model, should_format, chat_model, prompt, style_guide
         )
-        
+
         # Connect signals
         self.worker.transcription_completed.connect(self.on_transcription_completed)
         self.worker.formatting_completed.connect(self.on_formatting_completed)
         self.worker.error_occurred.connect(self.on_worker_error)
         self.worker.finished.connect(self.on_worker_finished)
-        
+
         # Start worker
         self.worker.start()
-    
+
     def on_transcription_completed(self, raw_text):
         """Handle transcription completion"""
         self.raw_text_edit.setPlainText(raw_text)
         logger.logger.info(f"Transcription completed: {raw_text}")
-        
+
         # If formatting is disabled, copy raw text and complete
         if not self.post_format_toggle.isChecked():
             self.copy_to_clipboard_if_enabled(raw_text)
             self.complete_processing()
-    
+
     def on_formatting_completed(self, formatted_text):
         """Handle formatting completion"""
         self.formatted_text_edit.setPlainText(formatted_text)
         logger.logger.info(f"Formatting completed: {formatted_text}")
-        
+
         # Copy formatted text to clipboard
         self.copy_to_clipboard_if_enabled(formatted_text)
         self.complete_processing()
-    
+
     def on_worker_error(self, error_message):
         """Handle worker errors"""
         self.show_error(f"Processing failed:\n{error_message}")
         self.complete_processing()
-    
+
     def on_worker_finished(self):
         """Clean up when worker finishes"""
         if hasattr(self, 'worker'):
             self.worker.deleteLater()
             del self.worker
-    
+
     def get_default_presets(self):
         """Get default prompt presets"""
         return {
@@ -704,8 +713,8 @@ class MainWindow(QMainWindow):
 
 # 出力
 整理された議事録のみを出力する。""",
-            
-            "Technical Documentation": """# 役割  
+
+            "Technical Documentation": """# 役割
 技術文書専門の編集者として、<TRANSCRIPT> ... </TRANSCRIPT> 内の技術的内容を整形する。
 
 # 厳守事項（禁止）
@@ -720,7 +729,7 @@ class MainWindow(QMainWindow):
 
 # 出力
 整形された技術文書のみを出力する。""",
-            
+
             "Blog Article": """# 役割
 ブログ記事専門の編集者として、<TRANSCRIPT> ... </TRANSCRIPT> 内のコンテンツを読みやすく整形する。
 
@@ -728,7 +737,7 @@ class MainWindow(QMainWindow):
 - 内容の追加や大幅な変更はしない。
 - 元の語調とトーンを維持する。
 
-# 作業指針  
+# 作業指針
 1. 読みやすい段落分けと文章構成
 2. 自然な日本語への修正
 3. 冗長な表現の簡潔化
@@ -737,7 +746,7 @@ class MainWindow(QMainWindow):
 # 出力
 整形されたブログ記事のみを出力する。"""
         }
-    
+
     def load_presets(self):
         """Load prompt presets from settings"""
         # Get saved presets or use defaults
@@ -745,12 +754,12 @@ class MainWindow(QMainWindow):
         if not saved_presets:
             saved_presets = self.get_default_presets()
             config.save_setting(config.KEY_PROMPT_PRESETS, saved_presets)
-        
+
         # Populate combo box
         self.preset_combo.blockSignals(True)  # Prevent triggering load_preset
         self.preset_combo.clear()
         self.preset_combo.addItems(saved_presets.keys())
-        
+
         # Load current preset
         current_preset = config.load_setting(config.KEY_CURRENT_PRESET, "Default Editor")
         if current_preset in saved_presets:
@@ -758,177 +767,177 @@ class MainWindow(QMainWindow):
             if index >= 0:
                 self.preset_combo.setCurrentIndex(index)
                 self.prompt_text_edit.setPlainText(saved_presets[current_preset])
-        
+
         self.preset_combo.blockSignals(False)
-    
+
     def load_preset(self, preset_name):
         """Load selected preset"""
         if not preset_name:
             return
-            
+
         presets = config.load_setting(config.KEY_PROMPT_PRESETS, {})
         if preset_name in presets:
             self.prompt_text_edit.setPlainText(presets[preset_name])
             config.save_setting(config.KEY_CURRENT_PRESET, preset_name)
-    
+
     def save_preset(self):
         """Save current prompt as a new preset"""
         preset_name, ok = QInputDialog.getText(
-            self, "Save Preset", 
+            self, "Save Preset",
             "Enter preset name:",
             QLineEdit.EchoMode.Normal
         )
-        
+
         if ok and preset_name.strip():
             preset_name = preset_name.strip()
             current_prompt = self.prompt_text_edit.toPlainText()
-            
+
             # Load existing presets
             presets = config.load_setting(config.KEY_PROMPT_PRESETS, {})
-            
+
             # Check if preset exists
             if preset_name in presets:
                 reply = QMessageBox.question(
-                    self, "Preset Exists", 
+                    self, "Preset Exists",
                     f"Preset '{preset_name}' already exists. Overwrite?",
                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
                 )
                 if reply != QMessageBox.StandardButton.Yes:
                     return
-            
+
             # Save preset
             presets[preset_name] = current_prompt
             config.save_setting(config.KEY_PROMPT_PRESETS, presets)
-            
+
             # Update combo box
             self.preset_combo.blockSignals(True)
             if self.preset_combo.findText(preset_name) == -1:
                 self.preset_combo.addItem(preset_name)
             self.preset_combo.setCurrentText(preset_name)
             self.preset_combo.blockSignals(False)
-            
+
             config.save_setting(config.KEY_CURRENT_PRESET, preset_name)
-            
+
             QMessageBox.information(self, "Success", f"Preset '{preset_name}' saved successfully.")
-    
+
     def delete_preset(self):
         """Delete selected preset"""
         current_preset = self.preset_combo.currentText()
         if not current_preset:
             return
-            
+
         # Don't allow deleting default presets
         default_names = list(self.get_default_presets().keys())
         if current_preset in default_names:
-            QMessageBox.warning(self, "Cannot Delete", 
+            QMessageBox.warning(self, "Cannot Delete",
                               f"Cannot delete default preset '{current_preset}'.")
             return
-        
+
         reply = QMessageBox.question(
-            self, "Delete Preset", 
+            self, "Delete Preset",
             f"Are you sure you want to delete preset '{current_preset}'?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
         )
-        
+
         if reply == QMessageBox.StandardButton.Yes:
             # Remove from settings
             presets = config.load_setting(config.KEY_PROMPT_PRESETS, {})
             if current_preset in presets:
                 del presets[current_preset]
                 config.save_setting(config.KEY_PROMPT_PRESETS, presets)
-            
+
             # Update combo box
             self.preset_combo.removeItem(self.preset_combo.currentIndex())
-            
+
             # Select default preset
             default_index = self.preset_combo.findText("Default Editor")
             if default_index >= 0:
                 self.preset_combo.setCurrentIndex(default_index)
-    
+
     def add_preset(self):
         """Add a new preset with custom name and prompt"""
         preset_name, ok = QInputDialog.getText(
-            self, "Add New Preset", 
+            self, "Add New Preset",
             "Enter preset name:",
             QLineEdit.EchoMode.Normal
         )
-        
+
         if ok and preset_name.strip():
             preset_name = preset_name.strip()
-            
+
             # Load existing presets
             presets = config.load_setting(config.KEY_PROMPT_PRESETS, {})
-            
+
             # Check if preset exists
             if preset_name in presets:
-                QMessageBox.warning(self, "Preset Exists", 
+                QMessageBox.warning(self, "Preset Exists",
                                   f"Preset '{preset_name}' already exists. Use a different name.")
                 return
-            
+
             # Ask for prompt content
             prompt_content, ok = QInputDialog.getMultiLineText(
-                self, "Add Preset Content", 
+                self, "Add Preset Content",
                 f"Enter prompt content for '{preset_name}':",
                 self.prompt_text_edit.toPlainText()
             )
-            
+
             if ok:
                 # Save preset
                 presets[preset_name] = prompt_content
                 config.save_setting(config.KEY_PROMPT_PRESETS, presets)
-                
+
                 # Update combo box
                 self.preset_combo.blockSignals(True)
                 self.preset_combo.addItem(preset_name)
                 self.preset_combo.setCurrentText(preset_name)
                 self.preset_combo.blockSignals(False)
-                
+
                 # Update prompt text and set as current
                 self.prompt_text_edit.setPlainText(prompt_content)
                 config.save_setting(config.KEY_CURRENT_PRESET, preset_name)
-                
+
                 QMessageBox.information(self, "Success", f"Preset '{preset_name}' added successfully.")
-    
+
     def edit_preset(self):
         """Edit the name of the selected preset"""
         current_preset = self.preset_combo.currentText()
         if not current_preset:
             QMessageBox.warning(self, "No Preset Selected", "Please select a preset to edit.")
             return
-            
+
         # Don't allow editing default presets
         default_names = list(self.get_default_presets().keys())
         if current_preset in default_names:
-            QMessageBox.warning(self, "Cannot Edit", 
+            QMessageBox.warning(self, "Cannot Edit",
                               f"Cannot edit default preset '{current_preset}'.")
             return
-        
+
         new_name, ok = QInputDialog.getText(
-            self, "Edit Preset Name", 
+            self, "Edit Preset Name",
             "Enter new preset name:",
             QLineEdit.EchoMode.Normal,
             current_preset
         )
-        
+
         if ok and new_name.strip() and new_name.strip() != current_preset:
             new_name = new_name.strip()
-            
+
             # Load existing presets
             presets = config.load_setting(config.KEY_PROMPT_PRESETS, {})
-            
+
             # Check if new name exists
             if new_name in presets:
-                QMessageBox.warning(self, "Preset Exists", 
+                QMessageBox.warning(self, "Preset Exists",
                                   f"Preset '{new_name}' already exists. Use a different name.")
                 return
-            
+
             # Rename preset
             if current_preset in presets:
                 preset_content = presets[current_preset]
                 del presets[current_preset]
                 presets[new_name] = preset_content
                 config.save_setting(config.KEY_PROMPT_PRESETS, presets)
-                
+
                 # Update combo box
                 current_index = self.preset_combo.currentIndex()
                 self.preset_combo.blockSignals(True)
@@ -936,77 +945,77 @@ class MainWindow(QMainWindow):
                 self.preset_combo.insertItem(current_index, new_name)
                 self.preset_combo.setCurrentIndex(current_index)
                 self.preset_combo.blockSignals(False)
-                
+
                 # Update current preset setting
                 config.save_setting(config.KEY_CURRENT_PRESET, new_name)
-                
+
                 QMessageBox.information(self, "Success", f"Preset renamed to '{new_name}' successfully.")
-    
+
     def complete_processing(self):
         """Complete the processing and update UI/indicators"""
         # Hide global recording indicator
         if hasattr(self, 'global_indicator'):
             self.global_indicator.hide_recording()
-        
+
         # Update status to Ready
         self.recording_status.setText("Ready")
         self.recording_status.setStyleSheet("")  # Reset any temporary styling
-        
+
         logger.logger.info("Processing completed - UI updated to Ready state")
-    
+
     def copy_to_clipboard_if_enabled(self, text: str):
         """Copy text to clipboard if auto-copy is enabled"""
         if not self.auto_copy_toggle.isChecked():
             return
-            
+
         if not text or not text.strip():
             return
-            
+
         try:
             # Get the clipboard
             clipboard = QApplication.clipboard()
             clipboard.setText(text.strip())
-            
+
             # Log and show brief notification
             logger.logger.info(f"Copied to clipboard: {text[:50]}..." if len(text) > 50 else f"Copied to clipboard: {text}")
-            
+
             # Show temporary status update only if not in processing state
             if self.recording_status.text() != "Processing...":
                 original_status = self.recording_status.text()
                 self.recording_status.setText("📋 Copied to clipboard!")
                 self.recording_status.setStyleSheet("color: #28a745; font-weight: 600;")
-                
+
                 # Reset status after 2 seconds
                 QTimer.singleShot(2000, lambda: (
                     self.recording_status.setText(original_status),
                     self.recording_status.setStyleSheet("")
                 ))
-            
+
         except Exception as e:
             logger.logger.error(f"Failed to copy to clipboard: {e}")
-    
+
     def load_style_guide(self):
         path, _ = QFileDialog.getOpenFileName(
             self, "Load Style Guide", "", "YAML Files (*.yaml *.yml);;JSON Files (*.json)")
         if path:
             self.load_style_guide_from_file(path)
             config.save_setting(config.KEY_STYLE_GUIDE_PATH, path)
-    
+
     def load_style_guide_from_file(self, path):
         try:
-            with open(path, 'r', encoding='utf-8') as f:
+            with open(path, encoding='utf-8') as f:
                 if path.endswith('.json'):
                     data = json.load(f)
                     self.loaded_style_text = json.dumps(data, indent=2)
                 else:  # YAML
                     data = yaml.safe_load(f)
                     self.loaded_style_text = yaml.dump(data, default_flow_style=False)
-            
+
             self.style_path_label.setText(f"Loaded: {os.path.basename(path)}")
-            
+
         except Exception as e:
             self.show_error(f"Failed to load style guide:\n{e}")
-    
+
     def save_transcription(self):
         # Determine which text to save
         current_tab = self.tab_widget.currentIndex()
@@ -1016,15 +1025,15 @@ class MainWindow(QMainWindow):
         else:  # Formatted tab
             text_to_save = self.formatted_text_edit.toPlainText()
             default_name = "formatted_transcription.txt"
-        
+
         if not text_to_save.strip():
             QMessageBox.information(self, "No Content", "No transcription to save.")
             return
-        
+
         file_path, _ = QFileDialog.getSaveFileName(
             self, "Save Transcription", default_name,
             "Text Files (*.txt);;All Files (*)")
-        
+
         if file_path:
             try:
                 with open(file_path, 'w', encoding='utf-8') as f:
@@ -1033,17 +1042,17 @@ class MainWindow(QMainWindow):
                 logger.logger.info(f"Saved transcription to: {file_path}")
             except Exception as e:
                 self.show_error(f"Failed to save file:\n{e}")
-    
+
     def reset_to_defaults(self):
         reply = QMessageBox.question(
-            self, "Reset Settings", 
+            self, "Reset Settings",
             "This will reset all settings to defaults. Continue?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-        
+
         if reply == QMessageBox.StandardButton.Yes:
             # Clear all settings
             config.settings.clear()
-            
+
             # Reset UI to defaults
             self.asr_model_combo.setCurrentText("whisper-1")
             self.chat_model_combo.setCurrentText("gpt-4o-mini")
@@ -1052,19 +1061,19 @@ class MainWindow(QMainWindow):
             self.prompt_text_edit.setPlainText(DEFAULT_PROMPT)
             self.loaded_style_text = ""
             self.style_path_label.setText("No style guide loaded")
-            
+
             # Reset window geometry
             self.resize(800, 600)
-            
+
             QMessageBox.information(self, "Reset Complete", "Settings have been reset to defaults.")
             logger.logger.info("Settings reset to defaults")
-    
+
     def show_about(self):
         about_text = """
         <h3>OpenSuperWhisper v0.1.0</h3>
         <p>Two-Stage Voice Transcription Tool</p>
-        <p>A cross-platform voice transcription application that uses OpenAI's 
-        state-of-the-art models to transcribe audio and then polish the 
+        <p>A cross-platform voice transcription application that uses OpenAI's
+        state-of-the-art models to transcribe audio and then polish the
         transcription according to your desired style.</p>
         <p><b>Features:</b></p>
         <ul>
@@ -1077,30 +1086,30 @@ class MainWindow(QMainWindow):
         <p>Licensed under MIT License</p>
         """
         QMessageBox.about(self, "About OpenSuperWhisper", about_text)
-    
+
     def show_shortcuts(self):
         shortcuts_text = """
         <h3>🎹 Keyboard Shortcuts</h3>
-        
+
         <h4>⌨️ Universal Shortcut:</h4>
         <ul>
         <li><b>Ctrl+Space</b> - Toggle recording (start/stop)</li>
         <li>Works everywhere: active window, minimized, or background</li>
         </ul>
-        
+
         <h4>📱 Other Local Shortcuts:</h4>
         <ul>
         <li><b>Ctrl+S</b> - Save transcription to file</li>
         <li><b>Ctrl+Q</b> - Quit application</li>
         </ul>
-        
+
         <h4>🔴 Recording Indicator:</h4>
         <ul>
         <li>Red blinking dot appears at bottom-right when recording</li>
         <li>Click indicator to stop recording and restore window</li>
         <li>Always visible on top of all applications</li>
         </ul>
-        
+
         <h4>💡 Usage Tips:</h4>
         <ul>
         <li>Press <b>Ctrl+Space</b> anywhere to start/stop recording instantly</li>
@@ -1112,38 +1121,38 @@ class MainWindow(QMainWindow):
         </ul>
         """
         QMessageBox.information(self, "Keyboard Shortcuts", shortcuts_text)
-    
+
     def set_api_key(self):
         current_key = config.load_setting(config.KEY_API_KEY, "")
-        
+
         # Show input dialog with masked text for security
         api_key, ok = QInputDialog.getText(
-            self, "Set OpenAI API Key", 
+            self, "Set OpenAI API Key",
             "Enter your OpenAI API key:",
             QLineEdit.Password,
             current_key
         )
-        
+
         if ok and api_key.strip():
             # Basic validation - OpenAI keys start with 'sk-'
             if not api_key.startswith('sk-'):
-                QMessageBox.warning(self, "Invalid API Key", 
+                QMessageBox.warning(self, "Invalid API Key",
                                   "OpenAI API keys should start with 'sk-'")
                 return
-                
+
             # Save the API key
             config.save_setting(config.KEY_API_KEY, api_key.strip())
-            
+
             # Set environment variable for current session
             os.environ["OPENAI_API_KEY"] = api_key.strip()
-            
-            QMessageBox.information(self, "API Key Set", 
+
+            QMessageBox.information(self, "API Key Set",
                                   "OpenAI API key has been saved successfully.")
             logger.logger.info("OpenAI API key updated via UI")
         elif ok:
-            QMessageBox.warning(self, "Empty API Key", 
+            QMessageBox.warning(self, "Empty API Key",
                               "Please enter a valid API key.")
-    
+
     def apply_dark_theme(self):
         """Apply clean, professional dark theme with excellent readability"""
         professional_style = """
@@ -1152,7 +1161,7 @@ class MainWindow(QMainWindow):
             background-color: #1e1e1e;
             color: #ffffff;
         }
-        
+
         /* Central Widget */
         QWidget {
             background-color: #1e1e1e;
@@ -1160,14 +1169,14 @@ class MainWindow(QMainWindow):
             font-family: 'Segoe UI', 'SF Pro Display', system-ui, sans-serif;
             font-size: 11pt;
         }
-        
+
         /* Labels - Clean and readable */
         QLabel {
             color: #ffffff;
             font-weight: 600;
             padding: 4px;
         }
-        
+
         /* Combo Boxes - Modern flat design */
         QComboBox {
             background-color: #2d2d30;
@@ -1210,7 +1219,7 @@ class MainWindow(QMainWindow):
             color: #ffffff;
             padding: 4px;
         }
-        
+
         /* Buttons - Clean modern style */
         QPushButton {
             background-color: #007acc;
@@ -1231,7 +1240,7 @@ class MainWindow(QMainWindow):
             background-color: #3c3c3c;
             color: #9d9d9d;
         }
-        
+
         /* Record Button */
         QPushButton#record_btn {
             background-color: #dc3545;
@@ -1244,7 +1253,7 @@ class MainWindow(QMainWindow):
         QPushButton#record_btn:pressed {
             background-color: #bd2130;
         }
-        
+
         /* Stop Button */
         QPushButton#stop_btn {
             background-color: #6c757d;
@@ -1252,7 +1261,7 @@ class MainWindow(QMainWindow):
         QPushButton#stop_btn:hover {
             background-color: #5a6268;
         }
-        
+
         /* Save Button */
         QPushButton#save_btn {
             background-color: #28a745;
@@ -1260,7 +1269,7 @@ class MainWindow(QMainWindow):
         QPushButton#save_btn:hover {
             background-color: #218838;
         }
-        
+
         /* Icon Buttons */
         QPushButton[class="icon-btn"] {
             background-color: #3c3c3c;
@@ -1275,7 +1284,7 @@ class MainWindow(QMainWindow):
             background-color: #4a4a4a;
             border: 1px solid #007acc;
         }
-        
+
         /* Text Edits - Clean terminal style */
         QTextEdit {
             background-color: #252526;
@@ -1291,7 +1300,7 @@ class MainWindow(QMainWindow):
         QTextEdit:focus {
             border: 1px solid #007acc;
         }
-        
+
         /* Tab Widget - Clean professional tabs */
         QTabWidget::pane {
             border: 1px solid #3f3f46;
@@ -1319,7 +1328,7 @@ class MainWindow(QMainWindow):
             background-color: #383838;
             color: #ffffff;
         }
-        
+
         /* CheckBox - Modern toggle */
         QCheckBox {
             color: #ffffff;
@@ -1341,7 +1350,7 @@ class MainWindow(QMainWindow):
         QCheckBox::indicator:hover {
             border: 2px solid #007acc;
         }
-        
+
         /* Status Label */
         QLabel#recording_status {
             background-color: #2d2d30;
@@ -1353,7 +1362,7 @@ class MainWindow(QMainWindow):
             color: #ffffff;
             min-height: 16px;
         }
-        
+
         /* Menu Bar - Professional navigation */
         QMenuBar {
             background-color: #2d2d30;
@@ -1373,7 +1382,7 @@ class MainWindow(QMainWindow):
         QMenuBar::item:pressed {
             background-color: #007acc;
         }
-        
+
         /* Menu */
         QMenu {
             background-color: #2d2d30;
@@ -1395,9 +1404,9 @@ class MainWindow(QMainWindow):
             margin: 4px 0;
         }
         """
-        
+
         self.setStyleSheet(professional_style)
-    
+
     def show_error(self, message):
         QMessageBox.critical(self, "Error", message)
 

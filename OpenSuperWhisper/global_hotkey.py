@@ -4,8 +4,8 @@ Cross-platform global hotkey registration for background recording
 """
 
 import sys
+
 from PySide6.QtCore import QObject, QTimer, Signal
-from PySide6.QtWidgets import QApplication
 
 # Platform-specific imports
 if sys.platform == "win32":
@@ -25,18 +25,18 @@ class GlobalHotkeyManager(QObject):
     """
     # Signals
     hotkey_pressed = Signal(str)  # Emitted when registered hotkey is pressed
-    
+
     def __init__(self):
         super().__init__()
         self.registered_hotkeys = {}
         self.is_monitoring = False
-        
+
         # Setup platform-specific monitoring
         if WINDOWS_AVAILABLE:
             self.setup_windows_monitoring()
         else:
             self.setup_fallback_monitoring()
-    
+
     def setup_windows_monitoring(self):
         """Setup Windows-specific hotkey monitoring"""
         try:
@@ -45,34 +45,34 @@ class GlobalHotkeyManager(QObject):
             self.MOD_CTRL = 0x0002
             self.MOD_SHIFT = 0x0004
             self.MOD_WIN = 0x0008
-            
+
             # Key codes
             self.VK_SPACE = 0x20
             self.VK_F1 = 0x70
             self.VK_F12 = 0x7B
-            
+
             # Windows API functions
             self.user32 = ctypes.windll.user32
             self.kernel32 = ctypes.windll.kernel32
-            
+
             # Message monitoring timer
             self.message_timer = QTimer()
             self.message_timer.timeout.connect(self.check_windows_messages)
-            
+
         except Exception as e:
             print(f"Windows hotkey setup failed: {e}")
             self.setup_fallback_monitoring()
-    
+
     def setup_fallback_monitoring(self):
         """Setup fallback monitoring for non-Windows platforms"""
         # Use Qt's built-in shortcut system as fallback
         self.fallback_timer = QTimer()
         self.fallback_timer.timeout.connect(self.check_fallback_hotkeys)
-        
+
     def register_hotkey(self, hotkey_id: str, modifiers: list, key_code: int):
         """
         Register a global hotkey
-        
+
         Args:
             hotkey_id: Unique identifier for the hotkey
             modifiers: List of modifiers ('ctrl', 'alt', 'shift', 'win')
@@ -82,7 +82,7 @@ class GlobalHotkeyManager(QObject):
             return self.register_windows_hotkey(hotkey_id, modifiers, key_code)
         else:
             return self.register_fallback_hotkey(hotkey_id, modifiers, key_code)
-    
+
     def register_windows_hotkey(self, hotkey_id: str, modifiers: list, key_code: int):
         """Register hotkey on Windows"""
         try:
@@ -96,14 +96,14 @@ class GlobalHotkeyManager(QObject):
                 mod_flags |= self.MOD_SHIFT
             if 'win' in modifiers:
                 mod_flags |= self.MOD_WIN
-            
+
             # Get unique hotkey ID (use simpler ID generation)
             hotkey_int_id = abs(hash(hotkey_id)) % 10000 + 1
-            
+
             # Unregister if already exists
             if hotkey_int_id in self.registered_hotkeys:
                 self.user32.UnregisterHotKey(None, hotkey_int_id)
-            
+
             # Register with Windows
             result = self.user32.RegisterHotKey(
                 None,  # Window handle (None for global)
@@ -111,26 +111,26 @@ class GlobalHotkeyManager(QObject):
                 mod_flags,
                 key_code
             )
-            
+
             if result:
                 self.registered_hotkeys[hotkey_int_id] = hotkey_id
                 print(f"Registered hotkey: {hotkey_id} (ID: {hotkey_int_id})")
-                
+
                 # Start monitoring if not already started
                 if not self.is_monitoring:
                     self.start_monitoring()
-                
+
                 return True
             else:
                 # Get last error for debugging
                 error_code = self.kernel32.GetLastError()
                 print(f"Failed to register hotkey: {hotkey_id} (Error: {error_code})")
                 return False
-                
+
         except Exception as e:
             print(f"Windows hotkey registration error: {e}")
             return False
-    
+
     def register_fallback_hotkey(self, hotkey_id: str, modifiers: list, key_code: int):
         """Register hotkey using fallback method"""
         # Store for fallback monitoring
@@ -138,43 +138,43 @@ class GlobalHotkeyManager(QObject):
             'modifiers': modifiers,
             'key_code': key_code
         }
-        
+
         if not self.is_monitoring:
             self.start_monitoring()
-        
+
         return True
-    
+
     def start_monitoring(self):
         """Start hotkey monitoring"""
         if self.is_monitoring:
             return
-            
+
         self.is_monitoring = True
-        
+
         if WINDOWS_AVAILABLE:
             # Start Windows message loop monitoring
             self.message_timer.start(50)  # Check every 50ms
         else:
             # Start fallback monitoring
             self.fallback_timer.start(100)  # Check every 100ms
-    
+
     def stop_monitoring(self):
         """Stop hotkey monitoring"""
         if not self.is_monitoring:
             return
-            
+
         self.is_monitoring = False
-        
+
         if WINDOWS_AVAILABLE:
             self.message_timer.stop()
         else:
             self.fallback_timer.stop()
-    
+
     def check_windows_messages(self):
         """Check for Windows hotkey messages"""
         if not WINDOWS_AVAILABLE:
             return
-            
+
         try:
             # Check for hotkey messages
             msg = wintypes.MSG()
@@ -184,23 +184,23 @@ class GlobalHotkeyManager(QObject):
                     if hotkey_id in self.registered_hotkeys:
                         hotkey_name = self.registered_hotkeys[hotkey_id]
                         self.hotkey_pressed.emit(hotkey_name)
-                        
+
         except Exception as e:
             print(f"Windows message check error: {e}")
-    
+
     def check_fallback_hotkeys(self):
         """Check for hotkeys using fallback method"""
         # This is a simplified fallback - in production you might want
         # to use platform-specific libraries like pynput
         pass
-    
+
     def unregister_hotkey(self, hotkey_id: str):
         """Unregister a hotkey"""
         if WINDOWS_AVAILABLE:
             return self.unregister_windows_hotkey(hotkey_id)
         else:
             return self.unregister_fallback_hotkey(hotkey_id)
-    
+
     def unregister_windows_hotkey(self, hotkey_id: str):
         """Unregister Windows hotkey"""
         try:
@@ -215,14 +215,14 @@ class GlobalHotkeyManager(QObject):
         except Exception as e:
             print(f"Windows hotkey unregistration error: {e}")
             return False
-    
+
     def unregister_fallback_hotkey(self, hotkey_id: str):
         """Unregister fallback hotkey"""
         if hotkey_id in self.registered_hotkeys:
             del self.registered_hotkeys[hotkey_id]
             return True
         return False
-    
+
     def unregister_all(self):
         """Unregister all hotkeys"""
         for hotkey_id in list(self.registered_hotkeys.keys()):
@@ -234,7 +234,7 @@ class GlobalHotkeyManager(QObject):
             else:
                 # Fallback hotkey
                 self.unregister_fallback_hotkey(hotkey_id)
-        
+
         self.stop_monitoring()
 
 
@@ -242,22 +242,22 @@ class GlobalHotkeyManager(QObject):
 def register_ctrl_space_hotkey(callback):
     """
     Register Ctrl+Space as global recording hotkey
-    
+
     Args:
         callback: Function to call when hotkey is pressed
     """
     manager = GlobalHotkeyManager()
-    
+
     # Connect signal to callback
     manager.hotkey_pressed.connect(
         lambda hotkey_id: callback() if hotkey_id == "record_toggle" else None
     )
-    
+
     # Register Ctrl+Space (key code 32 for space)
     success = manager.register_hotkey(
-        "record_toggle", 
-        ["ctrl"], 
+        "record_toggle",
+        ["ctrl"],
         32
     )
-    
+
     return manager if success else None

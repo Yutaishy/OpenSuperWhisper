@@ -30,10 +30,10 @@ def format_text(raw_text: str, prompt: str, style_guide: str = "", model: str = 
         system_instructions += f"Instructions: {prompt}\n"
     else:
         system_instructions += "Instructions: Fix grammar and punctuation, and format the text clearly.\n"
-    
+
     system_message = {"role": "system", "content": system_instructions}
     user_message = {"role": "user", "content": f"<TRANSCRIPT>\n{raw_text}\n</TRANSCRIPT>"}
-    
+
     try:
         client = get_client()
         # Prepare API parameters
@@ -41,30 +41,30 @@ def format_text(raw_text: str, prompt: str, style_guide: str = "", model: str = 
             "model": model,
             "messages": [system_message, user_message]
         }
-        
+
         # Add temperature only for supported models
         if model in ["gpt-4o-mini", "gpt-4o", "gpt-4", "gpt-3.5-turbo"]:
             api_params["temperature"] = 0
-        
+
         response = client.chat.completions.create(**api_params)
     except Exception as e:
-        raise Exception(f"Formatting API call failed: {e}")
-    
+        raise Exception(f"Formatting API call failed: {e}") from e
+
     formatted_text = response.choices[0].message.content
-    
+
     # Post-process to remove any TRANSCRIPT tags that might appear in the output
     import re
-    
+
     # Remove opening and closing TRANSCRIPT tags (case insensitive)
     formatted_text = re.sub(r'<TRANSCRIPT[^>]*>', '', formatted_text, flags=re.IGNORECASE)
     formatted_text = re.sub(r'</TRANSCRIPT>', '', formatted_text, flags=re.IGNORECASE)
-    
+
     # Also remove any standalone "TRANSCRIPT" text that might appear
     formatted_text = re.sub(r'\bTRANSCRIPT\b', '', formatted_text, flags=re.IGNORECASE)
-    
+
     # Clean up any extra whitespace or newlines
     formatted_text = re.sub(r'\n\s*\n', '\n', formatted_text)  # Remove multiple newlines
     formatted_text = formatted_text.strip()
-    
+
     return formatted_text
 

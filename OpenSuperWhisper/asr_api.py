@@ -1,5 +1,5 @@
+
 from openai import OpenAI
-import os
 
 client = None
 
@@ -26,5 +26,5 @@ def transcribe_audio(audio_path: str, model: str = "whisper-1") -> str:
                 response_format="text"
             )
         except Exception as e:
-            raise Exception(f"ASR transcription failed: {e}")
+            raise Exception(f"ASR transcription failed: {e}") from e
     return transcript.strip()
