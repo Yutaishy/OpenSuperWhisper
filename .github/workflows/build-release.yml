@@ -33,7 +33,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.12'
 
@@ -41,7 +41,9 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
-        sudo apt-get install -y portaudio19-dev python3-pyaudio
+        sudo apt-get install -y portaudio19-dev python3-pyaudio libasound2-dev
+        # Fix potential Qt platform issues on headless CI
+        export QT_QPA_PLATFORM=offscreen
 
     - name: Install system dependencies (macOS)
       if: matrix.os == 'macos-latest'
@@ -67,13 +69,17 @@ jobs:
     - name: Test run_app.py import
       run: |
         python -c "from OpenSuperWhisper.ui_mainwindow import MainWindow; print('MainWindow import successful')"
+      env:
+        QT_QPA_PLATFORM: ${{ matrix.os == 'ubuntu-latest' && 'offscreen' || '' }}
     
     - name: Build with PyInstaller
       run: |
         python build_executable.py "${{ matrix.executable_name }}"
+      env:
+        QT_QPA_PLATFORM: ${{ matrix.os == 'ubuntu-latest' && 'offscreen' || '' }}
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.artifact_name }}
         path: |
@@ -89,16 +95,15 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Download all artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
 
     - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.event.inputs.version || github.ref_name }}
-        release_name: OpenSuperWhisper ${{ github.event.inputs.version || github.ref_name }}
+        name: OpenSuperWhisper ${{ github.event.inputs.version || github.ref_name }}
         body: |
           ## 🎤 OpenSuperWhisper Release ${{ github.event.inputs.version || github.ref_name }}
           
@@ -109,47 +114,15 @@ jobs:
           - Automatic clipboard integration
           - Professional dark theme UI
           
-          ### 📦 Downloads
-          Choose the appropriate version for your operating system:
-          - **Windows**: OpenSuperWhisper.exe
-          - **macOS**: OpenSuperWhisper (macOS)
-          - **Linux**: OpenSuperWhisper (Linux)
-          
           ### 🔧 Requirements
           - OpenAI API key required
           - Internet connection for transcription and formatting
           
           ### 📚 Documentation
           See README.md for complete setup and usage instructions.
+        files: |
+          ./OpenSuperWhisper-Windows/OpenSuperWhisper.exe
+          ./OpenSuperWhisper-macOS/OpenSuperWhisper
+          ./OpenSuperWhisper-Linux/OpenSuperWhisper
         draft: false
         prerelease: false
-
-    - name: Upload Windows Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./OpenSuperWhisper-Windows/OpenSuperWhisper.exe
-        asset_name: OpenSuperWhisper-Windows.exe
-        asset_content_type: application/octet-stream
-
-    - name: Upload macOS Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./OpenSuperWhisper-macOS/OpenSuperWhisper
-        asset_name: OpenSuperWhisper-macOS
-        asset_content_type: application/octet-stream
-
-    - name: Upload Linux Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./OpenSuperWhisper-Linux/OpenSuperWhisper
-        asset_name: OpenSuperWhisper-Linux
-        asset_content_type: application/octet-stream
