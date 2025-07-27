@@ -4,6 +4,8 @@ Always-on-top floating indicator for recording status display
 """
 
 
+from typing import Any
+
 from PySide6.QtCore import QEasingCurve, QPropertyAnimation, Qt, QTimer
 from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QApplication, QHBoxLayout, QLabel, QWidget
@@ -14,16 +16,16 @@ class RecordingIndicator(QWidget):
     Always-on-top recording status indicator that overlays on screen
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.is_recording = False
         self.blink_timer = QTimer()
-        self.fade_animation = None
+        self.fade_animation: QPropertyAnimation | None = None
         self.setup_ui()
         self.setup_position()
         self.setup_animations()
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:
         """Setup the indicator UI with modern design"""
         # Window flags for always-on-top overlay
         self.setWindowFlags(
@@ -84,7 +86,7 @@ class RecordingIndicator(QWidget):
         # Mouse events for interaction
         self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
 
-    def setup_position(self):
+    def setup_position(self) -> None:
         """Position indicator at bottom-right of screen"""
         screen = QApplication.primaryScreen()
         screen_geometry = screen.availableGeometry()
@@ -95,11 +97,11 @@ class RecordingIndicator(QWidget):
 
         self.move(x, y)
 
-    def setup_animations(self):
+    def setup_animations(self) -> None:
         """Setup blink animation for recording state"""
         self.blink_timer.timeout.connect(self.toggle_blink)
 
-    def show_recording(self):
+    def show_recording(self) -> None:
         """Display recording indicator with animation"""
         if self.is_recording:
             return
@@ -122,7 +124,7 @@ class RecordingIndicator(QWidget):
         # Start blinking animation
         self.blink_timer.start(1000)  # Blink every 1 second
 
-    def show_processing(self):
+    def show_processing(self) -> None:
         """Show processing state"""
         self.blink_timer.stop()
         self.status_label.setText("Processing")
@@ -140,7 +142,7 @@ class RecordingIndicator(QWidget):
             self.show()
             self.animate_fade_in()
 
-    def hide_recording(self):
+    def hide_recording(self) -> None:
         """Hide recording indicator with animation"""
         if not self.is_recording:
             return
@@ -161,7 +163,7 @@ class RecordingIndicator(QWidget):
         # Hide after 2 seconds
         QTimer.singleShot(2000, self.animate_fade_out)
 
-    def toggle_blink(self):
+    def toggle_blink(self) -> None:
         """Toggle dot visibility for blinking effect"""
         if not self.is_recording:
             return
@@ -186,34 +188,37 @@ class RecordingIndicator(QWidget):
                 }
             """)
 
-    def animate_fade_in(self):
+    def animate_fade_in(self) -> None:
         """Fade-in animation"""
         self.fade_animation = QPropertyAnimation(self, b"windowOpacity")
-        self.fade_animation.setDuration(300)
-        self.fade_animation.setStartValue(0.0)
-        self.fade_animation.setEndValue(0.9)
-        self.fade_animation.setEasingCurve(QEasingCurve.Type.OutCubic)
-        self.fade_animation.start()
+        if self.fade_animation is not None:
+            self.fade_animation.setDuration(300)
+            self.fade_animation.setStartValue(0.0)
+            self.fade_animation.setEndValue(0.9)
+            self.fade_animation.setEasingCurve(QEasingCurve.Type.OutCubic)
+            self.fade_animation.start()
 
-    def animate_fade_out(self):
+    def animate_fade_out(self) -> None:
         """Fade-out animation"""
         self.fade_animation = QPropertyAnimation(self, b"windowOpacity")
-        self.fade_animation.setDuration(500)
-        self.fade_animation.setStartValue(0.9)
-        self.fade_animation.setEndValue(0.0)
-        self.fade_animation.setEasingCurve(QEasingCurve.Type.InCubic)
-        self.fade_animation.finished.connect(self.hide)
-        self.fade_animation.start()
+        if self.fade_animation is not None:
+            self.fade_animation.setDuration(500)
+            self.fade_animation.setStartValue(0.9)
+            self.fade_animation.setEndValue(0.0)
+            self.fade_animation.setEasingCurve(QEasingCurve.Type.InCubic)
+            self.fade_animation.finished.connect(self.hide)
+            self.fade_animation.start()
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event: Any) -> None:
         """Handle click events on indicator"""
         if event.button() == Qt.MouseButton.LeftButton:
             # Emit signal to stop recording and restore main window
-            if hasattr(self.parent(), 'restore_from_indicator'):
-                self.parent().restore_from_indicator()
+            parent = self.parent()
+            if parent is not None and hasattr(parent, 'restore_from_indicator'):
+                parent.restore_from_indicator()
         super().mousePressEvent(event)
 
-    def enterEvent(self, event):
+    def enterEvent(self, event: Any) -> None:
         """Mouse hover effect"""
         self.setStyleSheet("""
             QWidget {
@@ -224,7 +229,7 @@ class RecordingIndicator(QWidget):
         """)
         super().enterEvent(event)
 
-    def leaveEvent(self, event):
+    def leaveEvent(self, event: Any) -> None:
         """Mouse leave effect"""
         self.setStyleSheet("""
             QWidget {
@@ -244,37 +249,37 @@ class GlobalRecordingIndicator:
     _indicator = None
 
     @classmethod
-    def get_instance(cls):
+    def get_instance(cls) -> 'GlobalRecordingIndicator':
         """Get singleton instance"""
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize indicator"""
         if self._indicator is None:
             self._indicator = RecordingIndicator()
 
-    def show_recording(self):
+    def show_recording(self) -> None:
         """Show recording indicator"""
         if self._indicator:
             self._indicator.show_recording()
 
-    def show_processing(self):
+    def show_processing(self) -> None:
         """Show processing indicator"""
         if self._indicator:
             self._indicator.show_processing()
 
-    def hide_recording(self):
+    def hide_recording(self) -> None:
         """Hide recording indicator"""
         if self._indicator:
             self._indicator.hide_recording()
 
-    def set_parent_window(self, parent):
+    def set_parent_window(self, parent: Any) -> None:
         """Set parent window for communication"""
         if self._indicator:
-            self._indicator.parent = lambda: parent
+            self._indicator.setParent(parent)
 
-    def is_visible(self):
+    def is_visible(self) -> bool:
         """Check if indicator is currently visible"""
-        return self._indicator and self._indicator.is_recording
+        return bool(self._indicator and self._indicator.is_recording)

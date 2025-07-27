@@ -4,6 +4,8 @@ Cross-platform global hotkey registration for background recording
 """
 
 import sys
+from collections.abc import Callable
+from typing import Any
 
 from PySide6.QtCore import QObject, QTimer, Signal
 
@@ -26,9 +28,9 @@ class GlobalHotkeyManager(QObject):
     # Signals
     hotkey_pressed = Signal(str)  # Emitted when registered hotkey is pressed
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.registered_hotkeys = {}
+        self.registered_hotkeys: dict[int | str, Any] = {}
         self.is_monitoring = False
 
         # Setup platform-specific monitoring
@@ -37,7 +39,7 @@ class GlobalHotkeyManager(QObject):
         else:
             self.setup_fallback_monitoring()
 
-    def setup_windows_monitoring(self):
+    def setup_windows_monitoring(self) -> None:
         """Setup Windows-specific hotkey monitoring"""
         try:
             # Windows API constants
@@ -63,13 +65,13 @@ class GlobalHotkeyManager(QObject):
             print(f"Windows hotkey setup failed: {e}")
             self.setup_fallback_monitoring()
 
-    def setup_fallback_monitoring(self):
+    def setup_fallback_monitoring(self) -> None:
         """Setup fallback monitoring for non-Windows platforms"""
         # Use Qt's built-in shortcut system as fallback
         self.fallback_timer = QTimer()
         self.fallback_timer.timeout.connect(self.check_fallback_hotkeys)
 
-    def register_hotkey(self, hotkey_id: str, modifiers: list, key_code: int):
+    def register_hotkey(self, hotkey_id: str, modifiers: list[str], key_code: int) -> bool:
         """
         Register a global hotkey
 
@@ -83,7 +85,7 @@ class GlobalHotkeyManager(QObject):
         else:
             return self.register_fallback_hotkey(hotkey_id, modifiers, key_code)
 
-    def register_windows_hotkey(self, hotkey_id: str, modifiers: list, key_code: int):
+    def register_windows_hotkey(self, hotkey_id: str, modifiers: list[str], key_code: int) -> bool:
         """Register hotkey on Windows"""
         try:
             # Convert modifiers to Windows constants
@@ -131,7 +133,7 @@ class GlobalHotkeyManager(QObject):
             print(f"Windows hotkey registration error: {e}")
             return False
 
-    def register_fallback_hotkey(self, hotkey_id: str, modifiers: list, key_code: int):
+    def register_fallback_hotkey(self, hotkey_id: str, modifiers: list[str], key_code: int) -> bool:
         """Register hotkey using fallback method"""
         # Store for fallback monitoring
         self.registered_hotkeys[hotkey_id] = {
@@ -144,7 +146,7 @@ class GlobalHotkeyManager(QObject):
 
         return True
 
-    def start_monitoring(self):
+    def start_monitoring(self) -> None:
         """Start hotkey monitoring"""
         if self.is_monitoring:
             return
@@ -158,7 +160,7 @@ class GlobalHotkeyManager(QObject):
             # Start fallback monitoring
             self.fallback_timer.start(100)  # Check every 100ms
 
-    def stop_monitoring(self):
+    def stop_monitoring(self) -> None:
         """Stop hotkey monitoring"""
         if not self.is_monitoring:
             return
@@ -170,7 +172,7 @@ class GlobalHotkeyManager(QObject):
         else:
             self.fallback_timer.stop()
 
-    def check_windows_messages(self):
+    def check_windows_messages(self) -> None:
         """Check for Windows hotkey messages"""
         if not WINDOWS_AVAILABLE:
             return
@@ -188,20 +190,20 @@ class GlobalHotkeyManager(QObject):
         except Exception as e:
             print(f"Windows message check error: {e}")
 
-    def check_fallback_hotkeys(self):
+    def check_fallback_hotkeys(self) -> None:
         """Check for hotkeys using fallback method"""
         # This is a simplified fallback - in production you might want
         # to use platform-specific libraries like pynput
         pass
 
-    def unregister_hotkey(self, hotkey_id: str):
+    def unregister_hotkey(self, hotkey_id: str) -> bool:
         """Unregister a hotkey"""
         if WINDOWS_AVAILABLE:
             return self.unregister_windows_hotkey(hotkey_id)
         else:
             return self.unregister_fallback_hotkey(hotkey_id)
 
-    def unregister_windows_hotkey(self, hotkey_id: str):
+    def unregister_windows_hotkey(self, hotkey_id: str) -> bool:
         """Unregister Windows hotkey"""
         try:
             hotkey_int_id = hash(hotkey_id) & 0xFFFF
@@ -216,14 +218,14 @@ class GlobalHotkeyManager(QObject):
             print(f"Windows hotkey unregistration error: {e}")
             return False
 
-    def unregister_fallback_hotkey(self, hotkey_id: str):
+    def unregister_fallback_hotkey(self, hotkey_id: str) -> bool:
         """Unregister fallback hotkey"""
         if hotkey_id in self.registered_hotkeys:
             del self.registered_hotkeys[hotkey_id]
             return True
         return False
 
-    def unregister_all(self):
+    def unregister_all(self) -> None:
         """Unregister all hotkeys"""
         for hotkey_id in list(self.registered_hotkeys.keys()):
             if isinstance(hotkey_id, int):
@@ -239,7 +241,7 @@ class GlobalHotkeyManager(QObject):
 
 
 # Convenience function to register common hotkeys
-def register_ctrl_space_hotkey(callback):
+def register_ctrl_space_hotkey(callback: Callable[[], None]) -> GlobalHotkeyManager | None:
     """
     Register Ctrl+Space as global recording hotkey
 

@@ -3,7 +3,7 @@ from openai import OpenAI
 
 client = None
 
-def get_client():
+def get_client() -> OpenAI:
     global client
     if client is None:
         client = OpenAI()

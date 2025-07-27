@@ -4,6 +4,7 @@ Alternative hotkey implementation using keyboard monitoring
 """
 
 import sys
+from typing import Any
 
 from PySide6.QtCore import QObject, QTimer, Signal
 
@@ -22,14 +23,14 @@ class SimpleHotkeyMonitor(QObject):
     """
     hotkey_pressed = Signal(str)
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.is_monitoring = False
-        self.registered_hotkeys = {}
-        self.current_keys = set()
-        self.listener = None
+        self.registered_hotkeys: dict[str, str] = {}
+        self.current_keys: set[str] = set()
+        self.listener: Any | None = None
 
-    def register_hotkey(self, hotkey_id: str, key_combination: str):
+    def register_hotkey(self, hotkey_id: str, key_combination: str) -> bool:
         """
         Register a hotkey combination
 
@@ -44,7 +45,7 @@ class SimpleHotkeyMonitor(QObject):
 
         return True
 
-    def start_monitoring(self):
+    def start_monitoring(self) -> None:
         """Start monitoring keyboard input"""
         if self.is_monitoring:
             return
@@ -56,27 +57,28 @@ class SimpleHotkeyMonitor(QObject):
 
         self.is_monitoring = True
 
-    def start_pynput_monitoring(self):
+    def start_pynput_monitoring(self) -> None:
         """Start pynput-based monitoring"""
         try:
             self.listener = keyboard.Listener(
                 on_press=self.on_key_press,
                 on_release=self.on_key_release
             )
-            self.listener.start()
+            if self.listener is not None:
+                self.listener.start()
             print("Started pynput keyboard monitoring")
         except Exception as e:
             print(f"Failed to start pynput monitoring: {e}")
             self.start_fallback_monitoring()
 
-    def start_fallback_monitoring(self):
+    def start_fallback_monitoring(self) -> None:
         """Start fallback monitoring (polling-based)"""
         self.poll_timer = QTimer()
         self.poll_timer.timeout.connect(self.check_fallback_keys)
         self.poll_timer.start(50)  # Check every 50ms
         print("Started fallback keyboard monitoring")
 
-    def on_key_press(self, key):
+    def on_key_press(self, key: Any) -> None:
         """Handle key press events"""
         try:
             # Add key to current pressed keys
@@ -87,7 +89,7 @@ class SimpleHotkeyMonitor(QObject):
         except Exception as e:
             print(f"Key press error: {e}")
 
-    def on_key_release(self, key):
+    def on_key_release(self, key: Any) -> None:
         """Handle key release events"""
         try:
             # Remove key from current pressed keys
@@ -97,19 +99,19 @@ class SimpleHotkeyMonitor(QObject):
         except Exception as e:
             print(f"Key release error: {e}")
 
-    def get_key_name(self, key):
+    def get_key_name(self, key: Any) -> str | None:
         """Convert pynput key to string name"""
         try:
             if hasattr(key, 'char') and key.char:
-                return key.char.lower()
+                return str(key.char).lower()
             elif hasattr(key, 'name'):
-                return key.name.lower()
+                return str(key.name).lower()
             else:
                 return str(key).lower().replace('key.', '')
         except Exception:
             return None
 
-    def check_hotkey_combinations(self):
+    def check_hotkey_combinations(self) -> None:
         """Check if current key combination matches any registered hotkeys"""
         # Convert current keys to sorted combination string
         if not self.current_keys:
@@ -132,7 +134,7 @@ class SimpleHotkeyMonitor(QObject):
                 self.current_keys.clear()
                 break
 
-    def check_fallback_keys(self):
+    def check_fallback_keys(self) -> None:
         """Fallback key checking (Windows-specific)"""
         if not PYNPUT_AVAILABLE and sys.platform == "win32":
             try:
@@ -156,7 +158,7 @@ class SimpleHotkeyMonitor(QObject):
             except Exception as e:
                 print(f"Fallback key check error: {e}")
 
-    def stop_monitoring(self):
+    def stop_monitoring(self) -> None:
         """Stop monitoring"""
         if not self.is_monitoring:
             return
@@ -173,7 +175,7 @@ class SimpleHotkeyMonitor(QObject):
         if hasattr(self, 'poll_timer'):
             self.poll_timer.stop()
 
-    def unregister_all(self):
+    def unregister_all(self) -> None:
         """Unregister all hotkeys"""
         self.registered_hotkeys.clear()
         self.stop_monitoring()
@@ -182,7 +184,7 @@ class SimpleHotkeyMonitor(QObject):
 # Global instance
 _hotkey_monitor = None
 
-def get_hotkey_monitor():
+def get_hotkey_monitor() -> SimpleHotkeyMonitor:
     """Get global hotkey monitor instance"""
     global _hotkey_monitor
     if _hotkey_monitor is None:

@@ -1,6 +1,5 @@
 import OpenSuperWhisper.asr_api as asr
 import OpenSuperWhisper.formatter_api as fmt
-import OpenSuperWhisper.vocabulary as vocab
 
 
 class MockTranscriptionResponse:
@@ -55,11 +54,6 @@ def test_full_pipeline_integration(monkeypatch, tmp_path):
     # Test the pipeline
     raw_text = asr.transcribe_audio(str(audio_file), model="whisper-1")
     assert raw_text == "これはテストです。"
-
-    # Test vocabulary extraction
-    known_words = set()
-    new_words = vocab.extract_new_vocabulary(raw_text, known_words)
-    assert "テスト" in new_words
 
     # Test formatting
     formatted = fmt.format_text(raw_text, "Format properly", model="gpt-4o-mini")

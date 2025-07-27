@@ -1,8 +1,10 @@
+from typing import Any
+
 from openai import OpenAI
 
 client = None
 
-def get_client():
+def get_client() -> OpenAI:
     global client
     if client is None:
         client = OpenAI()
@@ -37,14 +39,14 @@ def format_text(raw_text: str, prompt: str, style_guide: str = "", model: str = 
     try:
         client = get_client()
         # Prepare API parameters
-        api_params = {
+        api_params: dict[str, Any] = {
             "model": model,
             "messages": [system_message, user_message]
         }
 
         # Add temperature only for supported models
         if model in ["gpt-4o-mini", "gpt-4o", "gpt-4", "gpt-3.5-turbo"]:
-            api_params["temperature"] = 0
+            api_params["temperature"] = 0.0
 
         response = client.chat.completions.create(**api_params)
     except Exception as e:

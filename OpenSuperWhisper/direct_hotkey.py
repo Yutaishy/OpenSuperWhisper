@@ -20,7 +20,7 @@ class DirectHotkeyMonitor(QObject):
     """
     hotkey_pressed = Signal(str)
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.is_monitoring = False
         self.poll_timer = QTimer()
@@ -38,7 +38,7 @@ class DirectHotkeyMonitor(QObject):
             except Exception:
                 pass  # Windows API not available
 
-    def start_monitoring(self):
+    def start_monitoring(self) -> bool:
         """Start monitoring keyboard state"""
         if not self.api_available:
             pass  # Cannot start monitoring
@@ -52,7 +52,7 @@ class DirectHotkeyMonitor(QObject):
         pass  # Started monitoring
         return True
 
-    def stop_monitoring(self):
+    def stop_monitoring(self) -> None:
         """Stop monitoring"""
         if not self.is_monitoring:
             return
@@ -61,7 +61,7 @@ class DirectHotkeyMonitor(QObject):
         self.poll_timer.stop()
         pass  # Stopped monitoring
 
-    def check_keys(self):
+    def check_keys(self) -> None:
         """Check for Ctrl+Space combination"""
         if not self.api_available:
             return
@@ -92,7 +92,7 @@ class DirectHotkeyMonitor(QObject):
 # Global instance
 _direct_monitor = None
 
-def get_direct_monitor():
+def get_direct_monitor() -> DirectHotkeyMonitor:
     """Get global direct monitor instance"""
     global _direct_monitor
     if _direct_monitor is None:

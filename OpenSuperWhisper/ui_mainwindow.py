@@ -9,7 +9,7 @@ import numpy as np
 import sounddevice as sd
 import yaml
 from PySide6.QtCore import QThread, QTimer, Signal
-from PySide6.QtGui import QAction
+from PySide6.QtGui import QAction, QCloseEvent
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -29,9 +29,10 @@ from PySide6.QtWidgets import (
 )
 
 from . import asr_api, config, formatter_api, logger
-from .direct_hotkey import get_direct_monitor
+from .direct_hotkey import DirectHotkeyMonitor, get_direct_monitor
+from .global_hotkey import GlobalHotkeyManager
 from .recording_indicator import GlobalRecordingIndicator
-from .simple_hotkey import get_hotkey_monitor
+from .simple_hotkey import SimpleHotkeyMonitor, get_hotkey_monitor
 
 DEFAULT_PROMPT = """# 役割
 あなたは「編集専用」の書籍編集者である。以下の <TRANSCRIPT> ... </TRANSCRIPT> に囲まれた本文だけを機械的に整形する。
@@ -57,7 +58,7 @@ class TranscriptionWorker(QThread):
     formatting_completed = Signal(str)     # formatted text
     error_occurred = Signal(str)           # error message
 
-    def __init__(self, audio_path, asr_model, should_format, chat_model, prompt, style_guide):
+    def __init__(self, audio_path: str, asr_model: str, should_format: bool, chat_model: str, prompt: str, style_guide: str) -> None:
         super().__init__()
         self.audio_path = audio_path
         self.asr_model = asr_model
@@ -66,7 +67,7 @@ class TranscriptionWorker(QThread):
         self.prompt = prompt
         self.style_guide = style_guide
 
-    def run(self):
+    def run(self) -> None:
         try:
             # Step 1: Transcription
             logger.logger.info(f"Starting transcription with {self.asr_model}")
@@ -89,7 +90,7 @@ class TranscriptionWorker(QThread):
 
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("OpenSuperWhisper")
         self.resize(800, 600)
@@ -100,7 +101,7 @@ class MainWindow(QMainWindow):
         self.fs = 16000
 
         # Hotkey debouncing
-        self.last_hotkey_time = 0
+        self.last_hotkey_time = 0.0
         self.hotkey_debounce_ms = 500  # 500ms debounce
         self.is_processing_toggle = False  # Prevent multiple toggles
 
@@ -118,7 +119,7 @@ class MainWindow(QMainWindow):
         self.load_settings()
         self.load_presets()
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:
         # Apply dark theme stylesheet
         self.apply_dark_theme()
 
@@ -303,7 +304,7 @@ class MainWindow(QMainWindow):
         self.auto_copy_toggle.toggled.connect(
             lambda state: config.save_setting("auto_copy_clipboard", state))
 
-    def setup_menu(self):
+    def setup_menu(self) -> None:
         menubar = self.menuBar()
 
         # File menu
@@ -353,26 +354,27 @@ class MainWindow(QMainWindow):
         shortcuts_action.triggered.connect(self.show_shortcuts)
         help_menu.addAction(shortcuts_action)
 
-    def setup_shortcuts(self):
+    def setup_shortcuts(self) -> None:
         # Disable local shortcut since we're using global hotkey for Ctrl+Space
         # self.record_shortcut = QShortcut(QKeySequence("Ctrl+Space"), self)
         # self.record_shortcut.activated.connect(self.toggle_recording_unified)
         pass
 
-    def setup_global_features(self):
+    def setup_global_features(self) -> None:
         """Setup global hotkeys and overlay indicator"""
         # Initialize global recording indicator
         self.global_indicator = GlobalRecordingIndicator.get_instance()
         self.global_indicator.set_parent_window(self)
 
         # Setup global hotkey manager with fallback
-        self.hotkey_manager = None
-        self.simple_hotkey_monitor = None
+        self.hotkey_manager: GlobalHotkeyManager | None = None
+        self.simple_hotkey_monitor: SimpleHotkeyMonitor | None = None
+        self.direct_monitor: DirectHotkeyMonitor | None = None
 
         # Delay hotkey setup to ensure Qt is fully initialized
         QTimer.singleShot(1000, self.delayed_hotkey_setup)  # 1 second delay
 
-    def delayed_hotkey_setup(self):
+    def delayed_hotkey_setup(self) -> None:
         """Setup hotkeys after Qt initialization delay"""
         try:
             # Use direct keyboard polling for maximum reliability
@@ -385,7 +387,7 @@ class MainWindow(QMainWindow):
             self.simple_hotkey_monitor = None
             self.direct_monitor = None
 
-    def setup_fallback_hotkey(self):
+    def setup_fallback_hotkey(self) -> None:
         """Setup fallback hotkey monitoring using SimpleHotkeyMonitor"""
         try:
             self.simple_hotkey_monitor = get_hotkey_monitor()
@@ -406,7 +408,7 @@ class MainWindow(QMainWindow):
             logger.logger.error(f"Fallback hotkey setup failed: {e}")
             self.simple_hotkey_monitor = None
 
-    def setup_direct_hotkey(self):
+    def setup_direct_hotkey(self) -> None:
         """Setup direct keyboard polling hotkey monitoring"""
         try:
             self.direct_monitor = get_direct_monitor()
@@ -423,13 +425,13 @@ class MainWindow(QMainWindow):
             logger.logger.error(f"Direct hotkey setup failed: {e}")
             self.direct_monitor = None
 
-    def handle_global_hotkey(self, hotkey_id: str):
+    def handle_global_hotkey(self, hotkey_id: str) -> None:
         """Handle global hotkey activation"""
         logger.logger.info(f"Global hotkey activated: {hotkey_id}")
         if hotkey_id == "global_record_toggle":
             self.toggle_recording_unified()
 
-    def handle_direct_hotkey(self, hotkey_id: str):
+    def handle_direct_hotkey(self, hotkey_id: str) -> None:
         """Handle direct hotkey activation with debouncing"""
         current_time = time.time() * 1000  # Convert to milliseconds
 
@@ -444,7 +446,7 @@ class MainWindow(QMainWindow):
             # Ensure we're on the main thread for GUI operations
             QTimer.singleShot(0, self.toggle_recording_unified)
 
-    def toggle_recording_unified(self):
+    def toggle_recording_unified(self) -> None:
         """Unified recording toggle (works both locally and globally)"""
         if self.is_processing_toggle:
             return
@@ -470,7 +472,7 @@ class MainWindow(QMainWindow):
         self.update()
         # If minimized, don't restore - just use indicator for feedback
 
-    def restore_from_indicator(self):
+    def restore_from_indicator(self) -> None:
         """Restore main window when indicator is clicked"""
         if self.isMinimized():
             self.showNormal()
@@ -483,7 +485,7 @@ class MainWindow(QMainWindow):
         if self.is_recording:
             self.stop_recording()
 
-    def load_settings(self):
+    def load_settings(self) -> None:
         # Load saved API key and set environment variable
         api_key = config.load_setting(config.KEY_API_KEY, "")
         if api_key:
@@ -525,7 +527,7 @@ class MainWindow(QMainWindow):
         if geom:
             self.restoreGeometry(geom)
 
-    def closeEvent(self, event):
+    def closeEvent(self, event: QCloseEvent) -> None:
         # Save settings on close
         config.save_setting(config.KEY_WINDOW_GEOMETRY, self.saveGeometry())
         config.save_setting(config.KEY_PROMPT_TEXT, self.prompt_text_edit.toPlainText())
@@ -545,17 +547,17 @@ class MainWindow(QMainWindow):
 
         super().closeEvent(event)
 
-    def toggle_recording(self):
+    def toggle_recording(self) -> None:
         """Legacy method - redirects to unified toggle"""
         self.toggle_recording_unified()
 
-    def update_recording_time(self):
+    def update_recording_time(self) -> None:
         self.recording_time += 1
         mins = self.recording_time // 60
         secs = self.recording_time % 60
         self.recording_status.setText(f"🔴 Recording... {mins:02d}:{secs:02d}")
 
-    def start_recording(self):
+    def start_recording(self) -> None:
         if self.is_recording:
             return
         self.is_recording = True
@@ -573,7 +575,7 @@ class MainWindow(QMainWindow):
         if hasattr(self, 'global_indicator'):
             self.global_indicator.show_recording()
 
-    def stop_recording(self):
+    def stop_recording(self) -> None:
         if not self.is_recording:
             return
 
@@ -588,6 +590,8 @@ class MainWindow(QMainWindow):
         self.recording_status.setText("Processing...")
 
         # Trim recording to actual length
+        if self.recording is None:
+            return
         recording = self.recording[:,0]
 
         # Use amplitude threshold for better audio detection
@@ -638,7 +642,7 @@ class MainWindow(QMainWindow):
         # Start background transcription
         self.start_transcription_worker(wav_path)
 
-    def start_transcription_worker(self, wav_path):
+    def start_transcription_worker(self, wav_path: str) -> None:
         """Start background worker for transcription and formatting"""
         selected_asr_model = self.asr_model_combo.currentText()
         should_format = self.post_format_toggle.isChecked()
@@ -664,7 +668,7 @@ class MainWindow(QMainWindow):
         # Start worker
         self.worker.start()
 
-    def on_transcription_completed(self, raw_text):
+    def on_transcription_completed(self, raw_text: str) -> None:
         """Handle transcription completion"""
         self.raw_text_edit.setPlainText(raw_text)
         logger.logger.info(f"Transcription completed: {raw_text}")
@@ -674,7 +678,7 @@ class MainWindow(QMainWindow):
             self.copy_to_clipboard_if_enabled(raw_text)
             self.complete_processing()
 
-    def on_formatting_completed(self, formatted_text):
+    def on_formatting_completed(self, formatted_text: str) -> None:
         """Handle formatting completion"""
         self.formatted_text_edit.setPlainText(formatted_text)
         logger.logger.info(f"Formatting completed: {formatted_text}")
@@ -683,18 +687,18 @@ class MainWindow(QMainWindow):
         self.copy_to_clipboard_if_enabled(formatted_text)
         self.complete_processing()
 
-    def on_worker_error(self, error_message):
+    def on_worker_error(self, error_message: str) -> None:
         """Handle worker errors"""
         self.show_error(f"Processing failed:\n{error_message}")
         self.complete_processing()
 
-    def on_worker_finished(self):
+    def on_worker_finished(self) -> None:
         """Clean up when worker finishes"""
         if hasattr(self, 'worker'):
             self.worker.deleteLater()
             del self.worker
 
-    def get_default_presets(self):
+    def get_default_presets(self) -> dict[str, str]:
         """Get default prompt presets"""
         return {
             "Default Editor": DEFAULT_PROMPT,
@@ -747,7 +751,7 @@ class MainWindow(QMainWindow):
 整形されたブログ記事のみを出力する。"""
         }
 
-    def load_presets(self):
+    def load_presets(self) -> None:
         """Load prompt presets from settings"""
         # Get saved presets or use defaults
         saved_presets = config.load_setting(config.KEY_PROMPT_PRESETS, {})
@@ -770,7 +774,7 @@ class MainWindow(QMainWindow):
 
         self.preset_combo.blockSignals(False)
 
-    def load_preset(self, preset_name):
+    def load_preset(self, preset_name: str) -> None:
         """Load selected preset"""
         if not preset_name:
             return
@@ -780,7 +784,7 @@ class MainWindow(QMainWindow):
             self.prompt_text_edit.setPlainText(presets[preset_name])
             config.save_setting(config.KEY_CURRENT_PRESET, preset_name)
 
-    def save_preset(self):
+    def save_preset(self) -> None:
         """Save current prompt as a new preset"""
         preset_name, ok = QInputDialog.getText(
             self, "Save Preset",
@@ -820,7 +824,7 @@ class MainWindow(QMainWindow):
 
             QMessageBox.information(self, "Success", f"Preset '{preset_name}' saved successfully.")
 
-    def delete_preset(self):
+    def delete_preset(self) -> None:
         """Delete selected preset"""
         current_preset = self.preset_combo.currentText()
         if not current_preset:
@@ -854,7 +858,7 @@ class MainWindow(QMainWindow):
             if default_index >= 0:
                 self.preset_combo.setCurrentIndex(default_index)
 
-    def add_preset(self):
+    def add_preset(self) -> None:
         """Add a new preset with custom name and prompt"""
         preset_name, ok = QInputDialog.getText(
             self, "Add New Preset",
@@ -898,7 +902,7 @@ class MainWindow(QMainWindow):
 
                 QMessageBox.information(self, "Success", f"Preset '{preset_name}' added successfully.")
 
-    def edit_preset(self):
+    def edit_preset(self) -> None:
         """Edit the name of the selected preset"""
         current_preset = self.preset_combo.currentText()
         if not current_preset:
@@ -951,7 +955,7 @@ class MainWindow(QMainWindow):
 
                 QMessageBox.information(self, "Success", f"Preset renamed to '{new_name}' successfully.")
 
-    def complete_processing(self):
+    def complete_processing(self) -> None:
         """Complete the processing and update UI/indicators"""
         # Hide global recording indicator
         if hasattr(self, 'global_indicator'):
@@ -963,7 +967,7 @@ class MainWindow(QMainWindow):
 
         logger.logger.info("Processing completed - UI updated to Ready state")
 
-    def copy_to_clipboard_if_enabled(self, text: str):
+    def copy_to_clipboard_if_enabled(self, text: str) -> None:
         """Copy text to clipboard if auto-copy is enabled"""
         if not self.auto_copy_toggle.isChecked():
             return
@@ -986,22 +990,22 @@ class MainWindow(QMainWindow):
                 self.recording_status.setStyleSheet("color: #28a745; font-weight: 600;")
 
                 # Reset status after 2 seconds
-                QTimer.singleShot(2000, lambda: (
-                    self.recording_status.setText(original_status),
+                def reset_status() -> None:
+                    self.recording_status.setText(original_status)
                     self.recording_status.setStyleSheet("")
-                ))
+                QTimer.singleShot(2000, reset_status)
 
         except Exception as e:
             logger.logger.error(f"Failed to copy to clipboard: {e}")
 
-    def load_style_guide(self):
+    def load_style_guide(self) -> None:
         path, _ = QFileDialog.getOpenFileName(
             self, "Load Style Guide", "", "YAML Files (*.yaml *.yml);;JSON Files (*.json)")
         if path:
             self.load_style_guide_from_file(path)
             config.save_setting(config.KEY_STYLE_GUIDE_PATH, path)
 
-    def load_style_guide_from_file(self, path):
+    def load_style_guide_from_file(self, path: str) -> None:
         try:
             with open(path, encoding='utf-8') as f:
                 if path.endswith('.json'):
@@ -1016,7 +1020,7 @@ class MainWindow(QMainWindow):
         except Exception as e:
             self.show_error(f"Failed to load style guide:\n{e}")
 
-    def save_transcription(self):
+    def save_transcription(self) -> None:
         # Determine which text to save
         current_tab = self.tab_widget.currentIndex()
         if current_tab == 0:  # Raw tab
@@ -1043,7 +1047,7 @@ class MainWindow(QMainWindow):
             except Exception as e:
                 self.show_error(f"Failed to save file:\n{e}")
 
-    def reset_to_defaults(self):
+    def reset_to_defaults(self) -> None:
         reply = QMessageBox.question(
             self, "Reset Settings",
             "This will reset all settings to defaults. Continue?",
@@ -1068,7 +1072,7 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Reset Complete", "Settings have been reset to defaults.")
             logger.logger.info("Settings reset to defaults")
 
-    def show_about(self):
+    def show_about(self) -> None:
         about_text = """
         <h3>OpenSuperWhisper v0.1.0</h3>
         <p>Two-Stage Voice Transcription Tool</p>
@@ -1087,7 +1091,7 @@ class MainWindow(QMainWindow):
         """
         QMessageBox.about(self, "About OpenSuperWhisper", about_text)
 
-    def show_shortcuts(self):
+    def show_shortcuts(self) -> None:
         shortcuts_text = """
         <h3>🎹 Keyboard Shortcuts</h3>
 
@@ -1122,14 +1126,14 @@ class MainWindow(QMainWindow):
         """
         QMessageBox.information(self, "Keyboard Shortcuts", shortcuts_text)
 
-    def set_api_key(self):
+    def set_api_key(self) -> None:
         current_key = config.load_setting(config.KEY_API_KEY, "")
 
         # Show input dialog with masked text for security
         api_key, ok = QInputDialog.getText(
             self, "Set OpenAI API Key",
             "Enter your OpenAI API key:",
-            QLineEdit.Password,
+            QLineEdit.EchoMode.Password,
             current_key
         )
 
@@ -1153,7 +1157,7 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Empty API Key",
                               "Please enter a valid API key.")
 
-    def apply_dark_theme(self):
+    def apply_dark_theme(self) -> None:
         """Apply clean, professional dark theme with excellent readability"""
         professional_style = """
         /* Main Window - Clean dark background */
@@ -1407,7 +1411,7 @@ class MainWindow(QMainWindow):
 
         self.setStyleSheet(professional_style)
 
-    def show_error(self, message):
+    def show_error(self, message: str) -> None:
         QMessageBox.critical(self, "Error", message)
 
 
