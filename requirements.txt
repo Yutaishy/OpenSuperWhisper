@@ -17,5 +17,5 @@ pynput>=1.7.6
 # Configuration
 PyYAML>=6.0
 
-# Optional: Enhanced Security (uncomment to enable API key encryption)
-# cryptography>=41.0.0
+# Security - API key encryption
+cryptography>=41.0.0

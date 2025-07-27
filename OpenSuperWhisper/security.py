@@ -5,12 +5,19 @@ Provides enhanced API key protection and secure storage
 
 import base64
 import os
-from cryptography.fernet import Fernet
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from typing import Optional
 
 from . import logger
+
+# Conditional import of cryptography
+try:
+    from cryptography.fernet import Fernet
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+    CRYPTOGRAPHY_AVAILABLE = True
+except ImportError:
+    logger.logger.warning("cryptography package not available - API key encryption disabled")
+    CRYPTOGRAPHY_AVAILABLE = False
 
 
 class APIKeyManager:
@@ -32,6 +39,9 @@ class APIKeyManager:
     
     def encrypt_api_key(self, api_key: str, password: str) -> str:
         """Encrypt API key with password"""
+        if not CRYPTOGRAPHY_AVAILABLE:
+            logger.logger.warning("Encryption not available - returning plain API key")
+            return api_key
         try:
             key = self._get_key(password)
             f = Fernet(key)
@@ -43,6 +53,9 @@ class APIKeyManager:
     
     def decrypt_api_key(self, encrypted_key: str, password: str) -> Optional[str]:
         """Decrypt API key with password"""
+        if not CRYPTOGRAPHY_AVAILABLE:
+            logger.logger.warning("Decryption not available - returning encrypted key as-is")
+            return encrypted_key
         try:
             key = self._get_key(password)
             f = Fernet(key)

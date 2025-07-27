@@ -27,9 +27,15 @@ def main():
         '--hidden-import=OpenSuperWhisper.direct_hotkey',
         '--hidden-import=OpenSuperWhisper.simple_hotkey',
         '--hidden-import=OpenSuperWhisper.recording_indicator',
+        '--hidden-import=OpenSuperWhisper.first_run',
+        '--hidden-import=OpenSuperWhisper.security',
         '--hidden-import=PySide6.QtCore',
         '--hidden-import=PySide6.QtGui',
         '--hidden-import=PySide6.QtWidgets',
+        '--hidden-import=cryptography',
+        '--hidden-import=cryptography.fernet',
+        '--hidden-import=yaml',
+        '--hidden-import=tempfile',
         '--distpath=dist',
         '--clean',  # Clean build directory
         'run_app.py'
@@ -52,8 +58,19 @@ def main():
         print("Linux platform detected - adding Linux-specific settings")
         args.extend([
             '--hidden-import=PySide6.QtDBus',
-            '--add-binary=/usr/lib/x86_64-linux-gnu/libportaudio.so.2:.',
+            # Try to find libportaudio.so.2 in common locations
+            '--collect-all=sounddevice',
         ])
+        # Try to add portaudio library if it exists
+        portaudio_paths = [
+            '/usr/lib/x86_64-linux-gnu/libportaudio.so.2',
+            '/usr/lib/libportaudio.so.2',
+            '/lib/x86_64-linux-gnu/libportaudio.so.2'
+        ]
+        for path in portaudio_paths:
+            if os.path.exists(path):
+                args.append(f'--add-binary={path}:.')
+                break
     
     print(f"Building executable: {executable_name}")
     print(f"Platform: {platform.system()}")
