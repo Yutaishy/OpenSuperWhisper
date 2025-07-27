@@ -15,6 +15,10 @@ on:
         required: false
         default: 'v0.4.0'
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   build:
     name: Build on ${{ matrix.os }}
