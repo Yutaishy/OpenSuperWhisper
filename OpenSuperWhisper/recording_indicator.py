@@ -36,16 +36,16 @@ class RecordingIndicator(QWidget):
             Qt.WindowType.WindowStaysOnTopHint |
             Qt.WindowType.Tool
         )
-        
+
         # Add platform-specific flags
         if sys.platform.startswith('linux'):
             flags |= Qt.WindowType.X11BypassWindowManagerHint
         elif sys.platform == 'win32':
             # Additional Windows-specific flags for proper always-on-top behavior
             flags |= Qt.WindowType.WindowDoesNotAcceptFocus
-        
+
         self.setWindowFlags(flags)
-        
+
         # Set window attributes for transparency and staying on top
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating, True)
 

@@ -4,8 +4,6 @@ Provides enhanced API key protection and secure storage
 """
 
 import base64
-import os
-from typing import Optional
 
 from . import logger
 
@@ -22,10 +20,10 @@ except ImportError:
 
 class APIKeyManager:
     """Secure API key storage with encryption"""
-    
+
     def __init__(self):
         self.salt = b'opensuperwhisper_salt_v1'  # In production, use random salt per installation
-    
+
     def _get_key(self, password: str) -> bytes:
         """Derive encryption key from password"""
         kdf = PBKDF2HMAC(
@@ -36,7 +34,7 @@ class APIKeyManager:
         )
         key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
         return key
-    
+
     def encrypt_api_key(self, api_key: str, password: str) -> str:
         """Encrypt API key with password"""
         if not CRYPTOGRAPHY_AVAILABLE:
@@ -50,8 +48,8 @@ class APIKeyManager:
         except Exception as e:
             logger.logger.error(f"Failed to encrypt API key: {e}")
             raise
-    
-    def decrypt_api_key(self, encrypted_key: str, password: str) -> Optional[str]:
+
+    def decrypt_api_key(self, encrypted_key: str, password: str) -> str | None:
         """Decrypt API key with password"""
         if not CRYPTOGRAPHY_AVAILABLE:
             logger.logger.warning("Decryption not available - returning encrypted key as-is")
@@ -65,7 +63,7 @@ class APIKeyManager:
         except Exception as e:
             logger.logger.error(f"Failed to decrypt API key: {e}")
             return None
-    
+
     def is_encrypted_key(self, key_value: str) -> bool:
         """Check if a key value appears to be encrypted"""
         # Encrypted keys will be base64 encoded and longer than normal API keys
@@ -74,7 +72,7 @@ class APIKeyManager:
         try:
             base64.urlsafe_b64decode(key_value.encode())
             return len(key_value) > 100 and not key_value.startswith('sk-')
-        except:
+        except Exception:
             return False
 
 
@@ -82,7 +80,7 @@ def secure_key_check(api_key: str) -> bool:
     """Validate API key format and security"""
     if not api_key:
         return False
-    
+
     # Check for common API key patterns
     if api_key.startswith('sk-'):
         # OpenAI API key format
@@ -90,7 +88,7 @@ def secure_key_check(api_key: str) -> bool:
             logger.logger.warning("API key appears too short")
             return False
         return True
-    
+
     # Could be encrypted key
     manager = APIKeyManager()
     return manager.is_encrypted_key(api_key)
@@ -100,7 +98,7 @@ def sanitize_for_logs(text: str) -> str:
     """Sanitize sensitive information from log output"""
     if not text:
         return text
-    
+
     # Replace API keys with masked version
     import re
     patterns = [
@@ -108,9 +106,9 @@ def sanitize_for_logs(text: str) -> str:
         (r'Bearer [a-zA-Z0-9]{20,}', 'Bearer ***MASKED***'),
         (r'"api_key":\s*"[^"]{10,}"', '"api_key": "***MASKED***"'),
     ]
-    
+
     result = text
     for pattern, replacement in patterns:
         result = re.sub(pattern, replacement, result)
-    
+
     return result

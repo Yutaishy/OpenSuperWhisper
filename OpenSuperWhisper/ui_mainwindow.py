@@ -120,7 +120,7 @@ class MainWindow(QMainWindow):
         self.setup_global_features()
         self.load_settings()
         self.load_presets()
-        
+
         # Show first run wizard if needed (delayed to ensure UI is ready)
         QTimer.singleShot(500, self.check_first_run)
 
@@ -498,7 +498,7 @@ class MainWindow(QMainWindow):
             logger.logger.info("Loaded API key from settings")
         else:
             logger.logger.warning("No API key found in settings")
-    
+
     def check_first_run(self) -> None:
         """Check if first run wizard should be shown"""
         try:

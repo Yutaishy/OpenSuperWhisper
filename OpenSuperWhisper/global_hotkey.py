@@ -12,8 +12,7 @@ from PySide6.QtCore import QObject, QTimer, Signal
 # Platform-specific imports
 if sys.platform == "win32":
     try:
-        import ctypes
-        from ctypes import wintypes
+        # ctypes imported later when needed to avoid lint warnings
         WINDOWS_AVAILABLE = True
     except ImportError:
         WINDOWS_AVAILABLE = False
@@ -191,8 +190,8 @@ class GlobalHotkeyManager(QObject):
             # Check for hotkey messages
             if not WINDOWS_AVAILABLE or self.user32 is None:
                 return
-            from ctypes import wintypes  # Re-import for type checker
             import ctypes  # Re-import for type checker
+            from ctypes import wintypes  # Re-import for type checker
             msg = wintypes.MSG()
             while self.user32.PeekMessageW(ctypes.byref(msg), None, 0, 0, 1):
                 if msg.message == 0x0312:  # WM_HOTKEY
