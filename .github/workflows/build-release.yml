@@ -68,29 +68,9 @@ jobs:
       run: |
         python -c "from OpenSuperWhisper.ui_mainwindow import MainWindow; print('MainWindow import successful')"
     
-    - name: Create PyInstaller spec file
+    - name: Build with PyInstaller
       run: |
-        python -c "
-        import PyInstaller.__main__
-        PyInstaller.__main__.run([
-            '--name=${{ matrix.executable_name }}',
-            '--onefile',
-            '--windowed',
-            '--collect-all=OpenSuperWhisper',
-            '--collect-all=PySide6',
-            '--hidden-import=OpenSuperWhisper',
-            '--hidden-import=OpenSuperWhisper.ui_mainwindow',
-            '--hidden-import=OpenSuperWhisper.asr_api',
-            '--hidden-import=OpenSuperWhisper.formatter_api',
-            '--hidden-import=OpenSuperWhisper.config',
-            '--hidden-import=OpenSuperWhisper.logger',
-            '--hidden-import=PySide6.QtCore',
-            '--hidden-import=PySide6.QtGui',
-            '--hidden-import=PySide6.QtWidgets',
-            '--distpath=dist',
-            'run_app.py'
-        ])
-        "
+        python build_executable.py "${{ matrix.executable_name }}"
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
