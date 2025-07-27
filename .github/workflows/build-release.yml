@@ -197,17 +197,45 @@ jobs:
     - name: Download all artifacts
       uses: actions/download-artifact@v4
 
-    - name: Debug artifact structure
+    - name: Reorganize artifacts for release
       run: |
-        echo "=== Artifact directory structure ==="
+        echo "=== Current directory structure ==="
         find . -type f -name "OpenSuperWhisper*" | head -20
         ls -la
-        for dir in OpenSuperWhisper-*; do
-          if [ -d "$dir" ]; then
-            echo "=== Contents of $dir ==="
-            ls -la "$dir/"
-          fi
-        done
+        
+        echo "=== Reorganizing artifacts ==="
+        # Create directory structure expected by release action
+        mkdir -p release-files
+        
+        # Copy Windows executable
+        if [ -f "OpenSuperWhisper-Windows/OpenSuperWhisper.exe" ]; then
+          cp "OpenSuperWhisper-Windows/OpenSuperWhisper.exe" "release-files/"
+          echo "Windows executable found and copied"
+        else
+          echo "ERROR: Windows executable not found"
+          find . -name "*.exe" -type f
+        fi
+        
+        # Copy macOS executable  
+        if [ -f "OpenSuperWhisper-macOS/OpenSuperWhisper" ]; then
+          cp "OpenSuperWhisper-macOS/OpenSuperWhisper" "release-files/OpenSuperWhisper-macOS"
+          echo "macOS executable found and copied"
+        else
+          echo "ERROR: macOS executable not found"
+          find . -name "*macOS*" -type f
+        fi
+        
+        # Copy Linux executable
+        if [ -f "OpenSuperWhisper-Linux/OpenSuperWhisper" ]; then
+          cp "OpenSuperWhisper-Linux/OpenSuperWhisper" "release-files/OpenSuperWhisper-Linux"
+          echo "Linux executable found and copied"
+        else
+          echo "ERROR: Linux executable not found"
+          find . -name "*Linux*" -type f
+        fi
+        
+        echo "=== Final release files ==="
+        ls -la release-files/
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
@@ -233,8 +261,8 @@ jobs:
           ### 📚 Documentation
           See README.md for complete setup and usage instructions.
         files: |
-          ./OpenSuperWhisper-Windows/OpenSuperWhisper.exe
-          ./OpenSuperWhisper-macOS/OpenSuperWhisper
-          ./OpenSuperWhisper-Linux/OpenSuperWhisper
+          release-files/OpenSuperWhisper.exe
+          release-files/OpenSuperWhisper-macOS
+          release-files/OpenSuperWhisper-Linux
         draft: false
         prerelease: false
