@@ -1,6 +1,29 @@
 # CHANGELOG
 
-## [0.4.0] - 2025-07-27 (Latest)
+## [0.5.0] - 2025-07-27 (Production Release)
+### Added
+- **Complete CI/CD Pipeline:** Full GitHub Actions integration
+  - ✅ Cross-platform testing (Windows, macOS, Linux)
+  - ✅ Automated builds and releases
+  - ✅ Security vulnerability scanning
+  - ✅ Code quality enforcement (ruff, mypy)
+- **Production-Ready Status:** Project elevated to stable/production
+- **GitHub Actions Badges:** Live CI/CD status indicators in README
+- **Release Automation:** Automated executable generation for all platforms
+
+### Fixed
+- **Linux EGL Dependencies:** Resolved Qt GUI issues in headless CI environments
+- **Windows PowerShell Compatibility:** Fixed shell script execution errors
+- **Unicode Encoding:** Resolved Windows cp1252 character encoding issues
+- **Type Safety:** Complete mypy compliance with proper type annotations
+- **Code Quality:** Full ruff linting compliance with modern Python standards
+
+### Changed
+- **Project Structure:** Cleaned up development artifacts and cache files
+- **Version Management:** Updated to semantic versioning v0.5.0
+- **Documentation:** Enhanced with CI/CD badges and status indicators
+
+## [0.4.0] - 2025-07-27
 ### Added
 - **Advanced Preset Management:** Complete CRUD operations for formatting prompts
   - ➕ Add new presets with custom names and content
