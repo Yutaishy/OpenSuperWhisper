@@ -8,11 +8,10 @@ version = "0.4.0"
 description = "Two-Stage Voice Transcription Pipeline with AI-Powered Text Formatting"
 readme = "README.md"
 authors = [{name = "OpenSuperWhisper Team"}]
-license = {text = "MIT"}
+license = "MIT"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: End Users/Desktop",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
@@ -46,6 +45,17 @@ Issues = "https://github.com/Yutaishy/voice_input/issues"
 
 [project.scripts]
 opensuperwhisper = "run_app:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["OpenSuperWhisper*"]
+exclude = ["tests*", "style_guides*", "build*", "dist*"]
+
+[tool.setuptools.package-data]
+OpenSuperWhisper = ["*.json", "*.yaml", "*.yml"]
+
+[tool.setuptools]
+include-package-data = true
 
 [tool.black]
 line-length = 88
