@@ -144,36 +144,49 @@ jobs:
         QT_QPA_PLATFORM: ${{ matrix.os == 'ubuntu-latest' && 'offscreen' || '' }}
         CI: true
         
-    - name: Verify build output
+    - name: Verify build output and create distribution archive
       shell: bash
       run: |
         ls -la dist/
-        file dist/${{ matrix.executable_name }} || echo "File command not available"
-        # Check executable size and properties
-        if [ -f "dist/${{ matrix.executable_name }}" ]; then
-          size=$(stat -c%s "dist/${{ matrix.executable_name }}" 2>/dev/null || stat -f%z "dist/${{ matrix.executable_name }}" 2>/dev/null || echo "0")
-          echo "Executable size: $size bytes"
-          if [ "$size" -lt 10000000 ]; then
-            echo "Warning: Executable seems too small ($size bytes)"
-          elif [ "$size" -gt 500000000 ]; then
-            echo "Warning: Executable seems too large ($size bytes)"
+        
+        # PyInstaller onedir mode creates a folder with the executable inside
+        if [ -d "dist/${{ matrix.executable_name }}" ]; then
+          echo "Found onedir build: dist/${{ matrix.executable_name }}/"
+          ls -la "dist/${{ matrix.executable_name }}/"
+          
+          # Check the main executable inside the folder
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            EXEC_PATH="dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}.exe"
+          else
+            EXEC_PATH="dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}"
           fi
           
-          # Check if executable is readable and has execution permissions
-          if [ ! -r "dist/${{ matrix.executable_name }}" ]; then
-            echo "Error: Executable is not readable"
+          if [ -f "$EXEC_PATH" ]; then
+            echo "Found executable: $EXEC_PATH"
+            size=$(stat -c%s "$EXEC_PATH" 2>/dev/null || stat -f%z "$EXEC_PATH" 2>/dev/null || echo "0")
+            echo "Executable size: $size bytes"
+            
+            # Set execution permissions on Unix systems
+            if [[ "${{ matrix.os }}" != "windows-latest" ]]; then
+              chmod +x "$EXEC_PATH"
+              echo "Set execution permissions"
+            fi
+          else
+            echo "Error: Main executable not found at $EXEC_PATH"
             exit 1
           fi
           
-          # On Unix systems, check execution permissions
-          if [[ "${{ matrix.os }}" != "windows-latest" ]]; then
-            if [ ! -x "dist/${{ matrix.executable_name }}" ]; then
-              echo "Warning: Executable lacks execution permissions, adding..."
-              chmod +x "dist/${{ matrix.executable_name }}"
-            fi
+          # Create ZIP archive for distribution
+          cd dist/
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            powershell Compress-Archive -Path "${{ matrix.executable_name }}" -DestinationPath "${{ matrix.executable_name }}.zip"
+          else
+            zip -r "${{ matrix.executable_name }}.zip" "${{ matrix.executable_name }}/"
           fi
+          echo "Created distribution archive: ${{ matrix.executable_name }}.zip"
+          ls -la *.zip
         else
-          echo "Error: Executable not found!"
+          echo "Error: Build directory not found!"
           exit 1
         fi
         echo "Build completed successfully"
@@ -183,7 +196,7 @@ jobs:
       with:
         name: ${{ matrix.artifact_name }}
         path: |
-          dist/${{ matrix.executable_name }}
+          dist/${{ matrix.executable_name }}.zip
         retention-days: 7
 
   release:
@@ -203,35 +216,35 @@ jobs:
         find . -type f -name "OpenSuperWhisper*" | head -20
         ls -la
         
-        echo "=== Reorganizing artifacts ==="
+        echo "=== Reorganizing ZIP artifacts ==="
         # Create directory structure expected by release action
         mkdir -p release-files
         
-        # Copy Windows executable
-        if [ -f "OpenSuperWhisper-Windows/OpenSuperWhisper.exe" ]; then
-          cp "OpenSuperWhisper-Windows/OpenSuperWhisper.exe" "release-files/"
-          echo "Windows executable found and copied"
+        # Copy Windows ZIP
+        if [ -f "OpenSuperWhisper-Windows/OpenSuperWhisper.zip" ]; then
+          cp "OpenSuperWhisper-Windows/OpenSuperWhisper.zip" "release-files/OpenSuperWhisper-Windows.zip"
+          echo "Windows ZIP found and copied"
         else
-          echo "ERROR: Windows executable not found"
-          find . -name "*.exe" -type f
+          echo "ERROR: Windows ZIP not found"
+          find . -name "*.zip" -type f
         fi
         
-        # Copy macOS executable  
-        if [ -f "OpenSuperWhisper-macOS/OpenSuperWhisper" ]; then
-          cp "OpenSuperWhisper-macOS/OpenSuperWhisper" "release-files/OpenSuperWhisper-macOS"
-          echo "macOS executable found and copied"
+        # Copy macOS ZIP  
+        if [ -f "OpenSuperWhisper-macOS/OpenSuperWhisper.zip" ]; then
+          cp "OpenSuperWhisper-macOS/OpenSuperWhisper.zip" "release-files/OpenSuperWhisper-macOS.zip"
+          echo "macOS ZIP found and copied"
         else
-          echo "ERROR: macOS executable not found"
-          find . -name "*macOS*" -type f
+          echo "ERROR: macOS ZIP not found"
+          find . -name "*macOS*.zip" -type f
         fi
         
-        # Copy Linux executable
-        if [ -f "OpenSuperWhisper-Linux/OpenSuperWhisper" ]; then
-          cp "OpenSuperWhisper-Linux/OpenSuperWhisper" "release-files/OpenSuperWhisper-Linux"
-          echo "Linux executable found and copied"
+        # Copy Linux ZIP
+        if [ -f "OpenSuperWhisper-Linux/OpenSuperWhisper.zip" ]; then
+          cp "OpenSuperWhisper-Linux/OpenSuperWhisper.zip" "release-files/OpenSuperWhisper-Linux.zip"
+          echo "Linux ZIP found and copied"
         else
-          echo "ERROR: Linux executable not found"
-          find . -name "*Linux*" -type f
+          echo "ERROR: Linux ZIP not found"
+          find . -name "*Linux*.zip" -type f
         fi
         
         echo "=== Final release files ==="
@@ -261,8 +274,8 @@ jobs:
           ### 📚 Documentation
           See README.md for complete setup and usage instructions.
         files: |
-          release-files/OpenSuperWhisper.exe
-          release-files/OpenSuperWhisper-macOS
-          release-files/OpenSuperWhisper-Linux
+          release-files/OpenSuperWhisper-Windows.zip
+          release-files/OpenSuperWhisper-macOS.zip
+          release-files/OpenSuperWhisper-Linux.zip
         draft: false
         prerelease: false

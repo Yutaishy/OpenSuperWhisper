@@ -11,7 +11,7 @@
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml/badge.svg" alt="CI/CD"></a>
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml/badge.svg" alt="Build"></a>
   <img src="https://img.shields.io/badge/Tests-18%20Passing-brightgreen.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.6.0-orange.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-0.6.1-orange.svg" alt="Version">
 </p>
 
 **Two-Stage Voice Transcription Pipeline with AI-Powered Text Formatting**
@@ -253,6 +253,38 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Issues**: [Bug Reports & Feature Requests](../../issues)
 - **Releases**: [Download Latest](../../releases)
 - **OpenAI API**: [Get API Key](https://platform.openai.com)
+
+## 🔒 Security & Antivirus Compatibility
+
+### Windows Security / Microsoft Defender
+OpenSuperWhisper v0.6.1+ is specifically designed to minimize false positives from antivirus software. However, if you encounter security warnings:
+
+#### If Windows Defender blocks the application:
+1. **Check Protection History**: Windows Security → Virus & threat protection → Protection history
+2. **Allow the file**: Find the blocked item and select "Allow on device" or "Restore"
+3. **Unblock downloaded file**: Right-click the ZIP file → Properties → Check "Unblock" → OK
+
+#### For other antivirus software:
+- Add the extracted application folder to your antivirus exclusion list temporarily
+- Check your antivirus quarantine and restore the application if needed
+
+### Installation Instructions
+1. **Download** the appropriate ZIP file for your platform from [Releases](../../releases)
+2. **Extract** the entire ZIP file to a folder (e.g., `C:\Program Files\OpenSuperWhisper\`)
+3. **Run** the executable from the extracted folder
+4. **Set up** your OpenAI API key via Settings → Set OpenAI API Key...
+
+### Security Measures
+- **No UPX compression**: Eliminates primary cause of false positives
+- **Onedir distribution**: Allows better antivirus scanning
+- **Open source**: All code is publicly auditable on GitHub
+- **SHA-256 hashes**: Provided in each release for integrity verification
+
+### Still having issues?
+If you continue to experience security warnings, please [report the issue](../../issues/new) with:
+- Your antivirus software name and version
+- The exact warning message
+- The file's SHA-256 hash
 
 ## 💬 Support
 

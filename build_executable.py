@@ -10,11 +10,12 @@ import PyInstaller.__main__
 def main():
     executable_name = sys.argv[1] if len(sys.argv) > 1 else "OpenSuperWhisper"
     
-    # Base arguments
+    # Base arguments - Security-focused configuration
     args = [
         f'--name={executable_name}',
-        '--onefile',
+        '--onedir',  # Changed from onefile to reduce false positives
         '--windowed',
+        '--noupx',  # Disable UPX compression globally to prevent false positives
         '--collect-all=OpenSuperWhisper',
         '--collect-all=PySide6',
         '--hidden-import=OpenSuperWhisper',
@@ -41,24 +42,28 @@ def main():
         'run_app.py'
     ]
     
-    # Add CI-specific optimizations
+    # Add CI-specific optimizations and security enhancements
     if os.getenv('CI'):
         print("CI environment detected - adding CI-specific optimizations")
         args.extend([
             '--log-level=WARN',  # Reduce verbosity for CI
             '--noconfirm',  # Don't ask for confirmation
-            '--exclude-module=tkinter',  # Exclude unnecessary modules
-            '--exclude-module=matplotlib',
-            '--exclude-module=test',
-            '--exclude-module=unittest',
-            '--exclude-module=IPython',
-            '--exclude-module=jupyter',
-            '--exclude-module=notebook',
-            '--exclude-module=scipy',
-            '--exclude-module=pandas',
-            '--exclude-module=sklearn',
-            '--noupx',  # Disable UPX compression to save memory
         ])
+    
+    # Security and compatibility improvements (all environments)
+    args.extend([
+        '--exclude-module=tkinter',  # Exclude unnecessary modules that may trigger AV
+        '--exclude-module=matplotlib',
+        '--exclude-module=test',
+        '--exclude-module=unittest',
+        '--exclude-module=IPython',
+        '--exclude-module=jupyter',
+        '--exclude-module=notebook',
+        '--exclude-module=scipy',
+        '--exclude-module=pandas',
+        '--exclude-module=sklearn',
+        '--strip',  # Strip debug information to reduce false positives
+    ])
     
     # Platform-specific adjustments
     if platform.system() == 'Linux':

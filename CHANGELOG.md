@@ -1,5 +1,29 @@
 # CHANGELOG
 
+## [0.6.1] - 2025-07-28 (Security Enhancement Release)
+### Fixed
+- **Antivirus False Positives:** Resolved Microsoft Defender and other AV software blocking executables
+  - ✅ **UPX Compression Disabled**: Removed UPX compression globally to prevent AV false positives
+  - ✅ **Onedir Distribution**: Changed from onefile to onedir mode for improved security scanning
+  - ✅ **Debug Stripping**: Added `--strip` flag to remove debug information that triggers heuristics
+  - ✅ **Module Exclusions**: Excluded unnecessary modules that can trigger security warnings
+
+### Enhanced
+- **Distribution Method:** ZIP archives containing application folder for better compatibility
+- **Build Security:** Comprehensive security-focused PyInstaller configuration
+- **Cross-Platform Compatibility:** Improved distribution format for all platforms
+
+### Technical
+- **Build Mode:** Changed from `--onefile` to `--onedir` for security
+- **Compression:** Disabled UPX globally with `--noupx` flag
+- **Artifacts:** GitHub Actions now creates platform-specific ZIP files
+- **Module Optimization:** Excluded development and unused modules
+
+### Important Notes
+- **Windows Users**: Extract ZIP and run the executable from the extracted folder
+- **Security**: This release specifically addresses antivirus software compatibility
+- **Distribution**: Each platform now receives a ZIP file instead of a single executable
+
 ## [0.6.0] - 2025-07-28 (Brand Identity Release)
 ### Added
 - **Complete Brand Identity:** Professional icon system with Wave + Quote design
