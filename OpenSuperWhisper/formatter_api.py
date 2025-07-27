@@ -1,3 +1,4 @@
+import os
 from typing import Any
 
 from openai import OpenAI
@@ -7,7 +8,9 @@ client = None
 def get_client() -> OpenAI:
     global client
     if client is None:
-        client = OpenAI()
+        # Set shorter timeouts for CI environments
+        timeout = 60.0 if os.getenv('CI') else 120.0
+        client = OpenAI(timeout=timeout)
     return client
 
 def format_text(raw_text: str, prompt: str, style_guide: str = "", model: str = "gpt-4o-mini") -> str:

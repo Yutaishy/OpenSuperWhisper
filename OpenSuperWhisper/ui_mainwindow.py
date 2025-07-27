@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 import sys
 import tempfile
 import time
@@ -560,6 +561,13 @@ class MainWindow(QMainWindow):
 
         if hasattr(self, 'global_indicator'):
             self.global_indicator.hide_recording()
+
+        # Cleanup temporary directory
+        if hasattr(self, 'temp_dir') and os.path.exists(self.temp_dir):
+            try:
+                shutil.rmtree(self.temp_dir)
+            except Exception as e:
+                logger.logger.warning(f"Failed to cleanup temp directory: {e}")
 
         super().closeEvent(event)
 

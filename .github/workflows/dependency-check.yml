@@ -1,0 +1,50 @@
+name: Dependency Security Check
+
+on:
+  push:
+    paths:
+      - 'requirements.txt'
+      - 'pyproject.toml'
+  pull_request:
+    paths:
+      - 'requirements.txt'
+      - 'pyproject.toml'
+  schedule:
+    # Run weekly on Mondays at 9 AM UTC
+    - cron: '0 9 * * 1'
+
+jobs:
+  security-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install safety bandit
+
+    - name: Check for known security vulnerabilities
+      run: |
+        pip install -r requirements.txt
+        safety check --json --output safety-report.json || true
+        
+    - name: Static security analysis
+      run: |
+        bandit -r OpenSuperWhisper/ -f json -o bandit-report.json || true
+        
+    - name: Upload security reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-reports
+        path: |
+          safety-report.json
+          bandit-report.json
+        retention-days: 30
+      if: always()

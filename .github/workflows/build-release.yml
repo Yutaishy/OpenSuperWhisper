@@ -60,8 +60,11 @@ jobs:
     - name: Install core dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install --timeout 900 PySide6 numpy openai sounddevice pynput PyYAML cryptography
-      timeout-minutes: 12
+        # Install packages one by one to reduce memory pressure
+        pip install --timeout 900 --no-cache-dir PySide6
+        pip install --timeout 900 --no-cache-dir numpy
+        pip install --timeout 900 --no-cache-dir openai sounddevice pynput PyYAML cryptography
+      timeout-minutes: 15
 
     - name: Install remaining dependencies
       run: |
@@ -70,8 +73,13 @@ jobs:
     
     - name: Debug - Check installed packages
       run: |
+        echo "=== System Resources ==="
+        df -h
+        free -h || echo "free command not available"
+        echo "=== Python Environment ==="
         pip list
         pip check  # Check for dependency conflicts
+        echo "=== Import Testing ==="
         python -c "import OpenSuperWhisper; print('OpenSuperWhisper import successful')"
         python -c "import PySide6; print('PySide6 import successful')"
         python -c "import cryptography; print('cryptography import successful')"
@@ -89,11 +97,28 @@ jobs:
       env:
         QT_QPA_PLATFORM: ${{ matrix.os == 'ubuntu-latest' && 'offscreen' || '' }}
         DISPLAY: ":99"
+        # Prevent OpenAI API calls during import testing
+        OPENAI_API_KEY: "test-key-do-not-use"
     
     - name: Build with PyInstaller
       run: |
-        python build_executable.py "${{ matrix.executable_name }}"
-      timeout-minutes: 15
+        # Retry PyInstaller build up to 2 times on failure
+        for i in {1..2}; do
+          echo "Build attempt $i"
+          if python build_executable.py "${{ matrix.executable_name }}"; then
+            echo "Build successful on attempt $i"
+            break
+          elif [ $i -eq 2 ]; then
+            echo "Build failed after 2 attempts"
+            exit 1
+          else
+            echo "Build failed, retrying..."
+            sleep 30
+            # Clean up any partial builds
+            rm -rf build/ dist/ *.spec
+          fi
+        done
+      timeout-minutes: 20
       env:
         QT_QPA_PLATFORM: ${{ matrix.os == 'ubuntu-latest' && 'offscreen' || '' }}
         CI: true
@@ -102,12 +127,28 @@ jobs:
       run: |
         ls -la dist/
         file dist/${{ matrix.executable_name }} || echo "File command not available"
-        # Check executable size (should be reasonable, not empty)
+        # Check executable size and properties
         if [ -f "dist/${{ matrix.executable_name }}" ]; then
           size=$(stat -c%s "dist/${{ matrix.executable_name }}" 2>/dev/null || stat -f%z "dist/${{ matrix.executable_name }}" 2>/dev/null || echo "0")
           echo "Executable size: $size bytes"
           if [ "$size" -lt 10000000 ]; then
-            echo "Warning: Executable seems too small"
+            echo "Warning: Executable seems too small ($size bytes)"
+          elif [ "$size" -gt 500000000 ]; then
+            echo "Warning: Executable seems too large ($size bytes)"
+          fi
+          
+          # Check if executable is readable and has execution permissions
+          if [ ! -r "dist/${{ matrix.executable_name }}" ]; then
+            echo "Error: Executable is not readable"
+            exit 1
+          fi
+          
+          # On Unix systems, check execution permissions
+          if [[ "${{ matrix.os }}" != "windows-latest" ]]; then
+            if [ ! -x "dist/${{ matrix.executable_name }}" ]; then
+              echo "Warning: Executable lacks execution permissions, adding..."
+              chmod +x "dist/${{ matrix.executable_name }}"
+            fi
           fi
         else
           echo "Error: Executable not found!"

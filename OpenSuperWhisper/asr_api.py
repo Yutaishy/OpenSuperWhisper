@@ -1,4 +1,5 @@
 
+import os
 from openai import OpenAI
 
 client = None
@@ -6,7 +7,9 @@ client = None
 def get_client() -> OpenAI:
     global client
     if client is None:
-        client = OpenAI()
+        # Set shorter timeouts for CI environments
+        timeout = 60.0 if os.getenv('CI') else 120.0
+        client = OpenAI(timeout=timeout)
     return client
 
 def transcribe_audio(audio_path: str, model: str = "whisper-1") -> str:
