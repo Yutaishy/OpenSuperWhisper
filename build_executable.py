@@ -15,7 +15,6 @@ def main():
         f'--name={executable_name}',
         '--onefile',
         '--windowed',
-        '--icon=assets/windows/osw.ico',
         '--collect-all=OpenSuperWhisper',
         '--collect-all=PySide6',
         '--hidden-import=OpenSuperWhisper',
@@ -65,6 +64,7 @@ def main():
     if platform.system() == 'Linux':
         print("Linux platform detected - adding Linux-specific settings")
         args.extend([
+            '--icon=assets/ios/AppIcon.appiconset/Icon-AppStore-1024.png',
             '--hidden-import=PySide6.QtDBus',
             # Try to find libportaudio.so.2 in common locations
             '--collect-all=sounddevice',
@@ -82,7 +82,9 @@ def main():
     
     elif platform.system() == 'Darwin':  # macOS
         print("macOS platform detected - adding macOS-specific settings")
+        # Use PNG icon for macOS (PyInstaller can convert with Pillow)
         args.extend([
+            '--icon=assets/ios/AppIcon.appiconset/Icon-AppStore-1024.png',
             '--osx-bundle-identifier=com.yutaishy.opensuperwhisper',
             '--collect-all=sounddevice',
         ])
@@ -90,6 +92,7 @@ def main():
     elif platform.system() == 'Windows':
         print("Windows platform detected - adding Windows-specific settings")
         args.extend([
+            '--icon=assets/windows/osw.ico',
             '--collect-all=sounddevice',
         ])
         # Add win32 imports if available

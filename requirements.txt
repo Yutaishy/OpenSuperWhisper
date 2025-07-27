@@ -19,3 +19,6 @@ PyYAML>=6.0
 
 # Security - API key encryption
 cryptography>=41.0.0
+
+# Image Processing - for icon conversion in PyInstaller
+Pillow>=9.0.0
