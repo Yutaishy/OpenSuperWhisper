@@ -83,10 +83,15 @@ jobs:
       timeout-minutes: 8
     
     - name: Debug - Check installed packages
+      shell: bash
       run: |
         echo "=== System Resources ==="
-        df -h
-        free -h || echo "free command not available"
+        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          echo "Windows environment - skipping df/free commands"
+        else
+          df -h
+          free -h || echo "free command not available"
+        fi
         echo "=== Python Environment ==="
         pip list
         pip check  # Check for dependency conflicts
