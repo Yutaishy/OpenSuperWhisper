@@ -197,6 +197,18 @@ jobs:
     - name: Download all artifacts
       uses: actions/download-artifact@v4
 
+    - name: Debug artifact structure
+      run: |
+        echo "=== Artifact directory structure ==="
+        find . -type f -name "OpenSuperWhisper*" | head -20
+        ls -la
+        for dir in OpenSuperWhisper-*; do
+          if [ -d "$dir" ]; then
+            echo "=== Contents of $dir ==="
+            ls -la "$dir/"
+          fi
+        done
+
     - name: Create Release
       uses: softprops/action-gh-release@v1
       env:
