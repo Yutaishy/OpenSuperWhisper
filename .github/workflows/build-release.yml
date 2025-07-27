@@ -19,7 +19,7 @@ jobs:
   build:
     name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 45
     strategy:
       matrix:
         include:
@@ -62,13 +62,20 @@ jobs:
         brew install portaudio
 
     - name: Install core dependencies
+      shell: bash
       run: |
         python -m pip install --upgrade pip
-        # Install packages one by one to reduce memory pressure
-        pip install --timeout 900 --no-cache-dir PySide6
-        pip install --timeout 900 --no-cache-dir numpy
-        pip install --timeout 900 --no-cache-dir openai sounddevice pynput PyYAML cryptography
-      timeout-minutes: 15
+        echo "=== System Info ==="
+        python -c "import sys; print(f'Python: {sys.version}'); import platform; print(f'Platform: {platform.platform()}')"
+        echo "=== Installing PySide6 (this may take several minutes) ==="
+        # Set environment variables for memory optimization
+        export PIP_NO_WARN_SCRIPT_LOCATION=1
+        export PIP_DISABLE_PIP_VERSION_CHECK=1
+        # Use system timeout and retry mechanism for PySide6
+        pip install --timeout 1200 --retries 3 --no-cache-dir PySide6 || pip install --timeout 1800 --no-cache-dir --force-reinstall PySide6
+        echo "=== Installing other core dependencies ==="
+        pip install --timeout 600 --no-cache-dir numpy openai sounddevice pynput PyYAML cryptography
+      timeout-minutes: 25
 
     - name: Install remaining dependencies
       run: |
