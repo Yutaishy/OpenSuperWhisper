@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'OpenSuperWhisper'))
 
 from PySide6.QtWidgets import QApplication
-from ui_mainwindow import MainWindow
+from OpenSuperWhisper.ui_mainwindow import MainWindow
 
 def main():
     app = QApplication(sys.argv)

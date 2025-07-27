@@ -52,21 +52,73 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -e ".[dev]"
+    
+    - name: Debug - Check installed packages
+      run: |
+        pip list
+        python -c "import OpenSuperWhisper; print('OpenSuperWhisper import successful')"
+        python -c "import PySide6; print('PySide6 import successful')"
 
     # Skip tests for now to focus on build
     # - name: Run tests
     #   run: |
     #     pytest tests/ -v
 
+    - name: Test run_app.py import
+      run: |
+        python -c "from OpenSuperWhisper.ui_mainwindow import MainWindow; print('MainWindow import successful')"
+    
     - name: Build executable with PyInstaller (Windows)
       if: matrix.os == 'windows-latest'
       run: |
-        pyinstaller --onefile --windowed --name "${{ matrix.executable_name }}" --add-data "OpenSuperWhisper;OpenSuperWhisper" --add-data "style_guides;style_guides" --hidden-import "OpenSuperWhisper.asr_api" --hidden-import "OpenSuperWhisper.formatter_api" --hidden-import "OpenSuperWhisper.config" --hidden-import "OpenSuperWhisper.logger" --hidden-import "OpenSuperWhisper.global_hotkey" --hidden-import "OpenSuperWhisper.direct_hotkey" --hidden-import "OpenSuperWhisper.simple_hotkey" --hidden-import "OpenSuperWhisper.recording_indicator" --hidden-import "OpenSuperWhisper.ui_mainwindow" --hidden-import "PySide6.QtCore" --hidden-import "PySide6.QtGui" --hidden-import "PySide6.QtWidgets" --distpath dist run_app.py
+        pyinstaller ^
+          --onefile ^
+          --windowed ^
+          --name "${{ matrix.executable_name }}" ^
+          --add-data "OpenSuperWhisper;OpenSuperWhisper" ^
+          --add-data "style_guides;style_guides" ^
+          --hidden-import "OpenSuperWhisper" ^
+          --hidden-import "OpenSuperWhisper.asr_api" ^
+          --hidden-import "OpenSuperWhisper.formatter_api" ^
+          --hidden-import "OpenSuperWhisper.config" ^
+          --hidden-import "OpenSuperWhisper.logger" ^
+          --hidden-import "OpenSuperWhisper.global_hotkey" ^
+          --hidden-import "OpenSuperWhisper.direct_hotkey" ^
+          --hidden-import "OpenSuperWhisper.simple_hotkey" ^
+          --hidden-import "OpenSuperWhisper.recording_indicator" ^
+          --hidden-import "OpenSuperWhisper.ui_mainwindow" ^
+          --hidden-import "PySide6.QtCore" ^
+          --hidden-import "PySide6.QtGui" ^
+          --hidden-import "PySide6.QtWidgets" ^
+          --collect-all "OpenSuperWhisper" ^
+          --distpath dist ^
+          run_app.py
 
     - name: Build executable with PyInstaller (Unix)
       if: matrix.os != 'windows-latest'
       run: |
-        pyinstaller --onefile --windowed --name "${{ matrix.executable_name }}" --add-data "OpenSuperWhisper:OpenSuperWhisper" --add-data "style_guides:style_guides" --hidden-import "OpenSuperWhisper.asr_api" --hidden-import "OpenSuperWhisper.formatter_api" --hidden-import "OpenSuperWhisper.config" --hidden-import "OpenSuperWhisper.logger" --hidden-import "OpenSuperWhisper.global_hotkey" --hidden-import "OpenSuperWhisper.direct_hotkey" --hidden-import "OpenSuperWhisper.simple_hotkey" --hidden-import "OpenSuperWhisper.recording_indicator" --hidden-import "OpenSuperWhisper.ui_mainwindow" --hidden-import "PySide6.QtCore" --hidden-import "PySide6.QtGui" --hidden-import "PySide6.QtWidgets" --distpath dist run_app.py
+        pyinstaller \
+          --onefile \
+          --windowed \
+          --name "${{ matrix.executable_name }}" \
+          --add-data "OpenSuperWhisper:OpenSuperWhisper" \
+          --add-data "style_guides:style_guides" \
+          --hidden-import "OpenSuperWhisper" \
+          --hidden-import "OpenSuperWhisper.asr_api" \
+          --hidden-import "OpenSuperWhisper.formatter_api" \
+          --hidden-import "OpenSuperWhisper.config" \
+          --hidden-import "OpenSuperWhisper.logger" \
+          --hidden-import "OpenSuperWhisper.global_hotkey" \
+          --hidden-import "OpenSuperWhisper.direct_hotkey" \
+          --hidden-import "OpenSuperWhisper.simple_hotkey" \
+          --hidden-import "OpenSuperWhisper.recording_indicator" \
+          --hidden-import "OpenSuperWhisper.ui_mainwindow" \
+          --hidden-import "PySide6.QtCore" \
+          --hidden-import "PySide6.QtGui" \
+          --hidden-import "PySide6.QtWidgets" \
+          --collect-all "OpenSuperWhisper" \
+          --distpath dist \
+          run_app.py
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
