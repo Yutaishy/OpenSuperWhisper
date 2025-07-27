@@ -3,11 +3,12 @@ Recording Status Overlay Indicator
 Always-on-top floating indicator for recording status display
 """
 
+import os
 import sys
 from typing import Any
 
 from PySide6.QtCore import QEasingCurve, QPropertyAnimation, Qt, QTimer
-from PySide6.QtGui import QCursor
+from PySide6.QtGui import QCursor, QIcon
 from PySide6.QtWidgets import QApplication, QHBoxLayout, QLabel, QWidget
 
 from . import logger
@@ -45,6 +46,11 @@ class RecordingIndicator(QWidget):
             flags |= Qt.WindowType.WindowDoesNotAcceptFocus
 
         self.setWindowFlags(flags)
+        
+        # Set application icon
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "windows", "osw.ico")
+        if os.path.exists(icon_path):
+            self.setWindowIcon(QIcon(icon_path))
 
         # Set window attributes for transparency and staying on top
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating, True)

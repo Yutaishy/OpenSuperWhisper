@@ -10,7 +10,7 @@ import numpy as np
 import sounddevice as sd
 import yaml
 from PySide6.QtCore import QThread, QTimer, Signal
-from PySide6.QtGui import QAction, QCloseEvent
+from PySide6.QtGui import QAction, QCloseEvent, QIcon
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -96,6 +96,11 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("OpenSuperWhisper")
         self.resize(800, 600)
+        
+        # Set application icon
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "windows", "osw.ico")
+        if os.path.exists(icon_path):
+            self.setWindowIcon(QIcon(icon_path))
 
         self.temp_dir = tempfile.mkdtemp()
         self.is_recording = False

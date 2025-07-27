@@ -4,9 +4,10 @@ Guides users through initial configuration
 """
 
 from __future__ import annotations
+import os
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QIcon
 from PySide6.QtWidgets import (
     QCheckBox,
     QDialog,
@@ -44,6 +45,11 @@ class FirstRunWizard(QDialog):
         self.setWindowTitle("OpenSuperWhisper Setup")
         self.setFixedSize(600, 500)
         self.setWindowFlags(Qt.WindowType.Dialog | Qt.WindowType.WindowCloseButtonHint)
+        
+        # Set application icon
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "windows", "osw.ico")
+        if os.path.exists(icon_path):
+            self.setWindowIcon(QIcon(icon_path))
 
         # Main layout
         layout = QVBoxLayout()

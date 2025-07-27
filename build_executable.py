@@ -15,6 +15,7 @@ def main():
         f'--name={executable_name}',
         '--onefile',
         '--windowed',
+        '--icon=assets/windows/osw.ico',
         '--collect-all=OpenSuperWhisper',
         '--collect-all=PySide6',
         '--hidden-import=OpenSuperWhisper',
