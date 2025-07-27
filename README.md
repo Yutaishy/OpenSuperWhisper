@@ -1,17 +1,26 @@
 # 🎤 OpenSuperWhisper
 
-[![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://python.org)
-[![OpenAI](https://img.shields.io/badge/OpenAI-Whisper%20%7C%20GPT-green.svg)](https://openai.com)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![CI/CD](https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml/badge.svg)](https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml)
-[![Build](https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml/badge.svg)](https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml)
-[![Tests](https://img.shields.io/badge/Tests-18%20Passing-brightgreen.svg)](#testing)
+<p align="center">
+  <img src="assets/windows/osw.ico" alt="OpenSuperWhisper Icon" width="128" height="128">
+</p>
+
+<p align="center">
+  <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.12+-blue.svg" alt="Python"></a>
+  <a href="https://openai.com"><img src="https://img.shields.io/badge/OpenAI-Whisper%20%7C%20GPT-green.svg" alt="OpenAI"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License"></a>
+  <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml/badge.svg" alt="CI/CD"></a>
+  <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml/badge.svg" alt="Build"></a>
+  <img src="https://img.shields.io/badge/Tests-18%20Passing-brightgreen.svg" alt="Tests">
+  <img src="https://img.shields.io/badge/Version-0.6.0-orange.svg" alt="Version">
+</p>
 
 **Two-Stage Voice Transcription Pipeline with AI-Powered Text Formatting**
 
 OpenSuperWhisper is a cross-platform desktop application that transforms speech into polished, professional text through a sophisticated two-stage pipeline: first transcribing audio with OpenAI's Whisper models, then intelligently formatting the results using GPT models with customizable style guides.
 
-![OpenSuperWhisper Demo](https://img.shields.io/badge/Demo-Available-blue.svg)
+<p align="center">
+  <img src="assets/misc/social_preview_1280x640.jpg" alt="OpenSuperWhisper Preview" width="640" height="320">
+</p>
 
 ## ✨ Key Features
 
@@ -193,6 +202,31 @@ mypy OpenSuperWhisper/
 │   (Final)       │    │ (Format Stage)   │    │   Style Guide       │
 └─────────────────┘    └──────────────────┘    └─────────────────────┘
 ```
+
+## 🎨 Brand & Design
+
+OpenSuperWhisper features a professional **Wave + Quote** icon design that represents the core functionality of audio-to-text transcription.
+
+### Visual Identity
+- **Design Concept**: Audio waves transforming into quotation marks, symbolizing speech-to-text conversion
+- **Color Palette**: 
+  - Primary gradient: `#0EA5E9` → `#14B8A6` (cyan to teal)
+  - Accent: `#E6FBFF` (light cyan)
+- **Typography**: Modern, clean sans-serif fonts for accessibility
+
+### Brand Assets
+- **Icons**: Complete multi-platform icon pack in [`assets/`](assets/)
+  - Windows: [`osw.ico`](assets/windows/osw.ico) (16px to 256px)
+  - iOS: [`AppIcon.appiconset`](assets/ios/AppIcon.appiconset/) (all required sizes)
+  - Android: [`mipmap-*`](assets/android/) density variations
+  - Web: [`favicon.ico`](assets/web/favicon.ico) + PWA icons
+- **Master Files**: Source assets in [`brand/icon/wave-quote/`](brand/icon/wave-quote/)
+  - [`master_2048.png`](brand/icon/wave-quote/master_2048.png) - High-resolution master
+  - [`fg_glyph_1024.png`](brand/icon/wave-quote/fg_glyph_1024.png) - Foreground glyph only
+- **Guidelines**: Complete specifications in [`brand/icon/wave-quote/palette.md`](brand/icon/wave-quote/palette.md)
+
+### Usage Guidelines
+The OpenSuperWhisper brand assets are provided for use within this project and official distributions. See [`brand/icon/LICENSE-ARTWORK.md`](brand/icon/LICENSE-ARTWORK.md) for detailed usage terms.
 
 ## 🤝 Contributing
 
