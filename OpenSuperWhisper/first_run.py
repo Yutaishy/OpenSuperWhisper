@@ -3,7 +3,7 @@ First-run setup wizard for OpenSuperWhisper
 Guides users through initial configuration
 """
 
-from typing import Optional
+from __future__ import annotations
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
@@ -27,7 +27,7 @@ from . import config, logger
 class FirstRunWizard(QDialog):
     """Setup wizard for first-time users"""
 
-    def __init__(self, parent: Optional[QWidget] = None) -> None:
+    def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.current_step = 0
         self.steps = [
@@ -320,7 +320,7 @@ def should_show_first_run() -> bool:
     return not config.load_setting("first_run_completed", False)
 
 
-def show_first_run_wizard(parent: Optional[QWidget] = None) -> bool:
+def show_first_run_wizard(parent: QWidget | None = None) -> bool:
     """Show first run wizard if needed"""
     if should_show_first_run():
         wizard = FirstRunWizard(parent)
