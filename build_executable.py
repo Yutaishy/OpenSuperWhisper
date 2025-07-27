@@ -109,9 +109,9 @@ def main():
     
     try:
         PyInstaller.__main__.run(args)
-        print(f"✅ Successfully built executable: {executable_name}")
+        print(f"Successfully built executable: {executable_name}")
     except Exception as e:
-        print(f"❌ Build failed: {e}")
+        print(f"Build failed: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":
