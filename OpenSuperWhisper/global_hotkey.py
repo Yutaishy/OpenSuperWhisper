@@ -59,6 +59,7 @@ class GlobalHotkeyManager(QObject):
 
             # Windows API functions
             if WINDOWS_AVAILABLE:
+                import ctypes  # Re-import for type checker
                 self.user32 = ctypes.windll.user32
                 self.kernel32 = ctypes.windll.kernel32
 
@@ -109,15 +110,19 @@ class GlobalHotkeyManager(QObject):
 
             # Unregister if already exists
             if hotkey_int_id in self.registered_hotkeys:
-                self.user32.UnregisterHotKey(None, hotkey_int_id)
+                if self.user32 is not None:
+                    self.user32.UnregisterHotKey(None, hotkey_int_id)
 
             # Register with Windows
-            result = self.user32.RegisterHotKey(
-                None,  # Window handle (None for global)
-                hotkey_int_id,
-                mod_flags,
-                key_code
-            )
+            if self.user32 is not None:
+                result = self.user32.RegisterHotKey(
+                    None,  # Window handle (None for global)
+                    hotkey_int_id,
+                    mod_flags,
+                    key_code
+                )
+            else:
+                result = False
 
             if result:
                 self.registered_hotkeys[hotkey_int_id] = hotkey_id
@@ -130,7 +135,7 @@ class GlobalHotkeyManager(QObject):
                 return True
             else:
                 # Get last error for debugging
-                error_code = self.kernel32.GetLastError()
+                error_code = self.kernel32.GetLastError() if self.kernel32 is not None else 0
                 print(f"Failed to register hotkey: {hotkey_id} (Error: {error_code})")
                 return False
 
@@ -186,6 +191,8 @@ class GlobalHotkeyManager(QObject):
             # Check for hotkey messages
             if not WINDOWS_AVAILABLE or self.user32 is None:
                 return
+            from ctypes import wintypes  # Re-import for type checker
+            import ctypes  # Re-import for type checker
             msg = wintypes.MSG()
             while self.user32.PeekMessageW(ctypes.byref(msg), None, 0, 0, 1):
                 if msg.message == 0x0312:  # WM_HOTKEY
@@ -215,7 +222,10 @@ class GlobalHotkeyManager(QObject):
         try:
             hotkey_int_id = hash(hotkey_id) & 0xFFFF
             if hotkey_int_id in self.registered_hotkeys:
-                result = self.user32.UnregisterHotKey(None, hotkey_int_id)
+                if self.user32 is not None:
+                    result = self.user32.UnregisterHotKey(None, hotkey_int_id)
+                else:
+                    result = False
                 if result:
                     del self.registered_hotkeys[hotkey_int_id]
                     print(f"Unregistered hotkey: {hotkey_id}")
