@@ -3,7 +3,7 @@ Recording Status Overlay Indicator
 Always-on-top floating indicator for recording status display
 """
 
-
+import sys
 from typing import Any
 
 from PySide6.QtCore import QEasingCurve, QPropertyAnimation, Qt, QTimer
@@ -21,19 +21,31 @@ class RecordingIndicator(QWidget):
         self.is_recording = False
         self.blink_timer = QTimer()
         self.fade_animation: QPropertyAnimation | None = None
+        self.parent_window: Any = None
         self.setup_ui()
         self.setup_position()
         self.setup_animations()
 
     def setup_ui(self) -> None:
         """Setup the indicator UI with modern design"""
-        # Window flags for always-on-top overlay
-        self.setWindowFlags(
+        # Window flags for always-on-top overlay (platform-specific)
+        flags = (
             Qt.WindowType.FramelessWindowHint |
             Qt.WindowType.WindowStaysOnTopHint |
-            Qt.WindowType.Tool |
-            Qt.WindowType.X11BypassWindowManagerHint
+            Qt.WindowType.Tool
         )
+        
+        # Add platform-specific flags
+        if sys.platform.startswith('linux'):
+            flags |= Qt.WindowType.X11BypassWindowManagerHint
+        elif sys.platform == 'win32':
+            # Additional Windows-specific flags for proper always-on-top behavior
+            flags |= Qt.WindowType.WindowDoesNotAcceptFocus
+        
+        self.setWindowFlags(flags)
+        
+        # Set window attributes for transparency and staying on top
+        self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating, True)
 
         # Transparent background
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
@@ -106,6 +118,7 @@ class RecordingIndicator(QWidget):
         if self.is_recording:
             return
 
+        print("DEBUG: RecordingIndicator.show_recording() called")
         self.is_recording = True
         self.status_label.setText("Recording")
         self.dot_label.setStyleSheet("""
@@ -120,12 +133,14 @@ class RecordingIndicator(QWidget):
         self.setWindowOpacity(0.0)
         self.show()
         self.animate_fade_in()
+        print(f"DEBUG: Indicator shown, visible: {self.isVisible()}, size: {self.size()}, pos: {self.pos()}")
 
         # Start blinking animation
         self.blink_timer.start(1000)  # Blink every 1 second
 
     def show_processing(self) -> None:
         """Show processing state"""
+        print("DEBUG: RecordingIndicator.show_processing() called")
         self.blink_timer.stop()
         self.status_label.setText("Processing")
         self.dot_label.setStyleSheet("""
@@ -138,9 +153,13 @@ class RecordingIndicator(QWidget):
 
         # Show with fade-in if not already visible
         if not self.isVisible():
+            print("DEBUG: Processing indicator not visible, showing now")
             self.setWindowOpacity(0.0)
             self.show()
             self.animate_fade_in()
+        else:
+            print("DEBUG: Processing indicator already visible, updating state")
+        print(f"DEBUG: Processing indicator shown, visible: {self.isVisible()}, size: {self.size()}, pos: {self.pos()}")
 
     def hide_recording(self) -> None:
         """Hide recording indicator with animation"""
@@ -213,9 +232,8 @@ class RecordingIndicator(QWidget):
         """Handle click events on indicator"""
         if event.button() == Qt.MouseButton.LeftButton:
             # Emit signal to stop recording and restore main window
-            parent = self.parent()
-            if parent is not None and hasattr(parent, 'restore_from_indicator'):
-                parent.restore_from_indicator()
+            if self.parent_window is not None and hasattr(self.parent_window, 'restore_from_indicator'):
+                self.parent_window.restore_from_indicator()
         super().mousePressEvent(event)
 
     def enterEvent(self, event: Any) -> None:
@@ -258,17 +276,44 @@ class GlobalRecordingIndicator:
     def __init__(self) -> None:
         """Initialize indicator"""
         if self._indicator is None:
+            print("DEBUG: Creating RecordingIndicator instance")
+            app = QApplication.instance()
+            if app is None:
+                print("DEBUG: No QApplication instance found!")
+                return  # Don't create indicator without QApplication
+            else:
+                print(f"DEBUG: QApplication instance found: {app}")
             self._indicator = RecordingIndicator()
+
+    def _ensure_indicator(self) -> None:
+        """Ensure indicator is created when QApplication is available"""
+        if self._indicator is None:
+            app = QApplication.instance()
+            if app is not None:
+                print("DEBUG: Creating RecordingIndicator (delayed initialization)")
+                self._indicator = RecordingIndicator()
+            else:
+                print("DEBUG: QApplication still not available for delayed initialization")
 
     def show_recording(self) -> None:
         """Show recording indicator"""
+        print("DEBUG: GlobalRecordingIndicator.show_recording() called")
+        self._ensure_indicator()
         if self._indicator:
+            print("DEBUG: Calling RecordingIndicator.show_recording()")
             self._indicator.show_recording()
+        else:
+            print("DEBUG: No _indicator instance available!")
 
     def show_processing(self) -> None:
         """Show processing indicator"""
+        print("DEBUG: GlobalRecordingIndicator.show_processing() called")
+        self._ensure_indicator()
         if self._indicator:
+            print("DEBUG: Calling RecordingIndicator.show_processing()")
             self._indicator.show_processing()
+        else:
+            print("DEBUG: No _indicator instance available for processing!")
 
     def hide_recording(self) -> None:
         """Hide recording indicator"""
@@ -278,7 +323,9 @@ class GlobalRecordingIndicator:
     def set_parent_window(self, parent: Any) -> None:
         """Set parent window for communication"""
         if self._indicator:
-            self._indicator.setParent(parent)
+            # Don't set parent to avoid being minimized with main window
+            # Just store reference for communication
+            self._indicator.parent_window = parent
 
     def is_visible(self) -> bool:
         """Check if indicator is currently visible"""
