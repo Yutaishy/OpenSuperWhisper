@@ -3,6 +3,8 @@ First-run setup wizard for OpenSuperWhisper
 Guides users through initial configuration
 """
 
+from typing import Optional
+
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
@@ -16,6 +18,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QTextEdit,
     QVBoxLayout,
+    QWidget,
 )
 
 from . import config, logger
@@ -24,7 +27,7 @@ from . import config, logger
 class FirstRunWizard(QDialog):
     """Setup wizard for first-time users"""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
         self.current_step = 0
         self.steps = [
@@ -36,7 +39,7 @@ class FirstRunWizard(QDialog):
         self.setup_ui()
         self.show_step(0)
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:
         """Setup the wizard UI"""
         self.setWindowTitle("OpenSuperWhisper Setup")
         self.setFixedSize(600, 500)
@@ -82,12 +85,12 @@ class FirstRunWizard(QDialog):
         layout.addLayout(nav_layout)
         self.setLayout(layout)
 
-    def clear_content(self):
+    def clear_content(self) -> None:
         """Clear the content area"""
         for i in reversed(range(self.content_layout.count())):
             self.content_layout.itemAt(i).widget().setParent(None)
 
-    def show_step(self, step_index):
+    def show_step(self, step_index: int) -> None:
         """Show a specific step"""
         if 0 <= step_index < len(self.steps):
             self.current_step = step_index
@@ -100,7 +103,7 @@ class FirstRunWizard(QDialog):
             self.next_btn.setVisible(step_index < len(self.steps) - 1)
             self.finish_btn.setVisible(step_index == len(self.steps) - 1)
 
-    def create_welcome_step(self):
+    def create_welcome_step(self) -> None:
         """Welcome and introduction step"""
         self.header.setText("Welcome to OpenSuperWhisper")
 
@@ -144,7 +147,7 @@ class FirstRunWizard(QDialog):
 
         self.content_layout.addWidget(req_frame)
 
-    def create_api_key_step(self):
+    def create_api_key_step(self) -> None:
         """API key configuration step"""
         self.header.setText("OpenAI API Key Setup")
 
@@ -179,7 +182,7 @@ class FirstRunWizard(QDialog):
         self.skip_key = QCheckBox("Skip for now (you can set this later in Settings)")
         self.content_layout.addWidget(self.skip_key)
 
-    def create_permissions_step(self):
+    def create_permissions_step(self) -> None:
         """Permissions and privacy step"""
         self.header.setText("Permissions & Privacy")
 
@@ -217,7 +220,7 @@ class FirstRunWizard(QDialog):
         grant_btn.clicked.connect(self.grant_permissions)
         self.content_layout.addWidget(grant_btn)
 
-    def create_completion_step(self):
+    def create_completion_step(self) -> None:
         """Completion and first launch step"""
         self.header.setText("Setup Complete!")
 
@@ -257,7 +260,7 @@ class FirstRunWizard(QDialog):
 
         self.content_layout.addWidget(launch_frame)
 
-    def test_api_key(self):
+    def test_api_key(self) -> None:
         """Test the provided API key"""
         api_key = self.api_key_input.text().strip()
         if not api_key:
@@ -274,13 +277,13 @@ class FirstRunWizard(QDialog):
         self.key_status.setText("✅ API key format looks correct")
         self.key_status.setStyleSheet("color: green;")
 
-    def grant_permissions(self):
+    def grant_permissions(self) -> None:
         """Grant permissions for the application"""
         self.mic_perm.setChecked(True)
         self.hotkey_perm.setChecked(True)
         self.clipboard_perm.setChecked(True)
 
-    def next_step(self):
+    def next_step(self) -> None:
         """Go to next step"""
         # Validate current step
         if self.current_step == 1:  # API key step
@@ -297,11 +300,11 @@ class FirstRunWizard(QDialog):
 
         self.show_step(self.current_step + 1)
 
-    def previous_step(self):
+    def previous_step(self) -> None:
         """Go to previous step"""
         self.show_step(self.current_step - 1)
 
-    def finish_setup(self):
+    def finish_setup(self) -> None:
         """Complete the setup process"""
         # Mark first run as complete
         config.save_setting("first_run_completed", True)
@@ -317,7 +320,7 @@ def should_show_first_run() -> bool:
     return not config.load_setting("first_run_completed", False)
 
 
-def show_first_run_wizard(parent=None) -> bool:
+def show_first_run_wizard(parent: Optional[QWidget] = None) -> bool:
     """Show first run wizard if needed"""
     if should_show_first_run():
         wizard = FirstRunWizard(parent)

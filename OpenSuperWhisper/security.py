@@ -21,7 +21,7 @@ except ImportError:
 class APIKeyManager:
     """Secure API key storage with encryption"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.salt = b'opensuperwhisper_salt_v1'  # In production, use random salt per installation
 
     def _get_key(self, password: str) -> bytes:
@@ -59,7 +59,7 @@ class APIKeyManager:
             f = Fernet(key)
             encrypted_bytes = base64.urlsafe_b64decode(encrypted_key.encode())
             decrypted = f.decrypt(encrypted_bytes)
-            return decrypted.decode()
+            return decrypted.decode()  # type: ignore[no-any-return]
         except Exception as e:
             logger.logger.error(f"Failed to decrypt API key: {e}")
             return None

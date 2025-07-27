@@ -59,8 +59,8 @@ class GlobalHotkeyManager(QObject):
             # Windows API functions
             if WINDOWS_AVAILABLE:
                 import ctypes  # Re-import for type checker
-                self.user32 = ctypes.windll.user32
-                self.kernel32 = ctypes.windll.kernel32
+                self.user32 = ctypes.windll.user32  # type: ignore[attr-defined]
+                self.kernel32 = ctypes.windll.kernel32  # type: ignore[attr-defined]
 
             # Message monitoring timer
             self.message_timer = QTimer()
