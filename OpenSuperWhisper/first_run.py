@@ -18,7 +18,6 @@ class FirstRunWizard(QDialog):
     
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setup_ui()
         self.current_step = 0
         self.steps = [
             self.create_welcome_step,
@@ -26,6 +25,7 @@ class FirstRunWizard(QDialog):
             self.create_permissions_step,
             self.create_completion_step
         ]
+        self.setup_ui()
         self.show_step(0)
     
     def setup_ui(self):
