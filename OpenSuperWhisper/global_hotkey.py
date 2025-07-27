@@ -5,7 +5,7 @@ Cross-platform global hotkey registration for background recording
 
 import sys
 from collections.abc import Callable
-from typing import Any, Optional
+from typing import Any
 
 from PySide6.QtCore import QObject, QTimer, Signal
 
@@ -32,10 +32,10 @@ class GlobalHotkeyManager(QObject):
         super().__init__()
         self.registered_hotkeys: dict[int | str, Any] = {}
         self.is_monitoring = False
-        
+
         # Initialize Windows API attributes
-        self.user32: Optional[Any] = None
-        self.kernel32: Optional[Any] = None
+        self.user32: Any | None = None
+        self.kernel32: Any | None = None
 
         # Setup platform-specific monitoring
         if WINDOWS_AVAILABLE:

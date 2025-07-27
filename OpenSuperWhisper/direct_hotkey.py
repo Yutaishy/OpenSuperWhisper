@@ -4,7 +4,7 @@ Simple and reliable hotkey detection using direct Windows API polling
 """
 
 import sys
-from typing import Any, Optional
+from typing import Any
 
 from PySide6.QtCore import QObject, QTimer, Signal
 
@@ -30,7 +30,7 @@ class DirectHotkeyMonitor(QObject):
 
         # Try to import Windows API
         self.api_available = False
-        self.user32: Optional[Any] = None
+        self.user32: Any | None = None
         if sys.platform == "win32":
             try:
                 import ctypes
