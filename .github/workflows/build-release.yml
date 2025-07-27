@@ -53,11 +53,16 @@ jobs:
       run: |
         brew install portaudio
 
-    - name: Install Python dependencies
+    - name: Install core dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install --timeout 900 PySide6 numpy openai sounddevice pynput PyYAML
+      timeout-minutes: 12
+
+    - name: Install remaining dependencies
+      run: |
         pip install -e ".[dev]" --timeout 900
-      timeout-minutes: 18
+      timeout-minutes: 8
     
     - name: Debug - Check installed packages
       run: |
