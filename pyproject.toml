@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "opensuperwhisper"
-version = "0.5.0"
+version = "0.6.0"
 description = "Two-Stage Voice Transcription Pipeline with AI-Powered Text Formatting"
 readme = "README.md"
 authors = [{name = "Yutaishy"}]

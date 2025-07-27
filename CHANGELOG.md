@@ -1,5 +1,32 @@
 # CHANGELOG
 
+## [0.6.0] - 2025-07-28 (Brand Identity Release)
+### Added
+- **Complete Brand Identity:** Professional icon system with Wave + Quote design
+  - ✅ Multi-platform icon support (Windows ICO, iOS AppIcon.appiconset, Android mipmap)
+  - ✅ Web icons and PWA manifest for future web deployment
+  - ✅ GitHub social preview image for enhanced repository presentation
+- **Application Icon Integration:** Consistent branding across all windows
+  - ✅ Main window icon integration
+  - ✅ Recording indicator window icon
+  - ✅ First-run wizard window icon
+  - ✅ PyInstaller executable icon configuration
+- **Brand Asset Management:** Complete brand guidelines and assets
+  - ✅ Master icon files (2048px background, 1024px foreground glyph)
+  - ✅ Color palette documentation (#0EA5E9 → #14B8A6 gradient)
+  - ✅ Artwork licensing and usage guidelines
+  - ✅ Platform-specific icon specifications
+
+### Enhanced
+- **Visual Polish:** Professional appearance with consistent iconography
+- **Build System:** Integrated icon assets into automated build pipeline
+- **Developer Experience:** Complete brand asset organization for future development
+
+### Technical
+- **Icon Generation:** Comprehensive multi-platform icon pack
+- **Color Scheme:** Cyan-to-teal gradient with light cyan accents
+- **File Organization:** Structured assets/ and brand/ directories
+
 ## [0.5.0] - 2025-07-27 (Production Release)
 ### Added
 - **Complete CI/CD Pipeline:** Full GitHub Actions integration
