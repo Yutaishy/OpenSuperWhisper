@@ -15,14 +15,14 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QVBoxLayout, QHBoxLayo
 from PySide6.QtCore import Qt, QTimer, QThread, Signal
 from PySide6.QtGui import QShortcut, QKeySequence, QAction, QClipboard
 
-import asr_api
-import formatter_api
-import config
-import logger
-from recording_indicator import GlobalRecordingIndicator
-from global_hotkey import GlobalHotkeyManager
-from simple_hotkey import get_hotkey_monitor
-from direct_hotkey import get_direct_monitor
+from . import asr_api
+from . import formatter_api
+from . import config
+from . import logger
+from .recording_indicator import GlobalRecordingIndicator
+from .global_hotkey import GlobalHotkeyManager
+from .simple_hotkey import get_hotkey_monitor
+from .direct_hotkey import get_direct_monitor
 
 DEFAULT_PROMPT = """# 役割
 あなたは「編集専用」の書籍編集者である。以下の <TRANSCRIPT> ... </TRANSCRIPT> に囲まれた本文だけを機械的に整形する。
