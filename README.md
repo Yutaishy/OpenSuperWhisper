@@ -3,6 +3,8 @@
 [![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://python.org)
 [![OpenAI](https://img.shields.io/badge/OpenAI-Whisper%20%7C%20GPT-green.svg)](https://openai.com)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI/CD](https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml/badge.svg)](https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml)
+[![Build](https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml/badge.svg)](https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml)
 [![Tests](https://img.shields.io/badge/Tests-18%20Passing-brightgreen.svg)](#testing)
 
 **Two-Stage Voice Transcription Pipeline with AI-Powered Text Formatting**
