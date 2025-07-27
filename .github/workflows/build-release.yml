@@ -156,7 +156,7 @@ jobs:
           
           # Check the main executable inside the folder
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            EXEC_PATH="dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}.exe"
+            EXEC_PATH="dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}"
           else
             EXEC_PATH="dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}"
           fi
