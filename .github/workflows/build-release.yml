@@ -1,14 +1,18 @@
 name: Build and Release
 
+# Triggered for testing GitHub Actions
+
 on:
   push:
     tags:
       - 'v*'
+    branches:
+      - main  # Add push to main for testing
   workflow_dispatch:
     inputs:
       version:
         description: 'Release version (e.g., v0.4.0)'
-        required: true
+        required: false
         default: 'v0.4.0'
 
 jobs:
