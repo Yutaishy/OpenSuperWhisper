@@ -84,6 +84,10 @@ python run_app.py
 - **Microphone access** for audio recording
 - **Windows 10+** / **macOS 10.15+** / **Ubuntu 20.04+**
 
+### Dependencies
+- Core: `PySide6`, `openai`, `sounddevice`, `numpy`, `pynput`, `PyYAML`, `cryptography`
+- Build: `Pillow` (for cross-platform icon conversion in PyInstaller)
+
 ## 🎯 Use Cases
 
 ### 📝 **Meeting Notes & Minutes**

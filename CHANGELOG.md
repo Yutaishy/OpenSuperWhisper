@@ -24,8 +24,15 @@
 
 ### Technical
 - **Icon Generation:** Comprehensive multi-platform icon pack
+- **Cross-Platform Build:** Added Pillow dependency for automatic icon conversion
+- **Platform-Specific Icons:** Windows ICO, macOS/Linux PNG with PyInstaller auto-conversion
 - **Color Scheme:** Cyan-to-teal gradient with light cyan accents
 - **File Organization:** Structured assets/ and brand/ directories
+
+### Fixed
+- **macOS Build Issue:** Resolved "only ('icns',) images may be used as icons" error
+- **Icon Compatibility:** Platform-specific icon paths for seamless builds
+- **Dependencies:** Added Pillow>=9.0.0 for PyInstaller icon processing
 
 ## [0.5.0] - 2025-07-27 (Production Release)
 ### Added
