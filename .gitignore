@@ -1,27 +1,30 @@
-# Build and distribution
-build/
-dist/
-*.spec
-*.egg-info/
-__pycache__/
-
-# User data and logs
-logs/
-*.log
-user_dict.txt
-nul
-
-# Application data
-.opensuperwhisper/
-
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
 .Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# PyInstaller
+*.spec
+*.manifest
+*.exe
+
+# Testing
+.tox/
+.coverage
+coverage.xml
 .pytest_cache/
-.claude/
+htmlcov/
+.nox/
+.cache/
 
 # Virtual environments
 env/
@@ -29,13 +32,6 @@ venv/
 .venv/
 ENV/
 .env
-
-# Testing
-.tox/
-.coverage
-.pytest_cache/
-htmlcov/
-.nox/
 
 # IDE and editors
 .vscode/
@@ -55,14 +51,11 @@ htmlcov/
 ehthumbs.db
 Thumbs.db
 
-# Temporary files and development artifacts
-*.tmp
-*.temp
-%APPDATA%/
-.claude/
-
-# Development artifacts
-nul
+# Application logs and data
+logs/
+*.log
+.opensuperwhisper/
+user_dict.txt
 
 # Audio files (testing artifacts)
 *.wav
@@ -70,15 +63,14 @@ nul
 *.m4a
 *.flac
 
-# PyInstaller
-*.manifest
-*.exe
+# Temporary files
+*.tmp
+*.temp
+nul
 
-# Distribution / packaging
-pip-log.txt
-pip-delete-this-directory.txt
+# Development tools
+.claude/
 
-# NPM cache and other cache directories
+# Cache directories
 %APPDATA%/
 npm-cache/
-.cache/
