@@ -224,6 +224,18 @@ class MainWindow(QMainWindow):
         prompt_header_layout.addWidget(self.preset_combo)
         
         # Preset management buttons
+        self.add_preset_btn = QPushButton("➕")
+        self.add_preset_btn.setToolTip("Add new preset")
+        self.add_preset_btn.setProperty("class", "icon-btn")
+        self.add_preset_btn.setMaximumWidth(35)
+        prompt_header_layout.addWidget(self.add_preset_btn)
+        
+        self.edit_preset_btn = QPushButton("✏️")
+        self.edit_preset_btn.setToolTip("Edit preset name")
+        self.edit_preset_btn.setProperty("class", "icon-btn")
+        self.edit_preset_btn.setMaximumWidth(35)
+        prompt_header_layout.addWidget(self.edit_preset_btn)
+        
         self.save_preset_btn = QPushButton("💾")
         self.save_preset_btn.setToolTip("Save current prompt as preset")
         self.save_preset_btn.setProperty("class", "icon-btn")
@@ -267,6 +279,8 @@ class MainWindow(QMainWindow):
         
         # Preset management signals
         self.preset_combo.currentTextChanged.connect(self.load_preset)
+        self.add_preset_btn.clicked.connect(self.add_preset)
+        self.edit_preset_btn.clicked.connect(self.edit_preset)
         self.save_preset_btn.clicked.connect(self.save_preset)
         self.delete_preset_btn.clicked.connect(self.delete_preset)
         
@@ -830,7 +844,103 @@ class MainWindow(QMainWindow):
             default_index = self.preset_combo.findText("Default Editor")
             if default_index >= 0:
                 self.preset_combo.setCurrentIndex(default_index)
+    
+    def add_preset(self):
+        """Add a new preset with custom name and prompt"""
+        preset_name, ok = QInputDialog.getText(
+            self, "Add New Preset", 
+            "Enter preset name:",
+            QLineEdit.EchoMode.Normal
+        )
+        
+        if ok and preset_name.strip():
+            preset_name = preset_name.strip()
             
+            # Load existing presets
+            presets = config.load_setting(config.KEY_PROMPT_PRESETS, {})
+            
+            # Check if preset exists
+            if preset_name in presets:
+                QMessageBox.warning(self, "Preset Exists", 
+                                  f"Preset '{preset_name}' already exists. Use a different name.")
+                return
+            
+            # Ask for prompt content
+            prompt_content, ok = QInputDialog.getMultiLineText(
+                self, "Add Preset Content", 
+                f"Enter prompt content for '{preset_name}':",
+                self.prompt_text_edit.toPlainText()
+            )
+            
+            if ok:
+                # Save preset
+                presets[preset_name] = prompt_content
+                config.save_setting(config.KEY_PROMPT_PRESETS, presets)
+                
+                # Update combo box
+                self.preset_combo.blockSignals(True)
+                self.preset_combo.addItem(preset_name)
+                self.preset_combo.setCurrentText(preset_name)
+                self.preset_combo.blockSignals(False)
+                
+                # Update prompt text and set as current
+                self.prompt_text_edit.setPlainText(prompt_content)
+                config.save_setting(config.KEY_CURRENT_PRESET, preset_name)
+                
+                QMessageBox.information(self, "Success", f"Preset '{preset_name}' added successfully.")
+    
+    def edit_preset(self):
+        """Edit the name of the selected preset"""
+        current_preset = self.preset_combo.currentText()
+        if not current_preset:
+            QMessageBox.warning(self, "No Preset Selected", "Please select a preset to edit.")
+            return
+            
+        # Don't allow editing default presets
+        default_names = list(self.get_default_presets().keys())
+        if current_preset in default_names:
+            QMessageBox.warning(self, "Cannot Edit", 
+                              f"Cannot edit default preset '{current_preset}'.")
+            return
+        
+        new_name, ok = QInputDialog.getText(
+            self, "Edit Preset Name", 
+            "Enter new preset name:",
+            QLineEdit.EchoMode.Normal,
+            current_preset
+        )
+        
+        if ok and new_name.strip() and new_name.strip() != current_preset:
+            new_name = new_name.strip()
+            
+            # Load existing presets
+            presets = config.load_setting(config.KEY_PROMPT_PRESETS, {})
+            
+            # Check if new name exists
+            if new_name in presets:
+                QMessageBox.warning(self, "Preset Exists", 
+                                  f"Preset '{new_name}' already exists. Use a different name.")
+                return
+            
+            # Rename preset
+            if current_preset in presets:
+                preset_content = presets[current_preset]
+                del presets[current_preset]
+                presets[new_name] = preset_content
+                config.save_setting(config.KEY_PROMPT_PRESETS, presets)
+                
+                # Update combo box
+                current_index = self.preset_combo.currentIndex()
+                self.preset_combo.blockSignals(True)
+                self.preset_combo.removeItem(current_index)
+                self.preset_combo.insertItem(current_index, new_name)
+                self.preset_combo.setCurrentIndex(current_index)
+                self.preset_combo.blockSignals(False)
+                
+                # Update current preset setting
+                config.save_setting(config.KEY_CURRENT_PRESET, new_name)
+                
+                QMessageBox.information(self, "Success", f"Preset renamed to '{new_name}' successfully.")
     
     def complete_processing(self):
         """Complete the processing and update UI/indicators"""

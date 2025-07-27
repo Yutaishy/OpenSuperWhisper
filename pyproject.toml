@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "opensuperwhisper"
-version = "0.3.0"
+version = "0.4.0"
 description = "Two-Stage Voice Transcription Pipeline with AI-Powered Text Formatting"
 readme = "README.md"
 authors = [{name = "OpenSuperWhisper Team"}]
@@ -40,9 +40,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/your-username/OpenSuperWhisper"
-Repository = "https://github.com/your-username/OpenSuperWhisper.git"
-Issues = "https://github.com/your-username/OpenSuperWhisper/issues"
+Homepage = "https://github.com/Yutaishy/voice_input"
+Repository = "https://github.com/Yutaishy/voice_input.git"
+Issues = "https://github.com/Yutaishy/voice_input/issues"
 
 [project.scripts]
 opensuperwhisper = "run_app:main"

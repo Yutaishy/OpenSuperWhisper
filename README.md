@@ -22,8 +22,9 @@ OpenSuperWhisper is a cross-platform desktop application that transforms speech 
 
 ### 🧠 **Two-Stage AI Pipeline**
 - **Stage 1**: OpenAI Whisper transcription (`whisper-1`, `gpt-4o-transcribe`)
-- **Stage 2**: GPT-powered text formatting (`gpt-4o-mini`, `gpt-4`)
-- **Customizable prompts** for specific use cases (meetings, articles, notes)
+- **Stage 2**: GPT-powered text formatting (`gpt-4o-mini`, `gpt-4`, `o3`, `o4-mini`)
+- **Advanced preset management** - create, edit, and customize formatting prompts
+- **Built-in presets** for meetings, technical docs, blog articles, and more
 - **YAML/JSON style guides** for consistent formatting rules
 
 ### 📋 **Seamless Workflow Integration**
@@ -105,18 +106,25 @@ Output: "Welcome to today's episode where we'll explore innovative approaches to
 2. Enter your API key (starts with `sk-`)
 3. Key is securely stored and automatically loaded
 
-### Custom Formatting Prompts
-Edit the **Formatting Prompt** text area for specific use cases:
+### Advanced Preset Management
+OpenSuperWhisper now includes powerful preset management capabilities:
 
-**For Technical Documentation**:
-```
-Transform this transcript into clear technical documentation with proper terminology, numbered steps, and code formatting where appropriate.
-```
+- **➕ Add Preset**: Create new formatting prompts with custom names
+- **✏️ Edit Preset**: Rename existing custom presets (default presets protected)
+- **💾 Save Preset**: Update prompt content for existing presets
+- **🗑️ Delete Preset**: Remove custom presets (with confirmation)
 
-**For Meeting Minutes**:
-```
-Convert this meeting discussion into structured minutes with action items, decisions, and participant names clearly identified.
-```
+**Built-in Presets Include**:
+- **Default Editor**: General text cleanup and formatting
+- **Meeting Minutes**: Structured minutes with action items and decisions
+- **Technical Documentation**: Technical writing with proper terminology
+- **Blog Article**: Engaging content with natural flow
+
+**Creating Custom Presets**:
+1. Click the **➕** button next to the preset dropdown
+2. Enter a unique preset name
+3. Write your custom formatting prompt
+4. The preset is automatically saved and available immediately
 
 ### Style Guide Integration
 Load YAML or JSON style guides for consistent formatting:
@@ -139,7 +147,7 @@ terminology:
 ### Running Tests
 ```bash
 # Install development dependencies
-pip install -r requirements-dev.txt
+pip install -e ".[dev]"
 
 # Run comprehensive test suite
 pytest tests/ -v

@@ -1,5 +1,22 @@
 # CHANGELOG
 
+## [0.4.0] - 2025-07-27 (Latest)
+### Added
+- **Advanced Preset Management:** Complete CRUD operations for formatting prompts
+  - ➕ Add new presets with custom names and content
+  - ✏️ Edit existing preset names (default presets protected)
+  - 💾 Save/update prompt content for existing presets
+  - 🗑️ Delete custom presets with confirmation dialogs
+- **Enhanced UI:** Added four management buttons to preset toolbar
+- **Built-in Preset Library:** Professional presets for meetings, technical docs, and blog articles
+- **Smart Preset Protection:** Default presets cannot be edited or deleted
+- **Real-time UI Updates:** Dropdown automatically reflects preset changes
+
+### Fixed
+- **Preset Validation:** Prevents duplicate names and empty content
+- **UI Consistency:** Proper signal blocking during programmatic updates
+- **Data Persistence:** All preset changes automatically saved to settings
+
 ## [0.3.0] - 2025-07-27 (GitHub Release Ready)
 ### Added
 - **Enhanced Recording Indicator:** Clear text display showing "Recording", "Processing", and "Completed" states
