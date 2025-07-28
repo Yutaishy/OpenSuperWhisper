@@ -66,8 +66,11 @@ pre-commit run --all-files
 python run_app.py
 
 # Build and test executable
-pyinstaller --onefile --windowed run_app.py --name OpenSuperWhisper
-./dist/OpenSuperWhisper.exe
+python build_executable.py OpenSuperWhisper
+# Windows
+./dist/OpenSuperWhisper/OpenSuperWhisper.exe
+# macOS/Linux
+./dist/OpenSuperWhisper/OpenSuperWhisper
 ```
 
 ## 📝 Contribution Guidelines
@@ -205,8 +208,11 @@ Any other relevant information
 - **`formatter_api.py`**: GPT-based text formatting
 - **`ui_mainwindow.py`**: PySide6 GUI components
 - **`config.py`**: Settings management
-- **`vocabulary.py`**: Japanese word extraction
-- **`prompt_manager.py`**: Style guide handling
+- **`logger.py`**: Logging system
+- **`global_hotkey.py`**: Global keyboard shortcuts
+- **`recording_indicator.py`**: Recording status overlay
+- **`first_run.py`**: Initial setup wizard
+- **`security.py`**: API key encryption
 
 ### Key Design Principles
 - **Modularity**: Each component has a single responsibility
@@ -221,22 +227,31 @@ Any other relevant information
 - [OpenAI API Documentation](https://platform.openai.com/docs)
 - [PySide6 Documentation](https://doc.qt.io/qtforpython/)
 - [pytest Documentation](https://docs.pytest.org/)
-- [Janome Documentation](https://mocobeta.github.io/janome/)
+- [PyInstaller Documentation](https://pyinstaller.org/)
 
 ### Project Structure
 ```
 OpenSuperWhisper/
-├── OpenSuperWhisper/     # Main package
-│   ├── asr_api.py       # Audio transcription
-│   ├── formatter_api.py # Text formatting
-│   ├── ui_mainwindow.py # GUI interface
-│   ├── config.py        # Settings management
-│   ├── vocabulary.py    # Word extraction
-│   └── prompt_manager.py # Style guides
-├── tests/               # Test suite
-├── style_guides/        # Example style guides
-├── requirements.txt     # Dependencies
-└── run_app.py          # Entry point
+├── OpenSuperWhisper/      # Main package
+│   ├── asr_api.py        # Audio transcription
+│   ├── formatter_api.py  # Text formatting
+│   ├── ui_mainwindow.py  # GUI interface
+│   ├── config.py         # Settings management
+│   ├── logger.py         # Logging system
+│   ├── global_hotkey.py  # Keyboard shortcuts
+│   ├── recording_indicator.py # Status overlay
+│   ├── first_run.py      # Setup wizard
+│   └── security.py       # API key management
+├── tests/                # Test suite
+├── style_guides/         # Example style guides
+├── assets/               # Icons and branding
+├── .github/              # GitHub templates
+│   ├── workflows/        # CI/CD pipelines
+│   └── ISSUE_TEMPLATE/   # Issue templates
+├── build_executable.py   # Build script
+├── requirements.txt      # Dependencies
+├── pyproject.toml       # Project metadata
+└── run_app.py           # Entry point
 ```
 
 ## 🤝 Community

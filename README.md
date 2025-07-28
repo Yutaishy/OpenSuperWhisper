@@ -65,9 +65,11 @@ OpenSuperWhisper is a cross-platform desktop application that transforms speech 
 **📥 [Download Latest Release](https://github.com/Yutaishy/OpenSuperWhisper/releases/latest)**
 
 Choose your platform:
-- **Windows**: `OpenSuperWhisper-Windows.zip` 
-- **macOS**: `OpenSuperWhisper-macOS.zip`
-- **Linux**: `OpenSuperWhisper-Linux.zip`
+- **Windows**: `OpenSuperWhisper-Windows.zip` (249 MB)
+- **macOS**: `OpenSuperWhisper-macOS.zip` (120 MB)
+- **Linux**: `OpenSuperWhisper-Linux.zip` (541 MB)
+
+⚠️ **Important**: Download the platform-specific ZIP files above, NOT the "Source code" archives. The source code archives do not contain the pre-built executables.
 
 **Setup:**
 1. Extract the ZIP file to your desired location
