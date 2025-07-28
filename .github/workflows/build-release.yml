@@ -206,22 +206,18 @@ jobs:
           echo "Error: No build output found!"
           exit 1
         fi
-          
-          # Create ZIP archive for distribution
-          cd dist/
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            # Windows uses onefile mode - single .exe file
-            powershell Compress-Archive -Path "${{ matrix.executable_name }}" -DestinationPath "OpenSuperWhisper.zip"
-          else
-            # macOS/Linux use onedir mode - directory with executable
-            zip -r "${{ matrix.executable_name }}.zip" "${{ matrix.executable_name }}/"
-          fi
-          echo "Created distribution archive: ${{ matrix.executable_name }}.zip"
-          ls -la *.zip
+        
+        # Create ZIP archive for distribution
+        cd dist/
+        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          # Windows uses onefile mode - single .exe file
+          powershell Compress-Archive -Path "${{ matrix.executable_name }}" -DestinationPath "OpenSuperWhisper.zip"
         else
-          echo "Error: Build directory not found!"
-          exit 1
+          # macOS/Linux use onedir mode - directory with executable
+          zip -r "${{ matrix.executable_name }}.zip" "${{ matrix.executable_name }}/"
         fi
+        echo "Created distribution archive: ${{ matrix.executable_name }}.zip"
+        ls -la *.zip
         echo "Build completed successfully"
 
     - name: Upload artifact
