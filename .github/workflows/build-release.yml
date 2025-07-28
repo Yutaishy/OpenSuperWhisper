@@ -225,7 +225,7 @@ jobs:
       with:
         name: ${{ matrix.artifact_name }}
         path: |
-          dist/${{ matrix.executable_name }}.zip
+          dist/OpenSuperWhisper.zip
         retention-days: 7
 
   release:

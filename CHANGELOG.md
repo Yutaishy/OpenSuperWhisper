@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [0.6.5] - 2025-07-28 (Complete Windows Fix Release)
+### Fixed
+- **Windows Artifact Issue:** Fixed Windows ZIP not being included in releases
+  - ✅ Corrected artifact upload path for Windows onefile builds
+  - ✅ All three platforms (Windows, macOS, Linux) now properly included in releases
+  - ✅ Windows single-file executable working without DLL errors
+
+### Enhanced
+- **Documentation:** Updated README.md to reflect Windows onefile distribution
+- **Third-party Ready:** Repository fully prepared for public release
+
 ## [0.6.4] - 2025-07-28 (Windows DLL Fix Release)
 ### Fixed
 - **Windows Critical Issue:** Fixed Python DLL loading error causing "LoadLibrary: メモリ ロケーションへのアクセスが無効です"

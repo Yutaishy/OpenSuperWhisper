@@ -11,7 +11,7 @@
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml/badge.svg" alt="CI/CD"></a>
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml/badge.svg" alt="Build"></a>
   <img src="https://img.shields.io/badge/Tests-18%20Passing-brightgreen.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.6.4-orange.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-0.6.5-orange.svg" alt="Version">
 </p>
 
 **Two-Stage Voice Transcription Pipeline with AI-Powered Text Formatting**
@@ -52,10 +52,12 @@ OpenSuperWhisper is a cross-platform desktop application that transforms speech 
 - **Comprehensive logging** for debugging and analysis
 
 ### 📦 **Production Ready**
-- **Single-file Windows executable** via PyInstaller
+- **Windows**: Single-file executable (onefile mode) for easy deployment
+- **macOS/Linux**: Directory-based distribution with all dependencies
 - **Comprehensive test suite** (18 tests, 100% core coverage)
 - **Professional error handling** and user feedback
 - **Cross-platform compatibility** (Windows, macOS, Linux)
+- **v0.6.4**: Fixed critical Windows DLL loading issues
 
 ## 🚀 Quick Start
 
@@ -270,7 +272,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🔒 Security & Antivirus Compatibility
 
 ### Windows Security / Microsoft Defender
-OpenSuperWhisper v0.6.3+ is specifically designed to minimize false positives from antivirus software. However, if you encounter security warnings:
+OpenSuperWhisper v0.6.4+ is specifically designed to minimize false positives from antivirus software. However, if you encounter security warnings:
 
 #### If Windows Defender blocks the application:
 1. **Check Protection History**: Windows Security → Virus & threat protection → Protection history
