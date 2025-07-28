@@ -1,0 +1,126 @@
+name: ✨ Feature Request
+description: Suggest a new feature for OpenSuperWhisper
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a new feature! Please provide as much detail as possible to help us understand your request.
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Pre-submission Checklist
+      description: Please confirm you have completed these steps
+      options:
+        - label: I have searched existing issues to avoid duplicates
+          required: true
+        - label: This feature would benefit other users, not just myself
+          required: true
+        - label: I have considered the scope and complexity of this request
+          required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Feature Summary
+      description: A brief summary of the feature you'd like to see
+      placeholder: Summarize your feature request in 1-2 sentences
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this feature solve?
+      placeholder: Describe the problem or limitation you're experiencing
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: How would you like this feature to work?
+      placeholder: Describe your ideal solution in detail
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What alternative solutions or features have you considered?
+      placeholder: Describe any alternative approaches you've thought about
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature Category
+      description: What category does this feature fall into?
+      options:
+        - Audio Recording & Processing
+        - Transcription & ASR
+        - Text Formatting & GPT Integration
+        - User Interface & UX
+        - Keyboard Shortcuts & Hotkeys
+        - Settings & Configuration
+        - Export & Integration
+        - Performance & Optimization
+        - Cross-platform Support
+        - Developer Tools & API
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority Level
+      description: How important is this feature to you?
+      options:
+        - Low - Nice to have
+        - Medium - Would improve my workflow
+        - High - Significantly impacts usability
+        - Critical - Blocking my usage
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_cases
+    attributes:
+      label: Use Cases
+      description: Describe specific scenarios where this feature would be useful
+      placeholder: |
+        1. When I'm doing X, this feature would help by...
+        2. During meetings, this would allow me to...
+        3. For content creation, this feature would...
+    validations:
+      required: true
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: Mockups/Examples
+      description: Any mockups, screenshots, or examples that illustrate your idea?
+      placeholder: Attach files or provide links to examples
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other information that would help us understand your request
+      placeholder: Technical considerations, similar features in other apps, etc.
+
+  - type: checkboxes
+    id: implementation
+    attributes:
+      label: Implementation Willingness
+      description: Would you be interested in helping implement this feature?
+      options:
+        - label: I would be willing to contribute code
+        - label: I would be willing to help with testing
+        - label: I would be willing to help with documentation
+        - label: I can only provide feedback and suggestions

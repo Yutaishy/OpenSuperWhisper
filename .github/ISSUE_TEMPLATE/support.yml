@@ -1,0 +1,118 @@
+name: 🤝 Support & Help
+description: Get help with setup, configuration, or usage questions
+title: "[Support]: "
+labels: ["question", "support"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Need help with OpenSuperWhisper? We're here to assist! Please provide details about what you need help with.
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Pre-submission Checklist
+      description: Please confirm you have completed these steps
+      options:
+        - label: I have read the README.md documentation
+          required: true
+        - label: I have checked the existing issues for similar questions
+          required: true
+        - label: I have tried basic troubleshooting steps
+          required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Support Category
+      description: What type of support do you need?
+      options:
+        - Installation & Setup
+        - OpenAI API Configuration
+        - Audio/Microphone Issues
+        - Transcription Problems
+        - Text Formatting Issues
+        - Keyboard Shortcuts & Hotkeys
+        - Performance Issues
+        - Antivirus/Security Concerns
+        - Platform-specific Problems
+        - General Usage Questions
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your Question
+      description: What specific help do you need?
+      placeholder: Describe your question or issue in detail
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      description: What operating system are you using?
+      options:
+        - Windows 10
+        - Windows 11
+        - macOS (Intel)
+        - macOS (Apple Silicon)
+        - Ubuntu 20.04+
+        - Other Linux Distribution
+        - Other (please specify below)
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: OpenSuperWhisper Version
+      description: What version are you using?
+      placeholder: "v0.6.2"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: installation
+    attributes:
+      label: Installation Method
+      description: How did you install OpenSuperWhisper?
+      options:
+        - Downloaded release executable
+        - Built from source
+        - Other method
+    validations:
+      required: true
+
+  - type: textarea
+    id: attempted
+    attributes:
+      label: What You've Tried
+      description: What troubleshooting steps have you already attempted?
+      placeholder: |
+        - Restarted the application
+        - Checked microphone permissions
+        - Verified API key
+        - etc.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other information that might be helpful
+      placeholder: Error messages, screenshots, specific use case details, etc.
+
+  - type: checkboxes
+    id: resources
+    attributes:
+      label: Resources Consulted
+      description: Which resources have you already checked?
+      options:
+        - label: README.md documentation
+        - label: CONTRIBUTING.md guide
+        - label: Existing GitHub issues
+        - label: Security documentation
+        - label: OpenAI API documentation

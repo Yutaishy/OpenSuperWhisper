@@ -270,7 +270,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🔒 Security & Antivirus Compatibility
 
 ### Windows Security / Microsoft Defender
-OpenSuperWhisper v0.6.1+ is specifically designed to minimize false positives from antivirus software. However, if you encounter security warnings:
+OpenSuperWhisper v0.6.3+ is specifically designed to minimize false positives from antivirus software. However, if you encounter security warnings:
 
 #### If Windows Defender blocks the application:
 1. **Check Protection History**: Windows Security → Virus & threat protection → Protection history
