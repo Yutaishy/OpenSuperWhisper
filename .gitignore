@@ -72,5 +72,6 @@ nul
 .claude/
 
 # Cache directories
-%APPDATA%/
-npm-cache/
+# Windows-specific cache paths should use proper escaping
+**/npm-cache/
+workflow-logs/

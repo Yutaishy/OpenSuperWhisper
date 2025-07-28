@@ -79,12 +79,16 @@ jobs:
         # Use system timeout and retry mechanism for PySide6
         pip install --timeout 1200 --retries 3 --no-cache-dir PySide6 || pip install --timeout 1800 --no-cache-dir --force-reinstall PySide6
         echo "=== Installing other core dependencies ==="
-        pip install --timeout 600 --no-cache-dir numpy openai sounddevice pynput PyYAML cryptography
+        pip install --timeout 600 --no-cache-dir numpy openai sounddevice pynput PyYAML cryptography Pillow
       timeout-minutes: 25
 
     - name: Install remaining dependencies
       run: |
+        echo "=== Installing development dependencies including PyInstaller ==="
         pip install -e ".[dev]" --timeout 900
+        echo "=== Verifying PyInstaller installation ==="
+        pip show pyinstaller
+        pyinstaller --version
       timeout-minutes: 8
     
     - name: Debug - Check installed packages
@@ -124,6 +128,18 @@ jobs:
     - name: Build with PyInstaller
       shell: bash
       run: |
+        # Add debug info for macOS
+        if [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+          echo "=== macOS Build Environment ==="
+          echo "Architecture: $(uname -m)"
+          echo "macOS Version: $(sw_vers -productVersion)"
+          echo "Python Location: $(which python)"
+          echo "PyInstaller Location: $(which pyinstaller)"
+          # Disable code signing for CI builds
+          export PYINSTALLER_COMPILE_BOOTLOADER=1
+          export MACOSX_DEPLOYMENT_TARGET=10.15
+        fi
+        
         # Retry PyInstaller build up to 2 times on failure
         for i in {1..2}; do
           echo "Build attempt $i"
@@ -132,6 +148,11 @@ jobs:
             break
           elif [ $i -eq 2 ]; then
             echo "Build failed after 2 attempts"
+            # Show more detailed error info
+            echo "=== Last 100 lines of build log ==="
+            if [ -f "build/OpenSuperWhisper/warn-OpenSuperWhisper.txt" ]; then
+              tail -100 "build/OpenSuperWhisper/warn-OpenSuperWhisper.txt" || true
+            fi
             exit 1
           else
             echo "Build failed, retrying..."
@@ -140,7 +161,7 @@ jobs:
             rm -rf build/ dist/ *.spec
           fi
         done
-      timeout-minutes: 20
+      timeout-minutes: 30
       env:
         QT_QPA_PLATFORM: ${{ matrix.os == 'ubuntu-latest' && 'offscreen' || '' }}
         CI: true

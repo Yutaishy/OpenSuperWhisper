@@ -88,11 +88,20 @@ def main():
     elif platform.system() == 'Darwin':  # macOS
         print("macOS platform detected - adding macOS-specific settings")
         # Use PNG icon for macOS (PyInstaller can convert with Pillow)
-        args.extend([
-            '--icon=assets/ios/AppIcon.appiconset/Icon-AppStore-1024.png',
-            '--osx-bundle-identifier=com.yutaishy.opensuperwhisper',
-            '--collect-all=sounddevice',
-        ])
+        # Check if icon file exists before adding it
+        icon_path = 'assets/ios/AppIcon.appiconset/Icon-AppStore-1024.png'
+        if os.path.exists(icon_path):
+            args.extend([
+                f'--icon={icon_path}',
+                '--osx-bundle-identifier=com.yutaishy.opensuperwhisper',
+                '--collect-all=sounddevice',
+            ])
+        else:
+            print(f"Warning: Icon file not found at {icon_path}, building without icon")
+            args.extend([
+                '--osx-bundle-identifier=com.yutaishy.opensuperwhisper',
+                '--collect-all=sounddevice',
+            ])
     
     elif platform.system() == 'Windows':
         print("Windows platform detected - adding Windows-specific settings")
