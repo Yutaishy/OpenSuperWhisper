@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.6.3] - 2025-07-28 (Complete Cross-Platform Release)
+### Fixed
+- **Windows Release Issue:** Fixed ZIP file naming inconsistency in GitHub Actions workflow
+  - ✅ Windows builds now properly included in releases (OpenSuperWhisper.exe.zip → OpenSuperWhisper-Windows.zip)
+  - ✅ All three platforms (Windows, macOS, Linux) now available in releases
+
 ## [0.6.2] - 2025-07-28 (macOS Build Fix Release)
 ### Fixed
 - **macOS PyInstaller Build:** Fixed framework collision error when building on macOS ARM64
