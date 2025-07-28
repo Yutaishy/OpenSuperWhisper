@@ -589,6 +589,20 @@ class MainWindow(QMainWindow):
     def start_recording(self) -> None:
         if self.is_recording:
             return
+        
+        # First try to start recording
+        try:
+            duration = 60  # max duration in seconds
+            buf = sd.rec(int(duration * self.fs), samplerate=self.fs, channels=1, dtype='float64')
+            logger.logger.info("sd.rec started successfully")
+        except Exception as e:
+            logger.logger.info(f"sd.rec failed: {e}")
+            self.show_error(f"Failed to start recording: {e}")
+            self.complete_processing()
+            return
+        
+        # Only update state if recording started successfully
+        self.recording = buf
         self.is_recording = True
         self.record_btn.setEnabled(False)
         self.stop_btn.setEnabled(True)
@@ -596,9 +610,6 @@ class MainWindow(QMainWindow):
         # Start recording timer
         self.recording_time = 0
         self.recording_timer.start(1000)  # Update every second
-
-        duration = 60  # max duration in seconds
-        self.recording = sd.rec(int(duration * self.fs), samplerate=self.fs, channels=1, dtype='float64')
 
         # Show global recording indicator
         if hasattr(self, 'global_indicator'):
@@ -608,68 +619,100 @@ class MainWindow(QMainWindow):
         if not self.is_recording:
             return
 
-        sd.stop()
-        sd.wait()
-        self.is_recording = False
-        self.record_btn.setEnabled(True)
-        self.stop_btn.setEnabled(False)
+        # Flag to track whether complete_processing was called
+        processing_completed = False
+        
+        try:
+            logger.logger.info("BEFORE sd.stop()")
+            sd.stop()
+            logger.logger.info("AFTER sd.stop(), BEFORE sd.wait()")
+            sd.wait()
+            logger.logger.info("AFTER sd.wait()")
+            
+            self.is_recording = False
+            self.record_btn.setEnabled(True)
+            self.stop_btn.setEnabled(False)
 
-        # Stop recording timer
-        self.recording_timer.stop()
-        self.recording_status.setText("Processing...")
+            # Stop recording timer
+            self.recording_timer.stop()
+            self.recording_status.setText("Processing...")
+            
+            # Show processing indicator early
+            if hasattr(self, 'global_indicator'):
+                self.global_indicator.show_processing()
 
-        # Trim recording to actual length
-        if self.recording is None:
-            return
-        recording = self.recording[:,0]
+            # Trim recording to actual length
+            if self.recording is None:
+                logger.logger.info("Recording buffer is None; aborting with UI recovery")
+                self.show_error("Recording failed to start (no audio buffer).")
+                self.complete_processing()   # UI を必ず Ready に戻す
+                processing_completed = True
+                return
+            recording = self.recording[:,0]
 
-        # Use amplitude threshold for better audio detection
-        amplitude_threshold = 0.001  # Adjust based on your microphone sensitivity
-        significant_indices = np.where(np.abs(recording) > amplitude_threshold)[0]
+            # Use amplitude threshold for better audio detection
+            amplitude_threshold = 0.001  # Adjust based on your microphone sensitivity
+            significant_indices = np.where(np.abs(recording) > amplitude_threshold)[0]
 
-        if len(significant_indices) > 0:
-            # Keep some padding before first and after last significant audio
-            padding_samples = int(0.1 * self.fs)  # 100ms padding
-            first_index = max(0, significant_indices[0] - padding_samples)
-            last_index = min(len(recording) - 1, significant_indices[-1] + padding_samples)
-            recording = recording[first_index:last_index+1]
-        else:
-            # Fallback to old method
-            nonzero_indices = np.where(recording != 0)[0]
-            if len(nonzero_indices) > 0:
-                last_index = nonzero_indices[-1]
-                recording = recording[:last_index+1]
+            if len(significant_indices) > 0:
+                # Keep some padding before first and after last significant audio
+                padding_samples = int(0.1 * self.fs)  # 100ms padding
+                first_index = max(0, significant_indices[0] - padding_samples)
+                last_index = min(len(recording) - 1, significant_indices[-1] + padding_samples)
+                recording = recording[first_index:last_index+1]
+            else:
+                # Fallback to old method
+                nonzero_indices = np.where(recording != 0)[0]
+                if len(nonzero_indices) > 0:
+                    last_index = nonzero_indices[-1]
+                    recording = recording[:last_index+1]
 
-        # Validate recording data
-        if len(recording) == 0:
-            self.show_error("Recording failed: No audio data captured")
-            self.complete_processing()
-            return
+            # Validate recording data
+            if len(recording) == 0:
+                self.show_error("Recording failed: No audio data captured")
+                self.complete_processing()
+                processing_completed = True
+                return
 
-        # Convert to int16 format for WAV (proper normalization)
-        # Normalize to [-1, 1] range first, then convert to int16
-        recording_normalized = np.clip(recording, -1.0, 1.0)
-        recording_int16 = (recording_normalized * 32767).astype(np.int16)
+            # Convert to int16 format for WAV (proper normalization)
+            # Normalize to [-1, 1] range first, then convert to int16
+            recording_normalized = np.clip(recording, -1.0, 1.0)
+            recording_int16 = (recording_normalized * 32767).astype(np.int16)
 
-        # Save to WAV file
-        wav_path = os.path.join(self.temp_dir, "recorded.wav")
-        with wave.open(wav_path, 'wb') as wf:
-            wf.setnchannels(1)
-            wf.setsampwidth(2)
-            wf.setframerate(self.fs)
-            wf.writeframes(recording_int16.tobytes())
+            # Save to WAV file
+            wav_path = os.path.join(self.temp_dir, "recorded.wav")
+            logger.logger.info("BEFORE wave.open")
+            with wave.open(wav_path, 'wb') as wf:
+                wf.setnchannels(1)
+                wf.setsampwidth(2)
+                wf.setframerate(self.fs)
+                wf.writeframes(recording_int16.tobytes())
+                logger.logger.info("AFTER writeframes")
 
-        # Validate WAV file
-        file_size = os.path.getsize(wav_path)
-        if file_size < 1000:  # Less than 1KB suggests empty or corrupted file
-            self.show_error(f"Recording failed: Audio file too small ({file_size} bytes)")
-            self.complete_processing()
-            return
+            # Validate WAV file
+            file_size = os.path.getsize(wav_path)
+            if file_size < 1000:  # Less than 1KB suggests empty or corrupted file
+                self.show_error(f"Recording failed: Audio file too small ({file_size} bytes)")
+                self.complete_processing()
+                processing_completed = True
+                return
 
-        logger.logger.info(f"Audio file created: {file_size} bytes, duration: {len(recording)/self.fs:.2f}s")
+            logger.logger.info(f"Audio file created: {file_size} bytes, duration: {len(recording)/self.fs:.2f}s")
 
-        # Start background transcription
-        self.start_transcription_worker(wav_path)
+            # Start background transcription
+            logger.logger.info("Starting transcription worker")
+            self.start_transcription_worker(wav_path)
+            logger.logger.info("Transcription worker started")
+            
+        except Exception as e:
+            logger.logger.info(f"Exception in stop_recording: {e}")
+            self.show_error(f"Recording stop error: {e}")
+            if not processing_completed:
+                self.complete_processing()
+        finally:
+            # Ensure UI returns to ready state even if error occurs
+            if not processing_completed and not hasattr(self, 'worker'):
+                self.complete_processing()
 
     def start_transcription_worker(self, wav_path: str) -> None:
         """Start background worker for transcription and formatting"""

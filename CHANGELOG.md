@@ -2,6 +2,27 @@
 
 ## [Unreleased]
 
+## [0.6.10] - 2025-07-29 (Processing Freeze & Missing Indicators Fix)
+### Fixed
+- **Processing Freeze**: Resolved UI freeze after Stop button press
+  - ✅ Added UI recovery in self.recording is None path with complete_processing() call
+  - ✅ Improved error handling with try/except/finally in stop_recording()
+  - ✅ Ensured UI always returns to Ready state even on errors
+- **Recording Start Order**: Fixed sd.rec exception handling
+  - ✅ Try recording start before updating UI state
+  - ✅ Show error and recover UI on recording failure
+- **Missing Indicators**: Fixed Processing/Completed popup visibility
+  - ✅ Show Processing indicator immediately after Stop button
+  - ✅ Improved multi-monitor positioning logic (parent window → cursor → primary)
+- **Logging**: Added arrival point logs for debugging
+  - ✅ BEFORE/AFTER logs for sd.stop(), sd.wait(), wave.open operations
+  - ✅ Transcription worker start/complete logs
+
+### Technical
+- Minimal diff approach - no architectural changes
+- Added processing_completed flag to prevent duplicate UI recovery calls
+- Enhanced RecordingIndicator screen detection for multi-monitor setups
+
 ## [0.6.9] - 2025-07-28 (Windows Icon Quality Enhancement)
 ### Enhanced
 - **Windows Icon Quality**: Replaced low-resolution icon with multi-resolution ICO file
