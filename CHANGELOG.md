@@ -6,7 +6,7 @@
 ### Fixed
 - **Windows Critical Issue:** Resolved Python DLL access violation error ("メモリ ロケーションへのアクセスが無効です")
   - ✅ Changed all platforms to onedir mode for maximum compatibility
-  - ✅ Eliminated onefi Mode that caused DLL loading issues in temporary directories
+  - ✅ Eliminated onefile mode that caused DLL loading issues in temporary directories
   - ✅ Updated GitHub Actions workflow to handle onedir builds consistently
   - ✅ Windows executable now runs reliably without memory access violations
 
