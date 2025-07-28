@@ -3,7 +3,8 @@
 ## [Unreleased]
 ### Fixed
 - **macOS PyInstaller Build:** Fixed framework collision error when building on macOS ARM64
-  - ✅ Replaced `--collect-all=PySide6` with `--collect-submodules` and `--collect-data` for macOS
+  - ✅ Excluded problematic Qt3D and multimedia modules on macOS to prevent framework conflicts
+  - ✅ Limited PySide6 inclusion to essential modules only (QtCore, QtGui, QtWidgets, QtNetwork)
   - ✅ Maintained `--collect-all=PySide6` for Windows and Linux platforms
   - ✅ Resolved "File exists" error in Qt framework Resources directory
   - ✅ Added Pillow dependency to GitHub Actions for icon conversion
