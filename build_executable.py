@@ -17,7 +17,6 @@ def main():
         '--windowed',
         '--noupx',  # Disable UPX compression globally to prevent false positives
         '--collect-all=OpenSuperWhisper',
-        '--collect-all=PySide6',
         '--hidden-import=OpenSuperWhisper',
         '--hidden-import=OpenSuperWhisper.ui_mainwindow',
         '--hidden-import=OpenSuperWhisper.asr_api',
@@ -73,6 +72,7 @@ def main():
             '--hidden-import=PySide6.QtDBus',
             # Try to find libportaudio.so.2 in common locations
             '--collect-all=sounddevice',
+            '--collect-all=PySide6',  # Linux can handle collect-all
         ])
         # Try to add portaudio library if it exists
         portaudio_paths = [
@@ -95,12 +95,18 @@ def main():
                 f'--icon={icon_path}',
                 '--osx-bundle-identifier=com.yutaishy.opensuperwhisper',
                 '--collect-all=sounddevice',
+                # Add PySide6 modules individually instead of collect-all to avoid framework issues
+                '--collect-submodules=PySide6',
+                '--collect-data=PySide6',
             ])
         else:
             print(f"Warning: Icon file not found at {icon_path}, building without icon")
             args.extend([
                 '--osx-bundle-identifier=com.yutaishy.opensuperwhisper',
                 '--collect-all=sounddevice',
+                # Add PySide6 modules individually instead of collect-all to avoid framework issues
+                '--collect-submodules=PySide6',
+                '--collect-data=PySide6',
             ])
     
     elif platform.system() == 'Windows':
@@ -108,6 +114,7 @@ def main():
         args.extend([
             '--icon=assets/windows/osw.ico',
             '--collect-all=sounddevice',
+            '--collect-all=PySide6',  # Windows can handle collect-all
         ])
         # Add win32 imports if available
         try:
