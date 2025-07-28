@@ -36,6 +36,12 @@ def main():
         '--hidden-import=cryptography.fernet',
         '--hidden-import=yaml',
         '--hidden-import=tempfile',
+        '--hidden-import=certifi',
+        '--hidden-import=ssl',
+        '--hidden-import=urllib3',
+        '--hidden-import=requests',
+        '--collect-all=certifi',
+        '--collect-all=openai',
         '--distpath=dist',
         '--clean',  # Clean build directory
         'run_app.py'

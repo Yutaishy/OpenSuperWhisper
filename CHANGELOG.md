@@ -2,6 +2,25 @@
 
 ## [Unreleased]
 
+## [0.6.8] - 2025-07-28 (SSL Certificate Fix for API Connections)
+### Fixed
+- **Critical SSL/TLS Issue**: Fixed OpenAI API connection errors in bundled executables
+  - ✅ Added proper SSL certificate bundling with `--collect-all=certifi`
+  - ✅ Included OpenAI package dependencies with `--collect-all=openai`
+  - ✅ Added explicit imports for ssl, urllib3, and requests modules
+  - ✅ Resolved "Processing failed: ASR transcription failed: Connection error"
+
+### Enhanced
+- **Build Configuration**: Improved PyInstaller settings for network connectivity
+  - Ensures SSL certificates are properly bundled in onedir mode
+  - Fixed regression from v0.6.6 where onedir transition broke API connections
+  - All platforms now include complete SSL/TLS support
+
+### Technical
+- Modified build_executable.py to include certifi and SSL dependencies
+- Added hidden imports for networking libraries
+- Ensures proper HTTPS connections to OpenAI API endpoints
+
 ## [0.6.7] - 2025-07-28 (Windows DLL Testing and Validation)
 ### Fixed
 - **Windows Build Configuration**: Removed `--strip` option on Windows to prevent DLL loading issues
