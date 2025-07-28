@@ -96,7 +96,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("OpenSuperWhisper")
         self.resize(800, 600)
-        
+
         # Set application icon
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "windows", "osw.ico")
         if os.path.exists(icon_path):
@@ -589,7 +589,7 @@ class MainWindow(QMainWindow):
     def start_recording(self) -> None:
         if self.is_recording:
             return
-        
+
         # First try to start recording
         try:
             duration = 60  # max duration in seconds
@@ -600,7 +600,7 @@ class MainWindow(QMainWindow):
             self.show_error(f"Failed to start recording: {e}")
             self.complete_processing()
             return
-        
+
         # Only update state if recording started successfully
         self.recording = buf
         self.is_recording = True
@@ -621,14 +621,14 @@ class MainWindow(QMainWindow):
 
         # Flag to track whether complete_processing was called
         processing_completed = False
-        
+
         try:
             logger.logger.info("BEFORE sd.stop()")
             sd.stop()
             logger.logger.info("AFTER sd.stop(), BEFORE sd.wait()")
             sd.wait()
             logger.logger.info("AFTER sd.wait()")
-            
+
             self.is_recording = False
             self.record_btn.setEnabled(True)
             self.stop_btn.setEnabled(False)
@@ -636,7 +636,7 @@ class MainWindow(QMainWindow):
             # Stop recording timer
             self.recording_timer.stop()
             self.recording_status.setText("Processing...")
-            
+
             # Show processing indicator early
             if hasattr(self, 'global_indicator'):
                 self.global_indicator.show_processing()
@@ -703,7 +703,7 @@ class MainWindow(QMainWindow):
             logger.logger.info("Starting transcription worker")
             self.start_transcription_worker(wav_path)
             logger.logger.info("Transcription worker started")
-            
+
         except Exception as e:
             logger.logger.info(f"Exception in stop_recording: {e}")
             self.show_error(f"Recording stop error: {e}")

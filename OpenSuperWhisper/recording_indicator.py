@@ -46,7 +46,7 @@ class RecordingIndicator(QWidget):
             flags |= Qt.WindowType.WindowDoesNotAcceptFocus
 
         self.setWindowFlags(flags)
-        
+
         # Set application icon
         icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "windows", "osw.ico")
         if os.path.exists(icon_path):
@@ -109,7 +109,7 @@ class RecordingIndicator(QWidget):
     def setup_position(self) -> None:
         """Position indicator at bottom-right of screen"""
         screen = None
-        
+
         # Priority: parent window → cursor position → primary screen
         if getattr(self, "parent_window", None):
             screen = self.parent_window.screen()
@@ -117,7 +117,7 @@ class RecordingIndicator(QWidget):
             screen = QApplication.screenAt(QCursor.pos())
         if not screen:
             screen = QApplication.primaryScreen()
-            
+
         # Get available geometry and position at bottom-right
         geo = screen.availableGeometry()
         x = geo.right() - self.width() - 20
