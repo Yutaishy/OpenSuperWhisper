@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## [Unreleased]
+
+## [0.6.2] - 2025-07-28 (macOS Build Fix Release)
 ### Fixed
 - **macOS PyInstaller Build:** Fixed framework collision error when building on macOS ARM64
   - ✅ Excluded problematic Qt3D and multimedia modules on macOS to prevent framework conflicts
@@ -11,8 +13,9 @@
 
 ### Enhanced
 - **Dependencies:** Added Pillow to core requirements for cross-platform icon support
-- **Documentation:** Updated README.md and CONTRIBUTING.md with latest setup instructions
+- **Documentation:** Updated README.md with clearer download instructions and platform-specific guidance
 - **CI/CD:** Improved GitHub Actions with better error reporting and platform-specific handling
+- **Release Process:** All three platforms (Windows, macOS, Linux) now build successfully
 
 ## [0.6.1] - 2025-07-28 (Security Enhancement Release)
 ### Fixed

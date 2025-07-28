@@ -11,7 +11,7 @@
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml/badge.svg" alt="CI/CD"></a>
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml/badge.svg" alt="Build"></a>
   <img src="https://img.shields.io/badge/Tests-18%20Passing-brightgreen.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.6.1-orange.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-0.6.2-orange.svg" alt="Version">
 </p>
 
 **Two-Stage Voice Transcription Pipeline with AI-Powered Text Formatting**
@@ -60,9 +60,19 @@ OpenSuperWhisper is a cross-platform desktop application that transforms speech 
 ## 🚀 Quick Start
 
 ### Option 1: Download Release (Recommended)
-1. Download the latest `OpenSuperWhisper.exe` from [Releases](../../releases)
-2. Set your OpenAI API key via **Settings → Set OpenAI API Key...**
-3. Click **🎤 Record** and start speaking!
+
+**📥 [Download Latest Release](https://github.com/Yutaishy/OpenSuperWhisper/releases/latest)**
+
+Choose your platform:
+- **Windows**: `OpenSuperWhisper-Windows.zip` 
+- **macOS**: `OpenSuperWhisper-macOS.zip`
+- **Linux**: `OpenSuperWhisper-Linux.zip`
+
+**Setup:**
+1. Extract the ZIP file to your desired location
+2. Run the executable from the extracted folder
+3. Set your OpenAI API key via **Settings → Set OpenAI API Key...**
+4. Click **🎤 Record** and start speaking!
 
 ### Option 2: Run from Source
 ```bash

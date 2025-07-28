@@ -243,9 +243,9 @@ jobs:
         # Create directory structure expected by release action
         mkdir -p release-files
         
-        # Copy Windows ZIP
-        if [ -f "OpenSuperWhisper-Windows/OpenSuperWhisper.zip" ]; then
-          cp "OpenSuperWhisper-Windows/OpenSuperWhisper.zip" "release-files/OpenSuperWhisper-Windows.zip"
+        # Copy Windows ZIP (note: Windows creates OpenSuperWhisper.exe.zip)
+        if [ -f "OpenSuperWhisper-Windows/OpenSuperWhisper.exe.zip" ]; then
+          cp "OpenSuperWhisper-Windows/OpenSuperWhisper.exe.zip" "release-files/OpenSuperWhisper-Windows.zip"
           echo "Windows ZIP found and copied"
         else
           echo "ERROR: Windows ZIP not found"
