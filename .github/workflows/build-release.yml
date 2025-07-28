@@ -171,24 +171,18 @@ jobs:
       run: |
         ls -la dist/
         
-        # Check for onefile (Windows) or onedir (macOS/Linux) build
-        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-          # Windows uses onefile mode - single .exe file
-          if [ -f "dist/${{ matrix.executable_name }}" ]; then
-            echo "Found Windows onefile build: dist/${{ matrix.executable_name }}"
-            EXEC_PATH="dist/${{ matrix.executable_name }}"
-            size=$(stat -c%s "$EXEC_PATH" 2>/dev/null || stat -f%z "$EXEC_PATH" 2>/dev/null || echo "0")
-            echo "Executable size: $size bytes"
-          else
-            echo "Error: Windows executable not found at dist/${{ matrix.executable_name }}"
-            exit 1
-          fi
-        elif [ -d "dist/${{ matrix.executable_name }}" ]; then
-          # macOS/Linux use onedir mode - folder with executable inside
+        # Check for onedir build (all platforms now use onedir mode)
+        if [ -d "dist/${{ matrix.executable_name }}" ]; then
+          # All platforms use onedir mode - folder with executable inside
           echo "Found onedir build: dist/${{ matrix.executable_name }}/"
           ls -la "dist/${{ matrix.executable_name }}/"
           
-          EXEC_PATH="dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}"
+          # Windows executable has .exe extension, Unix doesn't
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            EXEC_PATH="dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}.exe"
+          else
+            EXEC_PATH="dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}"
+          fi
           
           if [ -f "$EXEC_PATH" ]; then
             echo "Found executable: $EXEC_PATH"
@@ -196,8 +190,10 @@ jobs:
             echo "Executable size: $size bytes"
             
             # Set execution permissions on Unix systems
-            chmod +x "$EXEC_PATH"
-            echo "Set execution permissions"
+            if [[ "${{ matrix.os }}" != "windows-latest" ]]; then
+              chmod +x "$EXEC_PATH"
+              echo "Set execution permissions"
+            fi
           else
             echo "Error: Main executable not found at $EXEC_PATH"
             exit 1
@@ -209,14 +205,13 @@ jobs:
         
         # Create ZIP archive for distribution
         cd dist/
+        # All platforms use onedir mode - directory with executable
         if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-          # Windows uses onefile mode - single .exe file
           powershell Compress-Archive -Path "${{ matrix.executable_name }}" -DestinationPath "OpenSuperWhisper.zip"
         else
-          # macOS/Linux use onedir mode - directory with executable
-          zip -r "${{ matrix.executable_name }}.zip" "${{ matrix.executable_name }}/"
+          zip -r "OpenSuperWhisper.zip" "${{ matrix.executable_name }}/"
         fi
-        echo "Created distribution archive: ${{ matrix.executable_name }}.zip"
+        echo "Created distribution archive: OpenSuperWhisper.zip"
         ls -la *.zip
         echo "Build completed successfully"
 
@@ -250,7 +245,7 @@ jobs:
         # Create directory structure expected by release action
         mkdir -p release-files
         
-        # Copy Windows ZIP (note: Windows now creates OpenSuperWhisper.zip with onefile mode)
+        # Copy Windows ZIP (note: Windows now creates OpenSuperWhisper.zip with onedir mode)
         if [ -f "OpenSuperWhisper-Windows/OpenSuperWhisper.zip" ]; then
           cp "OpenSuperWhisper-Windows/OpenSuperWhisper.zip" "release-files/OpenSuperWhisper-Windows.zip"
           echo "Windows ZIP found and copied"

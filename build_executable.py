@@ -13,7 +13,7 @@ def main():
     # Base arguments - Security-focused configuration
     args = [
         f'--name={executable_name}',
-        '--onefile' if platform.system() == 'Windows' else '--onedir',  # Windows: onefile for DLL compatibility
+        '--onedir',  # Use onedir for all platforms to prevent DLL access violations
         '--windowed',
         '--noupx',  # Disable UPX compression globally to prevent false positives
         '--collect-all=OpenSuperWhisper',
@@ -186,14 +186,12 @@ def main():
             ])
     
     elif platform.system() == 'Windows':
-        print("Windows platform detected - adding Windows-specific settings (onefile mode)")
+        print("Windows platform detected - adding Windows-specific settings (onedir mode)")
         args.extend([
             '--icon=assets/windows/osw.ico',
             '--collect-all=sounddevice',
             '--collect-all=PySide6',  # Windows can handle collect-all
             '--add-data=assets;assets',  # Include assets for Windows
-            '--runtime-tmpdir=.',  # Use current directory for temp files
-            '--bootloader-ignore-signals',  # Ignore system signals
         ])
         # Add win32 imports if available
         try:

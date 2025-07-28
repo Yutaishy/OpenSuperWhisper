@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [0.6.6] - 2025-07-28 (Windows DLL Access Violation Fix)
+### Fixed
+- **Windows Critical Issue:** Resolved Python DLL access violation error ("メモリ ロケーションへのアクセスが無効です")
+  - ✅ Changed all platforms to onedir mode for maximum compatibility
+  - ✅ Eliminated onefi Mode that caused DLL loading issues in temporary directories
+  - ✅ Updated GitHub Actions workflow to handle onedir builds consistently
+  - ✅ Windows executable now runs reliably without memory access violations
+
+### Enhanced
+- **Cross-Platform Consistency:** Unified build approach across Windows, macOS, and Linux
+- **Distribution Reliability:** Directory-based distribution prevents DLL isolation issues
+- **Build Process:** Improved GitHub Actions workflow for onedir mode handling
+
 ## [0.6.5] - 2025-07-28 (Complete Windows Fix Release)
 ### Fixed
 - **Windows Artifact Issue:** Fixed Windows ZIP not being included in releases
