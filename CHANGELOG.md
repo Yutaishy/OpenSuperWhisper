@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+## [0.6.9] - 2025-07-28 (Windows Icon Quality Enhancement)
+### Enhanced
+- **Windows Icon Quality**: Replaced low-resolution icon with multi-resolution ICO file
+  - ✅ Created new ICO with 7 sizes: 16x16, 24x24, 32x32, 48x48, 64x64, 128x128, 256x256
+  - ✅ Fixed white background issue in taskbar and desktop shortcuts
+  - ✅ Improved icon clarity with LANCZOS resampling
+  - ✅ Maintained transparency across all icon sizes
+  - ✅ Better visual appearance in Windows Explorer and application windows
+
+### Technical
+- Generated multi-resolution ICO from high-quality 1024x1024 source image
+- Used PIL (Pillow) for high-quality image resizing
+- Manual ICO format construction for optimal compatibility
+- File size increased from ~1KB to 16.9KB for better quality
+
 ## [0.6.8] - 2025-07-28 (SSL Certificate Fix for API Connections)
 ### Fixed
 - **Critical SSL/TLS Issue**: Fixed OpenAI API connection errors in bundled executables
