@@ -61,8 +61,11 @@ def main():
         '--exclude-module=scipy',
         '--exclude-module=pandas',
         '--exclude-module=sklearn',
-        '--strip',  # Strip debug information to reduce false positives
     ])
+    
+    # Only strip on non-Windows platforms (may cause DLL issues on Windows)
+    if platform.system() != 'Windows':
+        args.append('--strip')
     
     # Platform-specific adjustments
     if platform.system() == 'Linux':

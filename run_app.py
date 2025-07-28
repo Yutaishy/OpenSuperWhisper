@@ -15,6 +15,11 @@ from PySide6.QtWidgets import QApplication
 from OpenSuperWhisper.ui_mainwindow import MainWindow
 
 def main():
+    # Check for version argument
+    if len(sys.argv) > 1 and sys.argv[1] == "--version":
+        print("OpenSuperWhisper v0.6.7")
+        sys.exit(0)
+    
     app = QApplication(sys.argv)
     
     # Create and show main window

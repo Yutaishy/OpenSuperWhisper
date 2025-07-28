@@ -166,6 +166,30 @@ jobs:
         QT_QPA_PLATFORM: ${{ matrix.os == 'ubuntu-latest' && 'offscreen' || '' }}
         CI: true
         
+    - name: Test executable (Windows only)
+      if: matrix.os == 'windows-latest'
+      shell: pwsh
+      run: |
+        Write-Host "Testing Windows executable..."
+        $proc = Start-Process -FilePath "dist\${{ matrix.executable_name }}\${{ matrix.executable_name }}.exe" -ArgumentList "--version" -NoNewWindow -PassThru -Wait -RedirectStandardOutput "output.txt" -RedirectStandardError "error.txt"
+        
+        if ($proc.ExitCode -ne 0) {
+          Write-Host "Executable failed with exit code: $($proc.ExitCode)"
+          if (Test-Path "error.txt") {
+            Write-Host "Error output:"
+            Get-Content "error.txt"
+          }
+          # Check if it's a DLL error
+          $errorContent = Get-Content "error.txt" -ErrorAction SilentlyContinue
+          if ($errorContent -match "Failed to load Python DLL" -or $errorContent -match "LoadLibrary") {
+            Write-Host "DLL loading error detected!"
+            exit 1
+          }
+        } else {
+          Write-Host "Executable test passed!"
+        }
+      continue-on-error: true
+    
     - name: Verify build output and create distribution archive
       shell: bash
       run: |

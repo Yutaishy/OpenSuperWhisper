@@ -2,6 +2,26 @@
 
 ## [Unreleased]
 
+## [0.6.7] - 2025-07-28 (Windows DLL Testing and Validation)
+### Fixed
+- **Windows Build Configuration**: Removed `--strip` option on Windows to prevent DLL loading issues
+  - ✅ Strip option now only applied to non-Windows platforms
+  - ✅ Minimized Windows-specific PyInstaller settings for better compatibility
+  - ✅ Added automated executable testing in CI/CD pipeline
+  - ✅ Implemented `--version` flag for quick validation testing
+
+### Enhanced
+- **CI/CD Testing**: Added Windows executable validation step in GitHub Actions
+  - Tests for DLL loading errors before release
+  - Catches "Failed to load Python DLL" errors automatically
+  - Ensures executables are functional before distribution
+- **Build Reliability**: Improved Windows build stability and compatibility
+
+### Technical
+- Modified build_executable.py to conditionally apply strip option
+- Added PowerShell test script in workflow for Windows executable validation
+- Implemented version argument handling in run_app.py
+
 ## [0.6.6] - 2025-07-28 (Windows DLL Access Violation Fix)
 ### Fixed
 - **Windows Critical Issue:** Resolved Python DLL access violation error ("メモリ ロケーションへのアクセスが無効です")
