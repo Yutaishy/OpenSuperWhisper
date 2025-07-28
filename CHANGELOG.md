@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [0.6.4] - 2025-07-28 (Windows DLL Fix Release)
+### Fixed
+- **Windows Critical Issue:** Fixed Python DLL loading error causing "LoadLibrary: メモリ ロケーションへのアクセスが無効です"
+  - ✅ Changed Windows build from onedir to onefile mode for better DLL compatibility
+  - ✅ Added Windows-specific PyInstaller configurations for stability
+  - ✅ Fixed ZIP file naming consistency in release workflow
+  - ✅ Windows executable now runs without DLL access violations
+
+### Enhanced
+- **Windows Build:** Improved Windows-specific build process with better error handling
+- **Distribution:** Single-file Windows executable for easier deployment
+
 ## [0.6.3] - 2025-07-28 (Complete Cross-Platform Release)
 ### Fixed
 - **Windows Release Issue:** Fixed ZIP file naming inconsistency in GitHub Actions workflow

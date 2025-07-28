@@ -201,8 +201,10 @@ jobs:
           # Create ZIP archive for distribution
           cd dist/
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            powershell Compress-Archive -Path "${{ matrix.executable_name }}" -DestinationPath "${{ matrix.executable_name }}.zip"
+            # Windows uses onefile mode - single .exe file
+            powershell Compress-Archive -Path "${{ matrix.executable_name }}" -DestinationPath "OpenSuperWhisper.zip"
           else
+            # macOS/Linux use onedir mode - directory with executable
             zip -r "${{ matrix.executable_name }}.zip" "${{ matrix.executable_name }}/"
           fi
           echo "Created distribution archive: ${{ matrix.executable_name }}.zip"
@@ -243,9 +245,9 @@ jobs:
         # Create directory structure expected by release action
         mkdir -p release-files
         
-        # Copy Windows ZIP (note: Windows creates OpenSuperWhisper.exe.zip)
-        if [ -f "OpenSuperWhisper-Windows/OpenSuperWhisper.exe.zip" ]; then
-          cp "OpenSuperWhisper-Windows/OpenSuperWhisper.exe.zip" "release-files/OpenSuperWhisper-Windows.zip"
+        # Copy Windows ZIP (note: Windows now creates OpenSuperWhisper.zip with onefile mode)
+        if [ -f "OpenSuperWhisper-Windows/OpenSuperWhisper.zip" ]; then
+          cp "OpenSuperWhisper-Windows/OpenSuperWhisper.zip" "release-files/OpenSuperWhisper-Windows.zip"
           echo "Windows ZIP found and copied"
         else
           echo "ERROR: Windows ZIP not found"
