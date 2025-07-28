@@ -75,3 +75,5 @@ nul
 # Windows-specific cache paths should use proper escaping
 **/npm-cache/
 workflow-logs/
+%APPDATA%/
+opensuperwhisper.egg-info/

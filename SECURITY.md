@@ -2,11 +2,12 @@
 
 ## Supported Versions
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 0.6.x   | :white_check_mark: |
-| 0.5.x   | :white_check_mark: |
-| < 0.5   | :x:                |
+| Version | Supported          | Notes                                    |
+| ------- | ------------------ | ---------------------------------------- |
+| 0.6.8+  | :white_check_mark: | SSL certificate fix for API connections  |
+| 0.6.0-0.6.7 | :warning:      | May have SSL/TLS connection issues       |
+| 0.5.x   | :white_check_mark: | Stable but lacks newer features          |
+| < 0.5   | :x:                | No longer supported                      |
 
 ## Reporting a Vulnerability
 
