@@ -171,17 +171,24 @@ jobs:
       run: |
         ls -la dist/
         
-        # PyInstaller onedir mode creates a folder with the executable inside
-        if [ -d "dist/${{ matrix.executable_name }}" ]; then
+        # Check for onefile (Windows) or onedir (macOS/Linux) build
+        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          # Windows uses onefile mode - single .exe file
+          if [ -f "dist/${{ matrix.executable_name }}" ]; then
+            echo "Found Windows onefile build: dist/${{ matrix.executable_name }}"
+            EXEC_PATH="dist/${{ matrix.executable_name }}"
+            size=$(stat -c%s "$EXEC_PATH" 2>/dev/null || stat -f%z "$EXEC_PATH" 2>/dev/null || echo "0")
+            echo "Executable size: $size bytes"
+          else
+            echo "Error: Windows executable not found at dist/${{ matrix.executable_name }}"
+            exit 1
+          fi
+        elif [ -d "dist/${{ matrix.executable_name }}" ]; then
+          # macOS/Linux use onedir mode - folder with executable inside
           echo "Found onedir build: dist/${{ matrix.executable_name }}/"
           ls -la "dist/${{ matrix.executable_name }}/"
           
-          # Check the main executable inside the folder
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            EXEC_PATH="dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}"
-          else
-            EXEC_PATH="dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}"
-          fi
+          EXEC_PATH="dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}"
           
           if [ -f "$EXEC_PATH" ]; then
             echo "Found executable: $EXEC_PATH"
@@ -189,14 +196,16 @@ jobs:
             echo "Executable size: $size bytes"
             
             # Set execution permissions on Unix systems
-            if [[ "${{ matrix.os }}" != "windows-latest" ]]; then
-              chmod +x "$EXEC_PATH"
-              echo "Set execution permissions"
-            fi
+            chmod +x "$EXEC_PATH"
+            echo "Set execution permissions"
           else
             echo "Error: Main executable not found at $EXEC_PATH"
             exit 1
           fi
+        else
+          echo "Error: No build output found!"
+          exit 1
+        fi
           
           # Create ZIP archive for distribution
           cd dist/
