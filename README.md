@@ -70,8 +70,11 @@ OpenSuperWhisper is a cross-platform desktop application that transforms speech 
 git clone https://github.com/Yutaishy/OpenSuperWhisper.git
 cd OpenSuperWhisper
 
-# Install dependencies
+# Install dependencies (runtime)
 pip install -r requirements.txt
+
+# OR install as editable package with development tools
+pip install -e ".[dev]"
 
 # Run application
 python run_app.py
@@ -85,8 +88,8 @@ python run_app.py
 - **Windows 10+** / **macOS 10.15+** / **Ubuntu 20.04+**
 
 ### Dependencies
-- Core: `PySide6`, `openai`, `sounddevice`, `numpy`, `pynput`, `PyYAML`, `cryptography`
-- Build: `Pillow` (for cross-platform icon conversion in PyInstaller)
+- **Core Runtime**: `PySide6`, `openai`, `sounddevice`, `numpy`, `pynput`, `PyYAML`, `cryptography`, `Pillow`
+- **Development**: `pytest`, `pytest-cov`, `black`, `ruff`, `mypy`, `types-PyYAML`, `pyinstaller`
 
 ## 🎯 Use Cases
 

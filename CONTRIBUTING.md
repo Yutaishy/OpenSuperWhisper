@@ -14,20 +14,21 @@ Thank you for your interest in contributing to OpenSuperWhisper! This document p
 
 2. **Set up development environment**
    ```bash
-   # Create virtual environment
+   # Create virtual environment (optional but recommended)
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    
-   # Install dependencies
-   pip install -r requirements.txt
-   
-   # Install development tools
-   pip install pytest black ruff mypy pre-commit
+   # Install dependencies with development tools
+   pip install -e ".[dev]"
    ```
 
-3. **Install pre-commit hooks**
+3. **Verify installation**
    ```bash
-   pre-commit install
+   # Test that the application runs
+   python run_app.py
+   
+   # Run tests to ensure everything works
+   pytest tests/ -v
    ```
 
 ## 🧪 Development Workflow

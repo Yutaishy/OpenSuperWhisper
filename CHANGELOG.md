@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## [Unreleased]
+### Fixed
+- **macOS PyInstaller Build:** Fixed framework collision error when building on macOS ARM64
+  - ✅ Replaced `--collect-all=PySide6` with `--collect-submodules` and `--collect-data` for macOS
+  - ✅ Maintained `--collect-all=PySide6` for Windows and Linux platforms
+  - ✅ Resolved "File exists" error in Qt framework Resources directory
+  - ✅ Added Pillow dependency to GitHub Actions for icon conversion
+
+### Enhanced
+- **Dependencies:** Added Pillow to core requirements for cross-platform icon support
+- **Documentation:** Updated README.md and CONTRIBUTING.md with latest setup instructions
+- **CI/CD:** Improved GitHub Actions with better error reporting and platform-specific handling
+
 ## [0.6.1] - 2025-07-28 (Security Enhancement Release)
 ### Fixed
 - **Antivirus False Positives:** Resolved Microsoft Defender and other AV software blocking executables
