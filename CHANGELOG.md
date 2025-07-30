@@ -2,6 +2,32 @@
 
 ## [Unreleased]
 
+## [0.6.11] - 2025-07-30 (Recording Time Extension & o4-mini-high Support)
+### Enhanced
+- **Recording Time Limit**: Extended from 60 seconds to 10 minutes (600 seconds)
+  - ✅ Increased maximum recording duration for longer conversations and meetings
+  - ✅ Maintains compatibility with OpenAI API limits (19.2MB < 25MB limit)
+  - ✅ Preserves existing manual stop functionality via hotkey or UI button
+
+- **AI Model Support**: Added o4-mini-high to formatting stage options
+  - ✅ New high-performance reasoning model for text formatting
+  - ✅ Proper temperature=0.0 configuration for consistent output
+  - ✅ Full UI integration with model selection dropdown
+  - ✅ Comprehensive API compatibility testing
+
+### Technical
+- **Code Quality**: Fixed all linting issues across codebase
+  - ✅ Resolved ruff formatting and import ordering issues
+  - ✅ Fixed build_executable.py import patterns for better maintainability
+  - ✅ Improved win32 module detection using importlib.util
+- **Testing**: Added dedicated test cases for o4-mini-high model support
+  - ✅ Verified API parameter handling and response processing
+  - ✅ Confirmed temperature setting application for new model
+
+### Documentation
+- **README**: Updated supported model list to include o4-mini-high
+- **System Integration**: Maintained full backward compatibility with existing settings
+
 ## [0.6.10] - 2025-07-29 (Processing Freeze & Missing Indicators Fix)
 ### Fixed
 - **Processing Freeze**: Resolved UI freeze after Stop button press

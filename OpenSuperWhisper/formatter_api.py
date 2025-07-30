@@ -48,7 +48,7 @@ def format_text(raw_text: str, prompt: str, style_guide: str = "", model: str = 
         }
 
         # Add temperature only for supported models
-        if model in ["gpt-4o-mini", "gpt-4o", "gpt-4", "gpt-3.5-turbo"]:
+        if model in ["gpt-4o-mini", "gpt-4o", "gpt-4", "gpt-3.5-turbo", "o4-mini", "o4-mini-high"]:
             api_params["temperature"] = 0.0
 
         response = client.chat.completions.create(**api_params)

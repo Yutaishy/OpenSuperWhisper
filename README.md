@@ -11,7 +11,7 @@
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml/badge.svg" alt="CI/CD"></a>
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml/badge.svg" alt="Build"></a>
   <img src="https://img.shields.io/badge/Tests-18%20Passing-brightgreen.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.6.10-orange.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-0.6.11-orange.svg" alt="Version">
 </p>
 
 **Two-Stage Voice Transcription Pipeline with AI-Powered Text Formatting**
@@ -33,7 +33,7 @@ OpenSuperWhisper is a cross-platform desktop application that transforms speech 
 
 ### 🧠 **Two-Stage AI Pipeline**
 - **Stage 1**: OpenAI Whisper transcription (`whisper-1`, `gpt-4o-transcribe`)
-- **Stage 2**: GPT-powered text formatting (`gpt-4o-mini`, `gpt-4`, `o3`, `o4-mini`)
+- **Stage 2**: GPT-powered text formatting (`gpt-4o-mini`, `gpt-4`, `o3`, `o4-mini`, `o4-mini-high`)
 - **Advanced preset management** - create, edit, and customize formatting prompts
 - **Built-in presets** for meetings, technical docs, blog articles, and more
 - **YAML/JSON style guides** for consistent formatting rules

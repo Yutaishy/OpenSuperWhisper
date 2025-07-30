@@ -33,6 +33,27 @@ def test_format_text_monkeypatch(monkeypatch):
     result = fmt.format_text(raw, prompt, style_guide=style, model="gpt-4o-mini")
     assert result == "Formatted Output"
 
+def test_format_text_o4_mini_high(monkeypatch):
+    def mock_create(**kwargs):
+        # Verify temperature=0.0 is set for o4-mini-high
+        assert kwargs.get("temperature") == 0.0
+        return MockChatResponse("Formatted with o4-mini-high")
+
+    def mock_get_client():
+        class MockClient:
+            def __init__(self):
+                self.chat = type('', (), {})()
+                self.chat.completions = type('', (), {})()
+                self.chat.completions.create = mock_create
+        return MockClient()
+
+    monkeypatch.setattr(fmt, "get_client", mock_get_client)
+
+    raw = "test input"
+    prompt = "Format professionally."
+    result = fmt.format_text(raw, prompt, model="o4-mini-high")
+    assert result == "Formatted with o4-mini-high"
+
 def test_format_text_exception(monkeypatch):
     def mock_create(**kwargs):
         raise Exception("API Error")

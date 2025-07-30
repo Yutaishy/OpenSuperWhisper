@@ -186,7 +186,8 @@ class MainWindow(QMainWindow):
             "o3-pro",                # 思考計算量を増やした高精度版
             "o3",                    # 汎用かつ強力な推論モデル
             "o3-mini",               # 小型・低コストの推論モデル
-            "o4-mini"                # 最新の小型o系・効率重視
+            "o4-mini",               # 最新の小型o系・効率重視
+            "o4-mini-high",          # o4-mini高精度版
         ])
         model_layout.addWidget(self.chat_model_combo)
 
@@ -592,7 +593,7 @@ class MainWindow(QMainWindow):
 
         # First try to start recording
         try:
-            duration = 60  # max duration in seconds
+            duration = 600  # max duration in seconds (10 minutes)
             buf = sd.rec(int(duration * self.fs), samplerate=self.fs, channels=1, dtype='float64')
             logger.logger.info("sd.rec started successfully")
         except Exception as e:

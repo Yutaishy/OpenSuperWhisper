@@ -2,14 +2,16 @@
 """
 Build script for creating executable with PyInstaller
 """
-import sys
 import os
 import platform
+import sys
+
 import PyInstaller.__main__
+
 
 def main():
     executable_name = sys.argv[1] if len(sys.argv) > 1 else "OpenSuperWhisper"
-    
+
     # Base arguments - Security-focused configuration
     args = [
         f'--name={executable_name}',
@@ -46,7 +48,7 @@ def main():
         '--clean',  # Clean build directory
         'run_app.py'
     ]
-    
+
     # Add CI-specific optimizations and security enhancements
     if os.getenv('CI'):
         print("CI environment detected - adding CI-specific optimizations")
@@ -54,7 +56,7 @@ def main():
             '--log-level=WARN',  # Reduce verbosity for CI
             '--noconfirm',  # Don't ask for confirmation
         ])
-    
+
     # Security and compatibility improvements (all environments)
     args.extend([
         '--exclude-module=tkinter',  # Exclude unnecessary modules that may trigger AV
@@ -68,11 +70,11 @@ def main():
         '--exclude-module=pandas',
         '--exclude-module=sklearn',
     ])
-    
+
     # Only strip on non-Windows platforms (may cause DLL issues on Windows)
     if platform.system() != 'Windows':
         args.append('--strip')
-    
+
     # Platform-specific adjustments
     if platform.system() == 'Linux':
         print("Linux platform detected - adding Linux-specific settings")
@@ -93,7 +95,7 @@ def main():
             if os.path.exists(path):
                 args.append(f'--add-binary={path}:.')
                 break
-    
+
     elif platform.system() == 'Darwin':  # macOS
         print("macOS platform detected - adding macOS-specific settings")
         # Use PNG icon for macOS (PyInstaller can convert with Pillow)
@@ -142,7 +144,7 @@ def main():
                 '--exclude-module=PySide6.QtWebSockets',
                 # Only include essential PySide6 modules needed for the app
                 '--hidden-import=PySide6.QtCore',
-                '--hidden-import=PySide6.QtGui', 
+                '--hidden-import=PySide6.QtGui',
                 '--hidden-import=PySide6.QtWidgets',
                 '--hidden-import=PySide6.QtNetwork',
             ])
@@ -189,11 +191,11 @@ def main():
                 '--exclude-module=PySide6.QtWebSockets',
                 # Only include essential PySide6 modules needed for the app
                 '--hidden-import=PySide6.QtCore',
-                '--hidden-import=PySide6.QtGui', 
+                '--hidden-import=PySide6.QtGui',
                 '--hidden-import=PySide6.QtWidgets',
                 '--hidden-import=PySide6.QtNetwork',
             ])
-    
+
     elif platform.system() == 'Windows':
         print("Windows platform detected - adding Windows-specific settings (onedir mode)")
         args.extend([
@@ -204,20 +206,21 @@ def main():
         ])
         # Add win32 imports if available
         try:
-            import win32api
-            args.extend([
-                '--hidden-import=win32api',
-                '--hidden-import=win32con', 
-                '--hidden-import=win32gui',
-            ])
-            print("Added win32 imports")
+            import importlib.util
+            if importlib.util.find_spec('win32api'):
+                args.extend([
+                    '--hidden-import=win32api',
+                    '--hidden-import=win32con',
+                    '--hidden-import=win32gui',
+                ])
+                print("Added win32 imports")
         except ImportError:
             print("win32 modules not available, skipping")
-    
+
     print(f"Building executable: {executable_name}")
     print(f"Platform: {platform.system()}")
     print(f"PyInstaller args: {' '.join(args)}")
-    
+
     try:
         PyInstaller.__main__.run(args)
         print(f"Successfully built executable: {executable_name}")
