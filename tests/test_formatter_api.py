@@ -35,8 +35,10 @@ def test_format_text_monkeypatch(monkeypatch):
 
 def test_format_text_o4_mini_high(monkeypatch):
     def mock_create(**kwargs):
-        # Verify temperature=0.0 is set for o4-mini-high
-        assert kwargs.get("temperature") == 0.0
+        # Verify o4-mini-high is converted to o4-mini with reasoning_effort:high
+        assert kwargs["model"] == "o4-mini"
+        assert kwargs.get("reasoning_effort") == "high"
+        assert "temperature" not in kwargs
         return MockChatResponse("Formatted with o4-mini-high")
 
     def mock_get_client():

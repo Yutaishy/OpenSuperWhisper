@@ -2,6 +2,33 @@
 
 ## [Unreleased]
 
+## [0.6.12] - 2025-07-30 (Critical Hotfix: OpenAI API Model Compatibility)
+### Fixed
+- **Critical API Compatibility**: Fixed OpenAI o-series model integration issues
+  - ✅ Properly implemented o4-mini-high using `reasoning_effort: "high"` parameter
+  - ✅ Removed temperature parameter for o1/o3/o4 series models (officially unsupported)
+  - ✅ Fixed "Error code: 404 - model does not exist" for o4-mini-high
+  - ✅ Fixed "Error code: 400 - Unsupported value: 'temperature'" for o-series models
+
+### Enhanced
+- **o4-mini-high Support**: Correctly implemented as o4-mini with reasoning_effort:"high"
+  - ✅ Maps UI selection "o4-mini-high" to API call with model:"o4-mini" + reasoning_effort:"high"
+  - ✅ Provides same high-precision mode as ChatGPT's o4-mini-high option
+  - ✅ Maintains all existing o-series models (o1, o1-mini, o3, o3-pro, o3-mini, o4-mini)
+
+### Technical
+- **API Compatibility**: Updated formatter_api.py to handle o4-mini-high special case
+- **Parameter Handling**: Excluded temperature parameter for all o-series reasoning models
+- **Testing**: Updated test cases to verify reasoning_effort parameter for o4-mini-high
+- **Documentation**: Clarified that o4-mini-high uses reasoning_effort parameter internally
+
+### Validation
+- ✅ All 8 test cases passing including o4-mini-high parameter validation
+- ✅ Verified against OpenAI API documentation and community feedback
+- ✅ Confirmed o4-mini-high implementation matches ChatGPT behavior
+
+**Impact**: This hotfix resolves all API compatibility issues reported in v0.6.11, ensuring smooth operation with OpenAI's latest o-series reasoning models including proper o4-mini-high support.
+
 ## [0.6.11] - 2025-07-30 (Recording Time Extension & o4-mini-high Support)
 ### Enhanced
 - **Recording Time Limit**: Extended from 60 seconds to 10 minutes (600 seconds)

@@ -187,7 +187,9 @@ class MainWindow(QMainWindow):
             "o3",                    # 汎用かつ強力な推論モデル
             "o3-mini",               # 小型・低コストの推論モデル
             "o4-mini",               # 最新の小型o系・効率重視
-            "o4-mini-high",          # o4-mini高精度版
+            "o4-mini-high",          # o4-mini高精度版（reasoning_effort:high）
+            "o1",                    # 推論特化モデル（確実に利用可能）
+            "o1-mini",               # 小型推論モデル（確実に利用可能）
         ])
         model_layout.addWidget(self.chat_model_combo)
 

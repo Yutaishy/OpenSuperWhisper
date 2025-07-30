@@ -41,14 +41,23 @@ def format_text(raw_text: str, prompt: str, style_guide: str = "", model: str = 
 
     try:
         client = get_client()
+        # Special handling for o4-mini-high
+        actual_model = model
+        if model == "o4-mini-high":
+            actual_model = "o4-mini"
+        
         # Prepare API parameters
         api_params: dict[str, Any] = {
-            "model": model,
+            "model": actual_model,
             "messages": [system_message, user_message]
         }
 
-        # Add temperature only for supported models
-        if model in ["gpt-4o-mini", "gpt-4o", "gpt-4", "gpt-3.5-turbo", "o4-mini", "o4-mini-high"]:
+        # Add reasoning_effort for o4-mini-high
+        if model == "o4-mini-high":
+            api_params["reasoning_effort"] = "high"
+
+        # Add temperature only for supported models (o1/o3/o4 series don't support temperature parameter)
+        if model in ["gpt-4o-mini", "gpt-4o", "gpt-4", "gpt-3.5-turbo", "gpt-4.1", "gpt-4.1-mini", "gpt-4.1-nano"]:
             api_params["temperature"] = 0.0
 
         response = client.chat.completions.create(**api_params)
