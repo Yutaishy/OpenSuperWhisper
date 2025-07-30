@@ -45,7 +45,7 @@ def format_text(raw_text: str, prompt: str, style_guide: str = "", model: str = 
         actual_model = model
         if model == "o4-mini-high":
             actual_model = "o4-mini"
-        
+
         # Prepare API parameters
         api_params: dict[str, Any] = {
             "model": actual_model,
