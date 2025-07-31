@@ -1,0 +1,19 @@
+# OpenSuperWhisper Docker Dependencies
+# Lightweight dependencies for Web API server (no GUI, no local audio processing)
+
+# Web Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# AI/ML APIs
+openai>=1.50.0
+
+# Configuration & Serialization
+PyYAML>=6.0
+pydantic>=2.5.0
+
+# File handling
+python-multipart>=0.0.6
+
+# Development/Production
+gunicorn>=21.2.0

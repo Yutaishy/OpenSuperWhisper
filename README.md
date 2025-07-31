@@ -11,7 +11,8 @@
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml/badge.svg" alt="CI/CD"></a>
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml/badge.svg" alt="Build"></a>
   <img src="https://img.shields.io/badge/Tests-18%20Passing-brightgreen.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.6.12-orange.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-0.6.13-orange.svg" alt="Version">
+  <a href="https://github.com/Yutaishy/OpenSuperWhisper/pkgs/container/opensuperwhisper"><img src="https://img.shields.io/badge/Docker-Available-blue.svg" alt="Docker"></a>
 </p>
 
 **Two-Stage Voice Transcription Pipeline with AI-Powered Text Formatting**
@@ -77,7 +78,36 @@ Choose your platform:
 3. Set your OpenAI API key via **Settings → Set OpenAI API Key...**
 4. Click **🎤 Record** and start speaking!
 
-### Option 2: Run from Source
+### Option 2: Docker (API Server Mode)
+
+**🐳 Run as Web API Server with Docker:**
+
+```bash
+# Quick start
+docker run -p 8000:8000 -e OPENAI_API_KEY=your_key_here ghcr.io/yutaishy/opensuperwhisper:latest
+
+# With custom port and settings
+docker run -p 3000:8000 -e OPENAI_API_KEY=sk-... -e PORT=8000 ghcr.io/yutaishy/opensuperwhisper:latest
+```
+
+**API Usage:**
+- **Health Check**: `GET http://localhost:8000/`
+- **Transcribe Audio**: `POST http://localhost:8000/transcribe` (upload audio file)
+- **Format Text**: `POST http://localhost:8000/format-text` (JSON payload)
+- **API Documentation**: `http://localhost:8000/docs` (Swagger UI)
+
+**Example API Call:**
+```bash
+# Upload and transcribe audio file
+curl -X POST "http://localhost:8000/transcribe" \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@your_audio.wav" \
+  -F "asr_model=whisper-1" \
+  -F "apply_formatting=true" \
+  -F "chat_model=gpt-4o-mini"
+```
+
+### Option 3: Run from Source
 ```bash
 # Clone repository
 git clone https://github.com/Yutaishy/OpenSuperWhisper.git
@@ -89,8 +119,11 @@ pip install -r requirements.txt
 # OR install as editable package with development tools
 pip install -e ".[dev]"
 
-# Run application
+# Run GUI application
 python run_app.py
+
+# OR run as Web API server
+python web_server.py
 ```
 
 ## 📋 System Requirements

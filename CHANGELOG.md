@@ -2,6 +2,48 @@
 
 ## [Unreleased]
 
+## [0.6.13] - 2025-01-31 (Docker Distribution Release)
+
+### Added
+- **Docker Support**: Complete Docker containerization for production deployment
+  - 📦 Lightweight Docker image based on Python 3.12-slim
+  - 🚀 Multi-platform support (linux/amd64, linux/arm64)
+  - 🌐 Web API server for Docker environments
+  - ☁️ GitHub Container Registry integration (ghcr.io)
+- **Web API Server**: RESTful API interface for headless operation
+  - `POST /transcribe` - Audio file transcription with optional formatting
+  - `POST /format-text` - Text-only formatting endpoint
+  - `GET /` - Health check and available models endpoint
+  - FastAPI-based implementation with automatic Swagger documentation
+- **GitHub Actions CI/CD**: Automated Docker image building and publishing
+  - ✅ Automated testing for all commits and pull requests
+  - 🔄 Multi-platform Docker builds (AMD64, ARM64)
+  - 🛡️ Security scanning with Trivy vulnerability scanner
+  - 📦 Automatic publishing to GitHub Container Registry
+
+### Changed
+- **Architecture**: Extended to support both GUI and API modes
+  - 🔄 Maintained full backward compatibility with existing GUI application
+  - 🎯 Separated concerns between GUI and API functionality
+  - ⚡ Optimized dependencies for different deployment scenarios
+- **Documentation**: Updated README with Docker deployment instructions and usage examples
+- **Dependencies**: Created Docker-specific lightweight requirements file
+
+### Technical Details
+- **Container Size**: Optimized for minimal footprint (~150MB)
+- **Startup Time**: Fast startup with pre-built dependencies
+- **Security**: Non-root user execution, proper health checks
+- **Scalability**: Designed for horizontal scaling in container orchestration
+
+### Usage
+```bash
+# Quick start
+docker run -p 8000:8000 -e OPENAI_API_KEY=your_key_here ghcr.io/yutaishy/opensuperwhisper:latest
+
+# API Documentation
+curl http://localhost:8000/docs
+```
+
 ## [0.6.12] - 2025-07-30 (Critical Hotfix: OpenAI API Model Compatibility)
 ### Fixed
 - **Critical API Compatibility**: Fixed OpenAI o-series model integration issues
