@@ -39,6 +39,9 @@ jobs:
     
     - name: Run tests
       run: |
+        # Install test-specific dependencies
+        pip install fastapi[all] httpx
+        
         # Basic import test
         python -c "from OpenSuperWhisper import web_api; print('✅ Web API imports successfully')"
         

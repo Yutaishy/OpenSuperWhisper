@@ -4,6 +4,12 @@
 
 ## [0.6.13] - 2025-01-31 (Docker Distribution Release)
 
+### Fixed
+- **CI/CD Build Issues**: Resolved GitHub Actions test failures
+  - ✅ Added missing numpy dependency for test execution
+  - ✅ Enhanced GitHub Actions workflow with proper test dependencies
+  - ✅ Fixed FastAPI TestClient import errors in CI environment
+
 ### Added
 - **Docker Support**: Complete Docker containerization for production deployment
   - 📦 Lightweight Docker image based on Python 3.12-slim
