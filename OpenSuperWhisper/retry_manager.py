@@ -8,6 +8,8 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 
+from typing import Any
+
 from . import logger
 
 
@@ -43,7 +45,7 @@ class RetryManager:
         "default": RetryConfig(max_retries=1, base_delay=10.0, strategy=RetryStrategy.FIXED_DELAY)
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize retry manager"""
         self.retry_queue: list[tuple[int, float]] = []  # (chunk_id, retry_time)
         self.retry_counts: dict[int, int] = {}  # chunk_id -> retry count
@@ -143,7 +145,7 @@ class RetryManager:
 
         return ready_chunks
 
-    def cancel_all_retries(self):
+    def cancel_all_retries(self) -> None:
         """Cancel all pending retries"""
         with self.retry_lock:
             cancelled_count = len(self.retry_queue)
@@ -154,7 +156,7 @@ class RetryManager:
         if cancelled_count > 0:
             logger.logger.info(f"Cancelled {cancelled_count} pending retries")
 
-    def remove_chunk(self, chunk_id: int):
+    def remove_chunk(self, chunk_id: int) -> None:
         """Remove a chunk from retry queue (e.g., if successful)"""
         with self.retry_lock:
             self.retry_queue = [(cid, rt) for cid, rt in self.retry_queue if cid != chunk_id]
@@ -188,7 +190,7 @@ class RetryManager:
 
         return config.base_delay
 
-    def get_retry_status(self) -> dict[str, any]:
+    def get_retry_status(self) -> dict[str, Any]:
         """Get current retry queue status"""
         with self.retry_lock:
             return {

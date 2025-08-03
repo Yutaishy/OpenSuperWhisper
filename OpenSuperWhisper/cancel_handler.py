@@ -18,7 +18,7 @@ class CancelHandler(QObject):
     cancel_requested = Signal()
     cancel_completed = Signal()
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         """
         Initialize cancel handler
 
@@ -86,7 +86,7 @@ class CancelHandler(QObject):
             logger.logger.info("User cancelled the cancellation")
             return 'cancel'
 
-    def execute_cancel(self, choice: str, recorder=None, processor=None, ui_callback=None):
+    def execute_cancel(self, choice: str, recorder=None, processor=None, ui_callback=None) -> None:
         """
         Execute cancellation based on user choice
 
@@ -147,9 +147,9 @@ class CancelHandler(QObject):
 
     def is_cancel_requested(self) -> bool:
         """Check if cancellation is requested"""
-        return self.is_cancelling
+        return bool(self.is_cancelling)
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset cancellation state"""
         self.is_cancelling = False
         logger.logger.debug("Cancel handler reset")

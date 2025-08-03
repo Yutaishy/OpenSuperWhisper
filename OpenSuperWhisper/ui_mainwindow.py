@@ -5,6 +5,7 @@ import sys
 import tempfile
 import time
 import wave
+from typing import Any, Optional
 
 import numpy as np
 import sounddevice as sd
@@ -127,15 +128,15 @@ class MainWindow(QMainWindow):
 
         # Realtime transcription components
         self.realtime_mode = True  # Enable realtime mode by default
-        self.realtime_recorder = None
-        self.chunk_processor = None
-        self.chunk_display_map = {}  # chunk_id -> display info
+        self.realtime_recorder: Optional[RealtimeRecorder] = None
+        self.chunk_processor: Optional[ChunkProcessor] = None
+        self.chunk_display_map: dict[int, dict[str, Any]] = {}  # chunk_id -> display info
 
         # Connect signal for thread-safe updates
         self.chunk_update_signal.connect(self._handle_chunk_update_signal)
         self.realtime_timer = QTimer()
         self.realtime_timer.timeout.connect(self.process_realtime_audio)
-        self.audio_buffer = []  # Buffer for realtime audio collection
+        self.audio_buffer: list[np.ndarray] = []  # Buffer for realtime audio collection
 
         # Cancel and retry managers
         self.cancel_handler = CancelHandler(self)

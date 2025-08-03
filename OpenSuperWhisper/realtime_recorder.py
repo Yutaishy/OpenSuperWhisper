@@ -5,6 +5,7 @@ Handles chunk-based recording with overlap for real-time transcription
 
 import time
 from collections import deque
+from typing import Optional
 
 import numpy as np
 
@@ -42,7 +43,7 @@ class RealtimeRecorder:
 
         # Buffer for silence detection
         self.silence_buffer_size = int(2.5 * sample_rate)  # 2.5 seconds buffer
-        self.recent_audio = deque(maxlen=self.silence_buffer_size)
+        self.recent_audio: deque[float] = deque(maxlen=self.silence_buffer_size)
 
         logger.logger.info("RealtimeRecorder initialized")
 
@@ -165,7 +166,7 @@ class RealtimeRecorder:
         # Calculate RMS (Root Mean Square) for better silence detection
         rms = np.sqrt(np.mean(recent_samples ** 2))
 
-        return rms < self.SILENCE_THRESHOLD
+        return bool(rms < self.SILENCE_THRESHOLD)
 
     def calculate_overlap_duration(self, language: str = "ja") -> float:
         """
@@ -269,7 +270,7 @@ class RealtimeRecorder:
 
         return np.concatenate(self.current_chunk)
 
-    def _find_optimal_split_point(self, audio_data: np.ndarray, chunk_duration: float = None) -> int:
+    def _find_optimal_split_point(self, audio_data: np.ndarray, chunk_duration: Optional[float] = None) -> int:
         """
         Find optimal split point considering phoneme boundaries
 

@@ -9,6 +9,7 @@ from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
 from enum import Enum
+from typing import Optional
 
 import numpy as np
 
@@ -83,7 +84,7 @@ class ChunkProcessor:
 
         logger.logger.info(f"ChunkProcessor initialized with {max_workers} workers")
 
-    def process_chunk(self, chunk_id: int, audio_data: np.ndarray) -> Future:
+    def process_chunk(self, chunk_id: int, audio_data: np.ndarray) -> Optional[Future]:
         """
         Submit audio chunk for processing
 
@@ -345,8 +346,8 @@ class ChunkProcessor:
         if results is None:
             results = self.get_results_in_order()
 
-        raw_texts = []
-        formatted_texts = []
+        raw_texts: list[str] = []
+        formatted_texts: list[str] = []
 
         for i, result in enumerate(results):
             if result.status == ChunkStatus.COMPLETED:
