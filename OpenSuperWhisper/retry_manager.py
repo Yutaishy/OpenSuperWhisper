@@ -185,7 +185,7 @@ class RetryManager:
         elif config.strategy == RetryStrategy.EXPONENTIAL:
             # Exponential backoff: base_delay * 2^retry_count
             delay = config.base_delay * (2 ** retry_count)
-            return min(delay, config.max_delay)
+            return float(min(delay, config.max_delay))
 
         return config.base_delay
 

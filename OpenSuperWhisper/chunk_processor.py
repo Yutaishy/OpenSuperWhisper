@@ -6,6 +6,7 @@ Manages parallel processing of audio chunks for real-time transcription
 import gc
 import time
 from collections.abc import Callable
+from typing import Any
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
 from enum import Enum
@@ -47,7 +48,7 @@ class ChunkProcessor:
         format_enabled: bool = True,
         format_prompt: str = "",
         style_guide: str = "",
-        retry_manager=None
+        retry_manager: Any = None
     ):
         """
         Initialize chunk processor

@@ -780,8 +780,9 @@ class MainWindow(QMainWindow):
                     final_chunk = self.realtime_recorder.stop_recording()
                     if final_chunk:
                         chunk_id, chunk_audio = final_chunk
-                        self.chunk_processor.process_chunk(chunk_id, chunk_audio)
-                        self.update_chunk_display(chunk_id, "processing")
+                        if self.chunk_processor:
+                            self.chunk_processor.process_chunk(chunk_id, chunk_audio)
+                            self.update_chunk_display(chunk_id, "processing")
 
                 # Wait for all chunks to complete processing
                 self.recording_status.setText("Finalizing...")
@@ -1670,7 +1671,7 @@ class MainWindow(QMainWindow):
     def show_error(self, message: str) -> None:
         QMessageBox.critical(self, "Error", message)
 
-    def audio_callback(self, indata, frames, time_info, status):
+    def audio_callback(self, indata: Any, frames: int, time_info: Any, status: Any) -> None:
         """Callback for realtime audio stream"""
         if status:
             logger.logger.warning(f"Audio callback status: {status}")
@@ -1684,12 +1685,13 @@ class MainWindow(QMainWindow):
             if result:
                 chunk_id, chunk_audio = result
                 # Process chunk in background
-                self.chunk_processor.process_chunk(chunk_id, chunk_audio)
+                if self.chunk_processor:
+                    self.chunk_processor.process_chunk(chunk_id, chunk_audio)
 
                 # Update UI to show chunk is processing
                 self.update_chunk_display(chunk_id, "processing")
 
-    def on_chunk_completed(self, chunk_id: int, result):
+    def on_chunk_completed(self, chunk_id: int, result: Any) -> None:
         """Handle completed chunk processing"""
         try:
             logger.logger.info(f"on_chunk_completed called for chunk {chunk_id}")
@@ -1710,7 +1712,7 @@ class MainWindow(QMainWindow):
             import traceback
             logger.logger.error(traceback.format_exc())
 
-    def on_chunk_error(self, chunk_id: int, result):
+    def on_chunk_error(self, chunk_id: int, result: Any) -> None:
         """Handle chunk processing error"""
         try:
             error_msg = str(result.error) if hasattr(result, 'error') else "Unknown error"
@@ -1737,13 +1739,13 @@ class MainWindow(QMainWindow):
         self.error_label.setText(f"⚠️ エラー ({self.error_count}件)")
         self.error_widget.setVisible(True)
 
-    def update_chunk_display(self, chunk_id: int, status: str, raw_text: str = None,
-                           formatted_text: str = None, error: str = None):
+    def update_chunk_display(self, chunk_id: int, status: str, raw_text: str | None = None,
+                           formatted_text: str | None = None, error: str | None = None) -> None:
         """Update UI with chunk status and results - called from worker thread"""
         # Emit signal to handle in main thread
         self.chunk_update_signal.emit(chunk_id, status, raw_text or "", formatted_text or "", error or "")
 
-    def _handle_chunk_update_signal(self, chunk_id: int, status: str, raw_text: str, formatted_text: str, error: str):
+    def _handle_chunk_update_signal(self, chunk_id: int, status: str, raw_text: str, formatted_text: str, error: str) -> None:
         """Handle chunk update in main thread"""
         try:
             logger.logger.info(f"_handle_chunk_update_signal start - chunk_id: {chunk_id}, status: {status}")
@@ -1880,7 +1882,7 @@ class MainWindow(QMainWindow):
             # Try to complete processing anyway
             self.complete_realtime_processing()
 
-    def complete_realtime_processing(self):
+    def complete_realtime_processing(self) -> None:
         """Complete realtime processing and show final results"""
         try:
             # First, process any failed chunks

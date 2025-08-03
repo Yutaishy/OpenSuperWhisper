@@ -4,6 +4,7 @@ Manages cancellation of recording and processing operations
 """
 
 from collections.abc import Callable
+from typing import Any
 
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QMessageBox
@@ -18,7 +19,7 @@ class CancelHandler(QObject):
     cancel_requested = Signal()
     cancel_completed = Signal()
 
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: QObject | None = None) -> None:
         """
         Initialize cancel handler
 
@@ -86,7 +87,7 @@ class CancelHandler(QObject):
             logger.logger.info("User cancelled the cancellation")
             return 'cancel'
 
-    def execute_cancel(self, choice: str, recorder=None, processor=None, ui_callback=None) -> None:
+    def execute_cancel(self, choice: str, recorder: Any = None, processor: Any = None, ui_callback: Any = None) -> None:
         """
         Execute cancellation based on user choice
 
