@@ -207,7 +207,7 @@ class PerformanceProfiler:
 
         # Results
         if memory_before_gc and memory_after_gc:
-            avg_freed = np.mean([b - a for b, a in zip(memory_before_gc, memory_after_gc, strict=False)])
+            avg_freed = np.mean([b - a for b, a in zip(memory_before_gc, memory_after_gc)])
             print("\nMemory Optimization Results:")
             print(f"- Average memory freed per GC: {avg_freed:.2f} MB")
             print("- GC triggered every 10 chunks as expected")

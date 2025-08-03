@@ -51,7 +51,7 @@ class ChunkProcessor:
     ):
         """
         Initialize chunk processor
-        
+
         Args:
             max_workers: Maximum parallel workers
             asr_model: ASR model to use
@@ -86,11 +86,11 @@ class ChunkProcessor:
     def process_chunk(self, chunk_id: int, audio_data: np.ndarray) -> Future:
         """
         Submit audio chunk for processing
-        
+
         Args:
             chunk_id: Unique chunk identifier
             audio_data: Audio data to process
-            
+
         Returns:
             Future object for tracking
         """
@@ -127,11 +127,11 @@ class ChunkProcessor:
     def _process_chunk_task(self, chunk_id: int, audio_data: np.ndarray) -> ChunkResult:
         """
         Process a single chunk (runs in thread pool)
-        
+
         Args:
             chunk_id: Chunk identifier
             audio_data: Audio data to process
-            
+
         Returns:
             ChunkResult with processing outcome
         """
@@ -210,7 +210,7 @@ class ChunkProcessor:
     def _handle_chunk_completion(self, chunk_id: int, future: Future) -> None:
         """
         Handle completion of chunk processing
-        
+
         Args:
             chunk_id: Chunk identifier
             future: Completed future
@@ -250,10 +250,10 @@ class ChunkProcessor:
     def retry_chunk(self, chunk_id: int) -> Future | None:
         """
         Retry processing for a failed chunk
-        
+
         Args:
             chunk_id: Chunk identifier to retry
-            
+
         Returns:
             Future for retry task or None if not retryable
         """
@@ -298,7 +298,7 @@ class ChunkProcessor:
     def get_results_in_order(self) -> list[ChunkResult]:
         """
         Get all chunk results in chronological order
-        
+
         Returns:
             List of ChunkResult ordered by chunk_id
         """
@@ -310,11 +310,11 @@ class ChunkProcessor:
     def remove_duplicate_text(self, text1: str, text2: str) -> str:
         """
         Remove duplicate text between chunk boundaries
-        
+
         Args:
             text1: End of previous chunk
             text2: Beginning of current chunk
-            
+
         Returns:
             Combined text with duplicates removed
         """
@@ -335,10 +335,10 @@ class ChunkProcessor:
     def combine_results(self, results: list[ChunkResult] | None = None) -> tuple[str, str]:
         """
         Combine all chunk results into final text
-        
+
         Args:
             results: Optional list of results (uses all if not provided)
-            
+
         Returns:
             Tuple of (raw_combined_text, formatted_combined_text)
         """
@@ -388,7 +388,7 @@ class ChunkProcessor:
     def process_retries(self) -> list[int]:
         """
         Process any chunks ready for retry
-        
+
         Returns:
             List of chunk IDs that were retried
         """

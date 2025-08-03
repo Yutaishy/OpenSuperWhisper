@@ -17,7 +17,7 @@ class RealtimeRecorder:
     def __init__(self, sample_rate: int = 16000):
         """
         Initialize the realtime recorder
-        
+
         Args:
             sample_rate: Audio sample rate (default: 16000 Hz for Whisper)
         """
@@ -59,7 +59,7 @@ class RealtimeRecorder:
     def stop_recording(self) -> tuple[int, np.ndarray] | None:
         """
         Stop recording and return final chunk if any
-        
+
         Returns:
             Tuple of (chunk_id, audio_data) if there's remaining audio, None otherwise
         """
@@ -77,10 +77,10 @@ class RealtimeRecorder:
     def add_audio_data(self, audio_data: np.ndarray) -> tuple[int, np.ndarray] | None:
         """
         Add audio data to current chunk and check if chunk boundary reached
-        
+
         Args:
             audio_data: New audio samples to add
-            
+
         Returns:
             Tuple of (chunk_id, audio_data) if chunk is ready, None otherwise
         """
@@ -103,10 +103,10 @@ class RealtimeRecorder:
     def check_chunk_boundary(self, current_time: float) -> bool:
         """
         Check if current chunk should be finalized based on timing and silence
-        
+
         Args:
             current_time: Current timestamp
-            
+
         Returns:
             True if chunk should be finalized
         """
@@ -142,10 +142,10 @@ class RealtimeRecorder:
     def detect_silence(self, duration: float) -> bool:
         """
         Detect if recent audio contains silence of specified duration
-        
+
         Args:
             duration: Required silence duration in seconds
-            
+
         Returns:
             True if silence detected
         """
@@ -170,10 +170,10 @@ class RealtimeRecorder:
     def calculate_overlap_duration(self, language: str = "ja") -> float:
         """
         Calculate overlap duration based on language
-        
+
         Args:
             language: Language code ("ja", "en", etc.)
-            
+
         Returns:
             Overlap duration in seconds
         """
@@ -187,10 +187,10 @@ class RealtimeRecorder:
     def _finalize_current_chunk(self, current_time: float) -> tuple[int, np.ndarray]:
         """
         Finalize current chunk and prepare for next one
-        
+
         Args:
             current_time: Current timestamp
-            
+
         Returns:
             Tuple of (chunk_id, audio_data)
         """
@@ -236,12 +236,12 @@ class RealtimeRecorder:
     ) -> tuple[np.ndarray, np.ndarray | None]:
         """
         Create chunk with overlap for context continuity
-        
+
         Args:
             audio_data: Full audio data
             start_idx: Start index
             end_idx: End index (split point)
-            
+
         Returns:
             Tuple of (chunk_data, overlap_data_for_next_chunk)
         """
@@ -272,11 +272,11 @@ class RealtimeRecorder:
     def _find_optimal_split_point(self, audio_data: np.ndarray, chunk_duration: float = None) -> int:
         """
         Find optimal split point considering phoneme boundaries
-        
+
         Args:
             audio_data: Audio data to analyze
             chunk_duration: Current chunk duration in seconds
-            
+
         Returns:
             Index of optimal split point
         """
@@ -402,10 +402,10 @@ class RealtimeRecorder:
     def get_chunk_time_range(self, chunk_id: int) -> tuple[float, float]:
         """
         Get time range for a specific chunk
-        
+
         Args:
             chunk_id: Chunk ID
-            
+
         Returns:
             Tuple of (start_time, end_time) relative to recording start
         """

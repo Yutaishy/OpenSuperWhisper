@@ -21,7 +21,7 @@ class CancelHandler(QObject):
     def __init__(self, parent=None):
         """
         Initialize cancel handler
-        
+
         Args:
             parent: Parent QObject
         """
@@ -34,10 +34,10 @@ class CancelHandler(QObject):
     def request_cancel(self, show_dialog: bool = True) -> str:
         """
         Request cancellation with optional confirmation dialog
-        
+
         Args:
             show_dialog: Whether to show confirmation dialog
-            
+
         Returns:
             User choice: 'save', 'discard', 'cancel', or 'force' (no dialog)
         """
@@ -89,7 +89,7 @@ class CancelHandler(QObject):
     def execute_cancel(self, choice: str, recorder=None, processor=None, ui_callback=None):
         """
         Execute cancellation based on user choice
-        
+
         Args:
             choice: User's choice ('save', 'discard', 'cancel')
             recorder: RealtimeRecorder instance

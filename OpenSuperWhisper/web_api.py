@@ -108,7 +108,7 @@ async def transcribe_audio(
 ) -> TranscriptionResponse:
     """
     Transcribe and optionally format audio file
-    
+
     Args:
         file: Audio file (WAV, MP3, etc.)
         asr_model: ASR model to use for transcription
@@ -116,7 +116,7 @@ async def transcribe_audio(
         chat_model: Chat model to use for formatting
         prompt: Custom formatting prompt
         style_guide: Optional style guide (YAML/JSON)
-    
+
     Returns:
         TranscriptionResponse with raw and formatted text
     """
@@ -192,13 +192,13 @@ async def format_text_only(
 ) -> dict[str, Any]:
     """
     Format text without transcription
-    
+
     Args:
         text: Raw text to format
         chat_model: Chat model to use
         prompt: Custom formatting prompt
         style_guide: Optional style guide
-    
+
     Returns:
         Dict with formatted text and metadata
     """

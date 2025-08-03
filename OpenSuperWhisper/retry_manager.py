@@ -55,11 +55,11 @@ class RetryManager:
     def should_retry(self, chunk_id: int, error: str) -> bool:
         """
         Determine if a chunk should be retried based on error type
-        
+
         Args:
             chunk_id: Chunk identifier
             error: Error message
-            
+
         Returns:
             True if should retry, False otherwise
         """
@@ -84,11 +84,11 @@ class RetryManager:
     def schedule_retry(self, chunk_id: int, error: str) -> float | None:
         """
         Schedule a chunk for retry
-        
+
         Args:
             chunk_id: Chunk identifier
             error: Error message
-            
+
         Returns:
             Retry time if scheduled, None otherwise
         """
@@ -117,7 +117,7 @@ class RetryManager:
     def get_ready_retries(self) -> list[int]:
         """
         Get list of chunks ready for retry
-        
+
         Returns:
             List of chunk IDs ready for retry
         """
