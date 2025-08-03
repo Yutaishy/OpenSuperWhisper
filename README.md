@@ -11,7 +11,7 @@
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml/badge.svg" alt="CI/CD"></a>
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml/badge.svg" alt="Build"></a>
   <img src="https://img.shields.io/badge/Tests-18%20Passing-brightgreen.svg" alt="Tests">
-  <img src="https://img.shields.io/badge/Version-0.6.13-orange.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-0.6.14-orange.svg" alt="Version">
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/pkgs/container/opensuperwhisper"><img src="https://img.shields.io/badge/Docker-Available-blue.svg" alt="Docker"></a>
 </p>
 
@@ -73,9 +73,9 @@ OpenSuperWhisper is a cross-platform desktop application that transforms speech 
 **📥 [Download Latest Release](https://github.com/Yutaishy/OpenSuperWhisper/releases/latest)**
 
 Choose your platform:
-- **Windows**: `OpenSuperWhisper-Windows.zip` (249 MB)
-- **macOS**: `OpenSuperWhisper-macOS.zip` (120 MB)
-- **Linux**: `OpenSuperWhisper-Linux.zip` (541 MB)
+- **Windows**: `OpenSuperWhisper-Windows.zip`
+- **macOS**: `OpenSuperWhisper-macOS.zip`
+- **Linux**: `OpenSuperWhisper-Linux.zip`
 
 ⚠️ **Important**: Download the platform-specific ZIP files above, NOT the "Source code" archives. The source code archives do not contain the pre-built executables.
 

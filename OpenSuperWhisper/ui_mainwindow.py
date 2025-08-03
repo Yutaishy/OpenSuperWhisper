@@ -1777,7 +1777,7 @@ class MainWindow(QMainWindow):
             import traceback
             logger.logger.error(traceback.format_exc())
 
-    def refresh_realtime_display(self):
+    def refresh_realtime_display(self) -> None:
         """Refresh the realtime transcription display"""
         try:
             # Build display text for raw transcription
@@ -1845,11 +1845,11 @@ class MainWindow(QMainWindow):
         except Exception:
             return "00:00"
 
-    def process_realtime_audio(self):
+    def process_realtime_audio(self) -> None:
         """Process buffered audio data (not used in callback mode)"""
         pass
 
-    def check_realtime_completion(self):
+    def check_realtime_completion(self) -> None:
         """Check if all realtime chunks have completed processing"""
         try:
             logger.logger.info("check_realtime_completion called")
@@ -1945,13 +1945,13 @@ class MainWindow(QMainWindow):
             self.realtime_mode = False
             logger.logger.info("Realtime processing completed")
 
-    def clear_errors(self):
+    def clear_errors(self) -> None:
         """Clear error display"""
         self.error_count = 0
         self.error_label.setText("⚠️ エラー (0件)")
         self.error_widget.setVisible(False)
 
-    def register_cancel_hotkey(self):
+    def register_cancel_hotkey(self) -> None:
         """Register ESC key for cancellation"""
         try:
             # Try to use global hotkey manager first
@@ -1973,13 +1973,13 @@ class MainWindow(QMainWindow):
         except Exception as e:
             logger.logger.error(f"Failed to register cancel hotkey: {e}")
 
-    def handle_cancel_hotkey(self):
+    def handle_cancel_hotkey(self) -> None:
         """Handle ESC key press for cancellation"""
         if self.is_recording and self.realtime_mode:
             logger.logger.info("ESC key pressed - initiating cancellation")
             self.cancel_recording()
 
-    def cancel_recording(self):
+    def cancel_recording(self) -> None:
         """Cancel ongoing recording and processing"""
         if not self.is_recording:
             return
@@ -2003,7 +2003,7 @@ class MainWindow(QMainWindow):
             ui_callback=self.cancel_ui_callback
         )
 
-    def cancel_ui_callback(self, action: str, data: str = None):
+    def cancel_ui_callback(self, action: str, data: str | None = None) -> None:
         """Callback for cancel handler UI updates"""
         if action == 'cancelling':
             self.recording_status.setText("Cancelling...")
@@ -2027,7 +2027,7 @@ class MainWindow(QMainWindow):
         if self.is_recording:
             self.stop_recording()
 
-    def check_retries(self):
+    def check_retries(self) -> None:
         """Check and process any pending retries"""
         if self.chunk_processor and not self.cancel_handler.is_cancel_requested():
             retried = self.chunk_processor.process_retries()
@@ -2037,7 +2037,7 @@ class MainWindow(QMainWindow):
                 for chunk_id in retried:
                     self.update_chunk_display(chunk_id, "processing")
 
-    def process_failed_chunks(self):
+    def process_failed_chunks(self) -> None:
         """Process all failed chunks after recording stops"""
         try:
             if not hasattr(self, 'chunk_processor') or not self.chunk_processor:
