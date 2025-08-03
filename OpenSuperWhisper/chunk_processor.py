@@ -6,10 +6,10 @@ Manages parallel processing of audio chunks for real-time transcription
 import gc
 import time
 from collections.abc import Callable
-from typing import Any
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any
 
 import numpy as np
 
