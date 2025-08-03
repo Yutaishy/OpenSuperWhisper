@@ -1,35 +1,48 @@
 #!/usr/bin/env python3
 """
-OpenSuperWhisper Application Launcher
+Safe version of OpenSuperWhisper with proper error handling
 """
-
-import os
 import sys
+import os
+import signal
 
-# Add the current directory to Python path
+# Add paths
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-# Add OpenSuperWhisper directory to Python path
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'OpenSuperWhisper'))
 
-from PySide6.QtWidgets import QApplication
+def signal_handler(sig, frame):
+    print("\nApplication interrupted, exiting gracefully...")
+    sys.exit(0)
 
-from OpenSuperWhisper.ui_mainwindow import MainWindow
+signal.signal(signal.SIGINT, signal_handler)
 
-
-def main():
-    # Check for version argument
-    if len(sys.argv) > 1 and sys.argv[1] == "--version":
-        print("OpenSuperWhisper v0.6.13")
-        sys.exit(0)
-
+try:
+    from PySide6.QtWidgets import QApplication
+    from OpenSuperWhisper.ui_mainwindow import MainWindow
+    
+    print("Starting OpenSuperWhisper...")
+    
+    # Create application
     app = QApplication(sys.argv)
-
-    # Create and show main window
+    
+    # Create main window
     window = MainWindow()
     window.show()
-
-    # Start the application event loop
+    
+    print(f"Application started successfully!")
+    print(f"Window title: {window.windowTitle()}")
+    print(f"Realtime mode: {window.realtime_mode}")
+    print("Press Ctrl+C to exit")
+    
+    # Run event loop
     sys.exit(app.exec())
-
-if __name__ == "__main__":
-    main()
+    
+except KeyboardInterrupt:
+    print("\nApplication closed by user")
+    
+except Exception as e:
+    print(f"Error: {e}")
+    import traceback
+    traceback.print_exc()
+    
+finally:
+    print("Application ended")

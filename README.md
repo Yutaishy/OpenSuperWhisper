@@ -20,7 +20,7 @@
 OpenSuperWhisper is a cross-platform desktop application that transforms speech into polished, professional text through a sophisticated two-stage pipeline: first transcribing audio with OpenAI's Whisper models, then intelligently formatting the results using GPT models with customizable style guides.
 
 <p align="center">
-  <img src="assets/misc/social_preview_1280x640.jpg" alt="OpenSuperWhisper Preview" width="640" height="320">
+  <img src="assets/social_preview_1280x640.jpg" alt="OpenSuperWhisper Preview" width="640" height="320">
 </p>
 
 ## ✨ Key Features
@@ -31,6 +31,13 @@ OpenSuperWhisper is a cross-platform desktop application that transforms speech 
 - **Always-on-top recording indicator** with blinking animation
 - **High-quality audio capture** (16kHz, mono, int16 format)
 - **Cross-platform compatibility** with sounddevice integration
+
+### 🚀 **Real-time Transcription (v0.6.13+)**
+- **Long recording support** - 10+ minutes without interruption
+- **Chunk-based processing** - Automatic 60-120 second chunks for optimal performance
+- **Live transcription** - See results while still recording
+- **Memory efficient** - Process large recordings without memory issues
+- **Smart silence detection** - Natural chunk boundaries at pauses
 
 ### 🧠 **Two-Stage AI Pipeline**
 - **Stage 1**: OpenAI Whisper transcription (`whisper-1`, `gpt-4o-transcribe`)

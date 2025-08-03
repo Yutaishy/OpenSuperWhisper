@@ -2,6 +2,40 @@
 
 ## [Unreleased]
 
+## [0.6.14] - 2025-08-03 (Production Release)
+
+### Added
+- **Real-time Transcription**: Revolutionary real-time voice-to-text with chunk-based processing
+  - 🎙️ Live transcription with 60-120 second chunks
+  - ⚡ Parallel processing with ThreadPoolExecutor
+  - 🔄 Automatic retry mechanism for failed chunks
+  - 💾 Memory-efficient streaming approach
+  - 🎯 Perfect for long recordings (10+ minutes supported)
+
+### Fixed
+- **Critical GUI Thread Safety**: Fixed application crash on recording stop
+  - ✅ Implemented Qt signals for thread-safe GUI updates
+  - ✅ Added comprehensive error handling in all callbacks
+  - ✅ Resolved AttributeError risks with hasattr checks
+  - ✅ Fixed Windows file locking issues with retry logic
+
+### Changed
+- **Project Structure**: Professional organization for public release
+  - 📁 Clean directory structure with proper archiving
+  - 📝 Comprehensive .gitignore for Python projects
+  - 📚 Updated documentation with troubleshooting guides
+  - 🧹 All development artifacts properly archived
+
+### Technical Improvements
+- **Threading Architecture**: Complete overhaul for stability
+  - Thread-safe GUI operations via Qt signals
+  - Proper cleanup of audio resources
+  - Graceful error recovery mechanisms
+- **Performance**: Optimized for production use
+  - Efficient chunk processing pipeline
+  - Minimal memory footprint
+  - Responsive UI during long recordings
+
 ## [0.6.13] - 2025-01-31 (Docker Distribution Release)
 
 ### Fixed
