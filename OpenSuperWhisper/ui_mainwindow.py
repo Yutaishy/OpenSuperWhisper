@@ -1859,7 +1859,7 @@ class MainWindow(QMainWindow):
             all_done = True
             pending_count = 0
             if hasattr(self, 'chunk_display_map'):
-                for chunk_id, info in self.chunk_display_map.items():
+                for _chunk_id, info in self.chunk_display_map.items():
                     if info.get('status') == 'processing':
                         all_done = False
                         pending_count += 1

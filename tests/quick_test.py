@@ -88,7 +88,7 @@ def test_basic_functionality():
         test_audio = np.random.randn(sample_rate * 10).astype(np.float32)
 
         # Note: This would normally call the API, but for testing we just verify it accepts the chunk
-        future = processor.process_chunk(0, test_audio)
+        processor.process_chunk(0, test_audio)
         print("[OK] Chunk submitted to processor")
 
         # Clean up

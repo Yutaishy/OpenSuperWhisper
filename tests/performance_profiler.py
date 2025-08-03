@@ -127,9 +127,7 @@ class PerformanceProfiler:
         futures = []
         for chunk_id, audio in test_chunks:
             # Measure submission time
-            submit_start = time.time()
             future = processor.process_chunk(chunk_id, audio)
-            submit_time = time.time() - submit_start
 
             if future:
                 futures.append(future)
@@ -207,7 +205,7 @@ class PerformanceProfiler:
 
         # Results
         if memory_before_gc and memory_after_gc:
-            avg_freed = np.mean([b - a for b, a in zip(memory_before_gc, memory_after_gc)])
+            avg_freed = np.mean([b - a for b, a in zip(memory_before_gc, memory_after_gc, strict=True)])
             print("\nMemory Optimization Results:")
             print(f"- Average memory freed per GC: {avg_freed:.2f} MB")
             print("- GC triggered every 10 chunks as expected")

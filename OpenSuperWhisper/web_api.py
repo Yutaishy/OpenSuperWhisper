@@ -174,7 +174,7 @@ async def transcribe_audio(
 
     except Exception as e:
         logger.logger.error(f"Transcription error: {e}")
-        raise HTTPException(status_code=500, detail=f"Transcription failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Transcription failed: {str(e)}") from e
     finally:
         # Cleanup temporary file
         try:
@@ -231,7 +231,7 @@ async def format_text_only(
 
     except Exception as e:
         logger.logger.error(f"Text formatting error: {e}")
-        raise HTTPException(status_code=500, detail=f"Text formatting failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Text formatting failed: {str(e)}") from e
 
 if __name__ == "__main__":
     import uvicorn
