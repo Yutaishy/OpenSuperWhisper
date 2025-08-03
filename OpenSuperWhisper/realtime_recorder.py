@@ -5,7 +5,6 @@ Handles chunk-based recording with overlap for real-time transcription
 
 import time
 from collections import deque
-from typing import Optional
 
 import numpy as np
 
@@ -270,7 +269,7 @@ class RealtimeRecorder:
 
         return np.concatenate(self.current_chunk)
 
-    def _find_optimal_split_point(self, audio_data: np.ndarray, chunk_duration: Optional[float] = None) -> int:
+    def _find_optimal_split_point(self, audio_data: np.ndarray, chunk_duration: float | None = None) -> int:
         """
         Find optimal split point considering phoneme boundaries
 
