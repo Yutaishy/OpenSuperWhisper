@@ -196,7 +196,7 @@ class RecordingIndicator(QWidget):
 
         # Hide after 2 seconds
         QTimer.singleShot(2000, self.animate_fade_out)
-    
+
     def show_live_transcribing(self) -> None:
         """Show live transcribing state"""
         self.status_label.setText("Live Transcribing")
@@ -207,7 +207,7 @@ class RecordingIndicator(QWidget):
                 font-weight: bold;
             }
         """)
-    
+
     def show_processing_chunk(self, current: int, total: int) -> None:
         """Show processing chunk X/Y"""
         self.status_label.setText(f"Processing Chunk {current}/{total}")
@@ -218,7 +218,7 @@ class RecordingIndicator(QWidget):
                 font-weight: bold;
             }
         """)
-    
+
     def show_finalizing(self) -> None:
         """Show finalizing state"""
         self.status_label.setText("Finalizing")
@@ -229,7 +229,7 @@ class RecordingIndicator(QWidget):
                 font-weight: bold;
             }
         """)
-    
+
     def show_cancelled(self) -> None:
         """Show cancelled state"""
         self.status_label.setText("Cancelled")
@@ -240,10 +240,10 @@ class RecordingIndicator(QWidget):
                 font-weight: bold;
             }
         """)
-        
+
         # Hide after 2 seconds
         QTimer.singleShot(2000, self.animate_fade_out)
-    
+
     def show_cancelling(self) -> None:
         """Show cancelling state"""
         self.status_label.setText("Cancelling...")
@@ -403,31 +403,31 @@ class GlobalRecordingIndicator:
     def is_visible(self) -> bool:
         """Check if indicator is currently visible"""
         return bool(self._indicator and self._indicator.is_recording)
-    
+
     def show_live_transcribing(self) -> None:
         """Show live transcribing state"""
         self._ensure_indicator()
         if self._indicator:
             self._indicator.show_live_transcribing()
-    
+
     def show_processing_chunk(self, current: int, total: int) -> None:
         """Show processing chunk state"""
         self._ensure_indicator()
         if self._indicator:
             self._indicator.show_processing_chunk(current, total)
-    
+
     def show_finalizing(self) -> None:
         """Show finalizing state"""
         self._ensure_indicator()
         if self._indicator:
             self._indicator.show_finalizing()
-    
+
     def show_cancelled(self) -> None:
         """Show cancelled state"""
         self._ensure_indicator()
         if self._indicator:
             self._indicator.show_cancelled()
-    
+
     def show_cancelling(self) -> None:
         """Show cancelling state"""
         self._ensure_indicator()

@@ -6,11 +6,8 @@ Docker-friendly REST API version of OpenSuperWhisper
 
 import os
 import tempfile
-import wave
-from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
-import numpy as np
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -38,19 +35,19 @@ class TranscriptionRequest(BaseModel):
     asr_model: str = "whisper-1"
     apply_formatting: bool = True
     chat_model: str = "gpt-4o-mini"
-    prompt: Optional[str] = None
-    style_guide: Optional[str] = None
+    prompt: str | None = None
+    style_guide: str | None = None
 
 class TranscriptionResponse(BaseModel):
     raw_text: str
-    formatted_text: Optional[str] = None
+    formatted_text: str | None = None
     processing_time: float
-    models_used: Dict[str, str]
+    models_used: dict[str, str]
 
 class HealthResponse(BaseModel):
     status: str
     version: str
-    available_models: Dict[str, list[str]]
+    available_models: dict[str, list[str]]
 
 # Default formatting prompt
 DEFAULT_PROMPT = """# 役割
@@ -85,7 +82,7 @@ async def health_check() -> HealthResponse:
             ],
             "chat_models": [
                 "gpt-4.1",
-                "gpt-4.1-mini", 
+                "gpt-4.1-mini",
                 "gpt-4.1-nano",
                 "gpt-4o",
                 "gpt-4o-mini",
@@ -106,8 +103,8 @@ async def transcribe_audio(
     asr_model: str = "whisper-1",
     apply_formatting: bool = True,
     chat_model: str = "gpt-4o-mini",
-    prompt: Optional[str] = None,
-    style_guide: Optional[str] = None
+    prompt: str | None = None,
+    style_guide: str | None = None
 ) -> TranscriptionResponse:
     """
     Transcribe and optionally format audio file
@@ -125,56 +122,56 @@ async def transcribe_audio(
     """
     import time
     start_time = time.time()
-    
+
     # Validate file type
     if not file.content_type or not file.content_type.startswith(('audio/', 'video/')):
         if not file.filename or not any(file.filename.lower().endswith(ext) for ext in ['.wav', '.mp3', '.m4a', '.flac', '.ogg']):
             raise HTTPException(status_code=400, detail="Unsupported file type. Please upload an audio file.")
-    
+
     # Check for API key
     if not os.getenv("OPENAI_API_KEY"):
         raise HTTPException(status_code=500, detail="OpenAI API key not configured")
-    
+
     try:
         # Save uploaded file to temporary location
         with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{file.filename}") as temp_file:
             content = await file.read()
             temp_file.write(content)
             temp_audio_path = temp_file.name
-        
+
         logger.logger.info(f"Processing uploaded file: {file.filename} ({len(content)} bytes)")
-        
+
         # Stage 1: ASR Transcription
         logger.logger.info(f"Starting ASR with model: {asr_model}")
         raw_text = asr_api.transcribe_audio(temp_audio_path, model=asr_model)
         logger.logger.info(f"ASR completed: {raw_text[:100]}...")
-        
+
         formatted_text = None
         models_used = {"asr": asr_model}
-        
+
         # Stage 2: Text Formatting (if enabled)
         if apply_formatting and raw_text.strip():
             logger.logger.info(f"Starting formatting with model: {chat_model}")
             formatting_prompt = prompt or DEFAULT_PROMPT
             formatted_text = formatter_api.format_text(
-                raw_text, 
-                formatting_prompt, 
-                style_guide or "", 
+                raw_text,
+                formatting_prompt,
+                style_guide or "",
                 model=chat_model
             )
             models_used["formatter"] = chat_model
             logger.logger.info(f"Formatting completed: {formatted_text[:100]}...")
-        
+
         processing_time = time.time() - start_time
         logger.logger.info(f"Total processing time: {processing_time:.2f}s")
-        
+
         return TranscriptionResponse(
             raw_text=raw_text,
             formatted_text=formatted_text,
             processing_time=processing_time,
             models_used=models_used
         )
-        
+
     except Exception as e:
         logger.logger.error(f"Transcription error: {e}")
         raise HTTPException(status_code=500, detail=f"Transcription failed: {str(e)}")
@@ -190,9 +187,9 @@ async def transcribe_audio(
 async def format_text_only(
     text: str,
     chat_model: str = "gpt-4o-mini",
-    prompt: Optional[str] = None,
-    style_guide: Optional[str] = None
-) -> Dict[str, Any]:
+    prompt: str | None = None,
+    style_guide: str | None = None
+) -> dict[str, Any]:
     """
     Format text without transcription
     
@@ -207,51 +204,51 @@ async def format_text_only(
     """
     if not text.strip():
         raise HTTPException(status_code=400, detail="Text cannot be empty")
-    
+
     if not os.getenv("OPENAI_API_KEY"):
         raise HTTPException(status_code=500, detail="OpenAI API key not configured")
-    
+
     try:
         import time
         start_time = time.time()
-        
+
         formatting_prompt = prompt or DEFAULT_PROMPT
         formatted_text = formatter_api.format_text(
-            text, 
-            formatting_prompt, 
-            style_guide or "", 
+            text,
+            formatting_prompt,
+            style_guide or "",
             model=chat_model
         )
-        
+
         processing_time = time.time() - start_time
-        
+
         return {
             "original_text": text,
             "formatted_text": formatted_text,
             "processing_time": processing_time,
             "model_used": chat_model
         }
-        
+
     except Exception as e:
         logger.logger.error(f"Text formatting error: {e}")
         raise HTTPException(status_code=500, detail=f"Text formatting failed: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     # Configure logging
     logger.logger.info("Starting OpenSuperWhisper Web API Server")
-    
+
     # Get configuration from environment variables
     host = os.getenv("HOST", "0.0.0.0")
     port = int(os.getenv("PORT", "8000"))
-    
+
     # Check for required API key
     if not os.getenv("OPENAI_API_KEY"):
         logger.logger.warning("OPENAI_API_KEY environment variable not set!")
         print("Warning: OPENAI_API_KEY not configured. API calls will fail.")
         print("Set the environment variable: export OPENAI_API_KEY=your_key_here")
-    
+
     # Start server
     logger.logger.info(f"Server starting on {host}:{port}")
     uvicorn.run(app, host=host, port=port, log_level="info")

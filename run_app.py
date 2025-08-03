@@ -2,9 +2,9 @@
 """
 Safe version of OpenSuperWhisper with proper error handling
 """
-import sys
 import os
 import signal
+import sys
 
 # Add paths
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -17,32 +17,34 @@ signal.signal(signal.SIGINT, signal_handler)
 
 try:
     from PySide6.QtWidgets import QApplication
+
     from OpenSuperWhisper.ui_mainwindow import MainWindow
-    
+
     print("Starting OpenSuperWhisper...")
-    
+
     # Create application
     app = QApplication(sys.argv)
-    
+
     # Create main window
     window = MainWindow()
     window.show()
-    
-    print(f"Application started successfully!")
+
+    print("Application started successfully!")
     print(f"Window title: {window.windowTitle()}")
     print(f"Realtime mode: {window.realtime_mode}")
     print("Press Ctrl+C to exit")
-    
+
     # Run event loop
     sys.exit(app.exec())
-    
+
 except KeyboardInterrupt:
     print("\nApplication closed by user")
-    
+
 except Exception as e:
     print(f"Error: {e}")
     import traceback
     traceback.print_exc()
-    
+
 finally:
     print("Application ended")
+

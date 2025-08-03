@@ -30,15 +30,15 @@ from PySide6.QtWidgets import (
 )
 
 from . import asr_api, config, formatter_api, logger
+from .cancel_handler import CancelHandler
+from .chunk_processor import ChunkProcessor
 from .direct_hotkey import DirectHotkeyMonitor, get_direct_monitor
 from .first_run import show_first_run_wizard
 from .global_hotkey import GlobalHotkeyManager
-from .recording_indicator import GlobalRecordingIndicator
-from .simple_hotkey import SimpleHotkeyMonitor, get_hotkey_monitor
 from .realtime_recorder import RealtimeRecorder
-from .chunk_processor import ChunkProcessor, ChunkStatus
-from .cancel_handler import CancelHandler
+from .recording_indicator import GlobalRecordingIndicator
 from .retry_manager import RetryManager
+from .simple_hotkey import SimpleHotkeyMonitor, get_hotkey_monitor
 
 DEFAULT_PROMPT = """# 役割
 あなたは「編集専用」の書籍編集者である。以下の <TRANSCRIPT> ... </TRANSCRIPT> に囲まれた本文だけを機械的に整形する。
@@ -98,7 +98,7 @@ class TranscriptionWorker(QThread):
 class MainWindow(QMainWindow):
     # Signals for thread-safe GUI updates
     chunk_update_signal = Signal(int, str, str, str, str)  # chunk_id, status, raw_text, formatted_text, error
-    
+
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("OpenSuperWhisper")
@@ -124,24 +124,24 @@ class MainWindow(QMainWindow):
         # Timer for recording duration display
         self.recording_timer = QTimer()
         self.recording_time = 0
-        
+
         # Realtime transcription components
         self.realtime_mode = True  # Enable realtime mode by default
         self.realtime_recorder = None
         self.chunk_processor = None
         self.chunk_display_map = {}  # chunk_id -> display info
-        
+
         # Connect signal for thread-safe updates
         self.chunk_update_signal.connect(self._handle_chunk_update_signal)
         self.realtime_timer = QTimer()
         self.realtime_timer.timeout.connect(self.process_realtime_audio)
         self.audio_buffer = []  # Buffer for realtime audio collection
-        
+
         # Cancel and retry managers
         self.cancel_handler = CancelHandler(self)
         self.retry_manager = RetryManager()
         self.error_count = 0
-        
+
         # Retry timer
         self.retry_timer = QTimer()
         self.retry_timer.timeout.connect(self.check_retries)
@@ -154,23 +154,23 @@ class MainWindow(QMainWindow):
         self.setup_global_features()
         self.load_settings()
         self.load_presets()
-        
+
         # Initialize realtime components if enabled
         if self.realtime_mode:
             self.initialize_realtime_components()
 
         # Show first run wizard if needed (delayed to ensure UI is ready)
         QTimer.singleShot(500, self.check_first_run)
-    
+
     def initialize_realtime_components(self) -> None:
         """Initialize realtime transcription components"""
         try:
-            from .realtime_recorder import RealtimeRecorder
             from .chunk_processor import ChunkProcessor
-            
+            from .realtime_recorder import RealtimeRecorder
+
             # Create realtime recorder
             self.realtime_recorder = RealtimeRecorder(sample_rate=self.fs)
-            
+
             # Create chunk processor (with default models for now)
             self.chunk_processor = ChunkProcessor(
                 max_workers=3,
@@ -178,11 +178,11 @@ class MainWindow(QMainWindow):
                 chat_model="gpt-4o-mini",
                 format_enabled=True
             )
-            
+
             # Set up callbacks
             self.chunk_processor.on_chunk_completed = self.on_chunk_completed
             self.chunk_processor.on_chunk_error = self.on_chunk_error
-            
+
             logger.logger.info("Realtime components initialized successfully")
         except Exception as e:
             logger.logger.error(f"Failed to initialize realtime components: {e}")
@@ -293,21 +293,21 @@ class MainWindow(QMainWindow):
         self.tab_widget.addTab(self.formatted_text_edit, "Formatted Text")
 
         layout.addWidget(self.tab_widget)
-        
+
         # Error display area (for realtime mode)
         self.error_widget = QWidget()
         self.error_widget.setVisible(False)
         error_layout = QHBoxLayout(self.error_widget)
         error_layout.setContentsMargins(0, 0, 0, 0)
-        
+
         self.error_label = QLabel("⚠️ エラー (0件)")
         self.clear_errors_btn = QPushButton("クリア")
         self.clear_errors_btn.clicked.connect(self.clear_errors)
-        
+
         error_layout.addWidget(self.error_label)
         error_layout.addStretch()
         error_layout.addWidget(self.clear_errors_btn)
-        
+
         layout.addWidget(self.error_widget)
 
         # Prompt editor with preset management
@@ -468,7 +468,7 @@ class MainWindow(QMainWindow):
             # Use direct keyboard polling for maximum reliability
             logger.logger.info("Setting up delayed hotkey monitoring")
             self.setup_direct_hotkey()
-            
+
             # Register ESC key for cancellation
             self.register_cancel_hotkey()
 
@@ -673,7 +673,7 @@ class MainWindow(QMainWindow):
 
         # Check if should use realtime mode (for recordings > 1 minute)
         self.realtime_mode = True  # Always use realtime mode for new implementation
-        
+
         if self.realtime_mode:
             # Initialize realtime components
             self.realtime_recorder = RealtimeRecorder(sample_rate=self.fs)
@@ -686,19 +686,19 @@ class MainWindow(QMainWindow):
                 style_guide=self.loaded_style_text,
                 retry_manager=self.retry_manager
             )
-            
+
             # Set callbacks
             self.chunk_processor.on_chunk_completed = self.on_chunk_completed
             self.chunk_processor.on_chunk_error = self.on_chunk_error
-            
+
             # Clear previous results
             self.chunk_display_map.clear()
             self.raw_text_edit.clear()
             self.formatted_text_edit.clear()
-            
+
             # Start realtime recording
             self.realtime_recorder.start_recording()
-            
+
             # Start audio stream
             try:
                 self.audio_stream = sd.InputStream(
@@ -710,12 +710,12 @@ class MainWindow(QMainWindow):
                 )
                 self.audio_stream.start()
                 logger.logger.info("Realtime audio stream started")
-                
+
                 # Start retry timer
                 self.retry_timer = QTimer()
                 self.retry_timer.timeout.connect(self.check_retries)
                 self.retry_timer.start(5000)  # Check every 5 seconds
-                
+
             except Exception as e:
                 logger.logger.error(f"Failed to start audio stream: {e}")
                 self.show_error(f"Failed to start recording: {e}")
@@ -738,7 +738,7 @@ class MainWindow(QMainWindow):
         self.is_recording = True
         self.record_btn.setEnabled(False)
         self.stop_btn.setEnabled(True)
-        
+
         # Disable preset changes during recording
         self.preset_combo.setEnabled(False)
         self.post_format_toggle.setEnabled(False)
@@ -746,7 +746,7 @@ class MainWindow(QMainWindow):
         # Start recording timer
         self.recording_time = 0
         self.recording_timer.start(1000)  # Update every second
-        
+
         # Start retry timer for realtime mode
         if self.realtime_mode:
             self.retry_timer.start()
@@ -769,11 +769,11 @@ class MainWindow(QMainWindow):
                     self.audio_stream.stop()
                     self.audio_stream.close()
                     logger.logger.info("Realtime audio stream stopped")
-                
+
                 # Stop retry timer
                 if hasattr(self, 'retry_timer'):
                     self.retry_timer.stop()
-                
+
                 # Get final chunk if any
                 if self.realtime_recorder:
                     final_chunk = self.realtime_recorder.stop_recording()
@@ -781,14 +781,14 @@ class MainWindow(QMainWindow):
                         chunk_id, chunk_audio = final_chunk
                         self.chunk_processor.process_chunk(chunk_id, chunk_audio)
                         self.update_chunk_display(chunk_id, "processing")
-                
+
                 # Wait for all chunks to complete processing
                 self.recording_status.setText("Finalizing...")
-                
+
                 # Enable preset changes again
                 self.preset_combo.setEnabled(True)
                 self.post_format_toggle.setEnabled(True)
-                
+
                 # Final display update will happen via callbacks
                 processing_completed = True
             else:
@@ -806,7 +806,7 @@ class MainWindow(QMainWindow):
             # Stop recording timer
             self.recording_timer.stop()
             self.recording_status.setText("Processing...")
-            
+
             # Stop retry timer
             if self.realtime_mode:
                 self.retry_timer.stop()
@@ -814,7 +814,7 @@ class MainWindow(QMainWindow):
             # Show processing indicator early
             if hasattr(self, 'global_indicator'):
                 self.global_indicator.show_processing()
-            
+
             # For realtime mode, finalize processing
             if self.realtime_mode and processing_completed:
                 # Schedule final processing check
@@ -1668,26 +1668,26 @@ class MainWindow(QMainWindow):
 
     def show_error(self, message: str) -> None:
         QMessageBox.critical(self, "Error", message)
-    
+
     def audio_callback(self, indata, frames, time_info, status):
         """Callback for realtime audio stream"""
         if status:
             logger.logger.warning(f"Audio callback status: {status}")
-        
+
         if self.is_recording and self.realtime_recorder:
             # Add audio data to realtime recorder
             audio_data = indata[:, 0].copy()  # Get mono channel
-            
+
             # Check if chunk boundary reached
             result = self.realtime_recorder.add_audio_data(audio_data)
             if result:
                 chunk_id, chunk_audio = result
                 # Process chunk in background
                 self.chunk_processor.process_chunk(chunk_id, chunk_audio)
-                
+
                 # Update UI to show chunk is processing
                 self.update_chunk_display(chunk_id, "processing")
-    
+
     def on_chunk_completed(self, chunk_id: int, result):
         """Handle completed chunk processing"""
         try:
@@ -1697,33 +1697,33 @@ class MainWindow(QMainWindow):
             formatted_text = result.formatted_text if hasattr(result, 'formatted_text') else None
             logger.logger.info(f"Updating display for chunk {chunk_id} with raw_text length: {len(raw_text) if raw_text else 0}")
             self.update_chunk_display(chunk_id, "completed", raw_text, formatted_text)
-            
+
             # Update recording indicator if needed
             if hasattr(self, 'recording_time') and self.recording_time >= 60 and hasattr(self, 'global_indicator'):
                 if hasattr(self.global_indicator, 'status_label'):
                     self.global_indicator.status_label.setText("Live Transcribing")
-            
+
             logger.logger.info(f"on_chunk_completed finished for chunk {chunk_id}")
         except Exception as e:
             logger.logger.error(f"Error in on_chunk_completed: {e}")
             import traceback
             logger.logger.error(traceback.format_exc())
-    
+
     def on_chunk_error(self, chunk_id: int, result):
         """Handle chunk processing error"""
         try:
             error_msg = str(result.error) if hasattr(result, 'error') else "Unknown error"
             self.update_chunk_display(chunk_id, "error", error=error_msg)
-            
+
             # Show error in status (but don't interrupt recording)
             if hasattr(self, 'error_count'):
                 self.error_count += 1
             else:
                 self.error_count = 1
-            
+
             # Log the error
             logger.logger.error(f"Chunk {chunk_id} error: {error_msg}")
-            
+
             # For critical errors, check if we should continue
             if "プロセスはファイルにアクセスできません" in error_msg or "WinError" in error_msg:
                 # Schedule retry or continue processing
@@ -1731,26 +1731,26 @@ class MainWindow(QMainWindow):
                     QTimer.singleShot(1000, self.check_realtime_completion)
         except Exception as e:
             logger.logger.error(f"Error in on_chunk_error handler: {e}")
-        
+
         # Update error display
         self.error_label.setText(f"⚠️ エラー ({self.error_count}件)")
         self.error_widget.setVisible(True)
-    
-    def update_chunk_display(self, chunk_id: int, status: str, raw_text: str = None, 
+
+    def update_chunk_display(self, chunk_id: int, status: str, raw_text: str = None,
                            formatted_text: str = None, error: str = None):
         """Update UI with chunk status and results - called from worker thread"""
         # Emit signal to handle in main thread
         self.chunk_update_signal.emit(chunk_id, status, raw_text or "", formatted_text or "", error or "")
-    
+
     def _handle_chunk_update_signal(self, chunk_id: int, status: str, raw_text: str, formatted_text: str, error: str):
         """Handle chunk update in main thread"""
         try:
             logger.logger.info(f"_handle_chunk_update_signal start - chunk_id: {chunk_id}, status: {status}")
-            
+
             # Store chunk info without complex processing
             if not hasattr(self, 'chunk_display_map'):
                 self.chunk_display_map = {}
-                
+
             self.chunk_display_map[chunk_id] = {
                 'status': status,
                 'time_range': f"[Chunk {chunk_id}]",
@@ -1758,35 +1758,35 @@ class MainWindow(QMainWindow):
                 'formatted_text': formatted_text if formatted_text else None,
                 'error': error if error else None
             }
-            
+
             # Simple display update without complex formatting
             if status == 'completed' and raw_text:
                 logger.logger.info(f"Updating raw_text_edit with text: {raw_text[:50]}...")
                 if hasattr(self, 'raw_text_edit'):
                     self.raw_text_edit.setPlainText(raw_text)
-                    
+
                 if formatted_text and hasattr(self, 'formatted_text_edit'):
                     self.formatted_text_edit.setPlainText(formatted_text)
-            
+
             logger.logger.info(f"_handle_chunk_update_signal end - chunk_id: {chunk_id}")
         except Exception as e:
             logger.logger.error(f"Error in _handle_chunk_update_signal: {e}")
             import traceback
             logger.logger.error(traceback.format_exc())
-    
+
     def refresh_realtime_display(self):
         """Refresh the realtime transcription display"""
         try:
             # Build display text for raw transcription
             raw_display_parts = []
             formatted_display_parts = []
-            
+
             if not hasattr(self, 'chunk_display_map'):
                 return
-                
+
             for chunk_id in sorted(self.chunk_display_map.keys()):
                 chunk_info = self.chunk_display_map[chunk_id]
-                
+
                 # Raw text display
                 if chunk_info.get('status') == 'completed':
                     time_range = chunk_info.get('time_range', '')
@@ -1801,28 +1801,28 @@ class MainWindow(QMainWindow):
                 else:
                     time_range = chunk_info.get('time_range', '')
                     raw_part = f"{time_range} ⏳ 待機中...\n\n"
-                
+
                 raw_display_parts.append(raw_part)
-                
+
                 # Formatted text display
                 if chunk_info.get('status') == 'completed' and chunk_info.get('formatted_text'):
                     formatted_display_parts.append(chunk_info['formatted_text'])
                 elif chunk_info.get('status') == 'error':
                     formatted_display_parts.append("[エラー: 取得失敗]")
-            
+
             # Add current recording indicator
             if hasattr(self, 'is_recording') and self.is_recording:
                 current_time = self.recording_time if hasattr(self, 'recording_time') else 0
                 raw_display_parts.append(f"[{self.format_time(current_time)}-録音中] 🎤 録音中...\n")
-            
+
             # Update text edits
             if hasattr(self, 'raw_text_edit'):
                 self.raw_text_edit.setPlainText('\n'.join(raw_display_parts))
-            
+
             if hasattr(self, 'post_format_toggle') and self.post_format_toggle.isChecked():
                 if hasattr(self, 'formatted_text_edit'):
                     self.formatted_text_edit.setPlainText('\n'.join(formatted_display_parts))
-            
+
             # Scroll to bottom
             if hasattr(self, 'raw_text_edit'):
                 scrollbar = self.raw_text_edit.verticalScrollBar()
@@ -1832,7 +1832,7 @@ class MainWindow(QMainWindow):
             logger.logger.error(f"Error in refresh_realtime_display: {e}")
             import traceback
             logger.logger.error(traceback.format_exc())
-    
+
     def format_time(self, seconds: float) -> str:
         """Format seconds to MM:SS"""
         try:
@@ -1841,11 +1841,11 @@ class MainWindow(QMainWindow):
             return f"{mins:02d}:{secs:02d}"
         except Exception:
             return "00:00"
-    
+
     def process_realtime_audio(self):
         """Process buffered audio data (not used in callback mode)"""
         pass
-    
+
     def check_realtime_completion(self):
         """Check if all realtime chunks have completed processing"""
         try:
@@ -1854,7 +1854,7 @@ class MainWindow(QMainWindow):
                 logger.logger.warning("chunk_processor not found, completing processing")
                 self.complete_realtime_processing()
                 return
-            
+
             # Check if all chunks are completed or errored
             all_done = True
             pending_count = 0
@@ -1863,7 +1863,7 @@ class MainWindow(QMainWindow):
                     if info.get('status') == 'processing':
                         all_done = False
                         pending_count += 1
-            
+
             if all_done:
                 self.complete_realtime_processing()
             else:
@@ -1878,7 +1878,7 @@ class MainWindow(QMainWindow):
             logger.logger.error(traceback.format_exc())
             # Try to complete processing anyway
             self.complete_realtime_processing()
-    
+
     def complete_realtime_processing(self):
         """Complete realtime processing and show final results"""
         try:
@@ -1886,19 +1886,19 @@ class MainWindow(QMainWindow):
             if hasattr(self, 'chunk_processor') and self.chunk_processor:
                 if hasattr(self, 'process_failed_chunks'):
                     self.process_failed_chunks()
-            
+
             # Combine all results
             if hasattr(self, 'chunk_processor') and self.chunk_processor:
                 try:
                     raw_combined, formatted_combined = self.chunk_processor.combine_results()
-                    
+
                     # Show final results without timestamps
                     if hasattr(self, 'raw_text_edit'):
                         self.raw_text_edit.setPlainText(raw_combined)
                     if hasattr(self, 'post_format_toggle') and self.post_format_toggle.isChecked() and formatted_combined:
                         if hasattr(self, 'formatted_text_edit'):
                             self.formatted_text_edit.setPlainText(formatted_combined)
-                    
+
                     # Auto-copy if enabled
                     if hasattr(self, 'auto_copy_toggle') and self.auto_copy_toggle.isChecked():
                         clipboard = QApplication.clipboard()
@@ -1908,7 +1908,7 @@ class MainWindow(QMainWindow):
                             clipboard.setText(raw_combined)
                 except Exception as e:
                     logger.logger.error(f"Error combining results: {e}")
-            
+
             # Cleanup
             if hasattr(self, 'chunk_processor') and self.chunk_processor:
                 try:
@@ -1916,7 +1916,7 @@ class MainWindow(QMainWindow):
                 except Exception as e:
                     logger.logger.error(f"Error shutting down chunk processor: {e}")
                 self.chunk_processor = None
-        
+
         except Exception as e:
             logger.logger.error(f"Error in complete_realtime_processing: {e}")
             import traceback
@@ -1925,29 +1925,29 @@ class MainWindow(QMainWindow):
             # Update status
             if hasattr(self, 'recording_status'):
                 self.recording_status.setText("Complete")
-            
+
             # Hide processing indicator
             if hasattr(self, 'global_indicator'):
                 try:
                     self.global_indicator.hide_recording()
                 except Exception as e:
                     logger.logger.error(f"Error hiding indicator: {e}")
-            
+
             # Ensure UI is in correct state
             try:
                 self.complete_processing()
             except Exception as e:
                 logger.logger.error(f"Error in complete_processing: {e}")
-            
+
             self.realtime_mode = False
             logger.logger.info("Realtime processing completed")
-    
+
     def clear_errors(self):
         """Clear error display"""
         self.error_count = 0
         self.error_label.setText("⚠️ エラー (0件)")
         self.error_widget.setVisible(False)
-    
+
     def register_cancel_hotkey(self):
         """Register ESC key for cancellation"""
         try:
@@ -1960,38 +1960,38 @@ class MainWindow(QMainWindow):
                 if success:
                     logger.logger.info("Registered ESC key for cancellation")
                     return
-            
+
             # Fallback to Qt shortcut
-            from PySide6.QtGui import QShortcut, QKeySequence
+            from PySide6.QtGui import QKeySequence, QShortcut
             self.cancel_shortcut = QShortcut(QKeySequence("Escape"), self)
             self.cancel_shortcut.activated.connect(self.handle_cancel_hotkey)
             logger.logger.info("Registered ESC key using Qt shortcut")
-            
+
         except Exception as e:
             logger.logger.error(f"Failed to register cancel hotkey: {e}")
-    
+
     def handle_cancel_hotkey(self):
         """Handle ESC key press for cancellation"""
         if self.is_recording and self.realtime_mode:
             logger.logger.info("ESC key pressed - initiating cancellation")
             self.cancel_recording()
-    
+
     def cancel_recording(self):
         """Cancel ongoing recording and processing"""
         if not self.is_recording:
             return
-        
+
         # Get user choice
         choice = self.cancel_handler.request_cancel(show_dialog=True)
-        
+
         if choice == 'cancel':
             # User cancelled the cancellation
             return
-        
+
         # Update UI
         if hasattr(self, 'global_indicator'):
             self.global_indicator.show_cancelling()
-        
+
         # Execute cancellation
         self.cancel_handler.execute_cancel(
             choice,
@@ -1999,7 +1999,7 @@ class MainWindow(QMainWindow):
             processor=self.chunk_processor,
             ui_callback=self.cancel_ui_callback
         )
-    
+
     def cancel_ui_callback(self, action: str, data: str = None):
         """Callback for cancel handler UI updates"""
         if action == 'cancelling':
@@ -2019,11 +2019,11 @@ class MainWindow(QMainWindow):
             self.recording_status.setText("Waiting for completion...")
         elif action == 'error':
             self.show_error(f"Cancellation error: {data}")
-        
+
         # Stop recording if still active
         if self.is_recording:
             self.stop_recording()
-    
+
     def check_retries(self):
         """Check and process any pending retries"""
         if self.chunk_processor and not self.cancel_handler.is_cancel_requested():
@@ -2033,27 +2033,27 @@ class MainWindow(QMainWindow):
                 # Update display to show retry in progress
                 for chunk_id in retried:
                     self.update_chunk_display(chunk_id, "processing")
-    
+
     def process_failed_chunks(self):
         """Process all failed chunks after recording stops"""
         try:
             if not hasattr(self, 'chunk_processor') or not self.chunk_processor:
                 return
-            
+
             # Find all failed chunks
             failed_chunks = []
             if hasattr(self, 'chunk_display_map'):
                 for chunk_id, info in self.chunk_display_map.items():
                     if info.get('status') == 'error':
                         failed_chunks.append(chunk_id)
-            
+
             if failed_chunks:
                 logger.logger.info(f"Processing {len(failed_chunks)} failed chunks")
-                
+
                 # Update status
                 if hasattr(self, 'recording_status'):
                     self.recording_status.setText(f"Retrying {len(failed_chunks)} failed chunks...")
-                
+
                 # Retry each failed chunk (max 1 retry as per requirements)
                 for chunk_id in failed_chunks:
                     if hasattr(self.chunk_processor, 'chunk_results') and chunk_id in self.chunk_processor.chunk_results:
@@ -2062,7 +2062,7 @@ class MainWindow(QMainWindow):
                             future = self.chunk_processor.retry_chunk(chunk_id)
                             if future:
                                 self.update_chunk_display(chunk_id, "processing")
-            
+
             # Wait a bit for retries to complete
             if failed_chunks:
                 QTimer.singleShot(5000, self.check_realtime_completion)
