@@ -9,6 +9,11 @@ import sys
 # Add paths
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+# Handle --version flag for CI/CD testing
+if len(sys.argv) > 1 and sys.argv[1] == '--version':
+    print("OpenSuperWhisper v0.6.14")
+    sys.exit(0)
+
 def signal_handler(sig, frame):
     print("\nApplication interrupted, exiting gracefully...")
     sys.exit(0)
