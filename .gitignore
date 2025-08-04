@@ -90,3 +90,8 @@ coverage.xml
 *.tmp
 *.temp
 nul
+
+# Windows specific folders (should never be committed)
+%APPDATA%/
+%USERPROFILE%/
+%TEMP%/
