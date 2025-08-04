@@ -13,3 +13,4 @@ OpenSuperWhisperプロジェクト専用ドキュメント一覧
 - [変更履歴](./CHANGELOG.md)
 - [MCPツール統合ガイド](./MCP_INTEGRATION_GUIDE.md)
 - [繰り返しミス防止ガイド](./COMMON_MISTAKES.md)
+- [ビルド・リリースワークフロー](./BUILD_RELEASE_WORKFLOW.md)
