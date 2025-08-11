@@ -166,16 +166,34 @@ jobs:
       env:
         QT_QPA_PLATFORM: ${{ matrix.os == 'ubuntu-latest' && 'offscreen' || '' }}
         CI: true
+    
+    - name: Smoke test executable (non-Windows)
+      if: matrix.os != 'windows-latest'
+      shell: bash
+      run: |
+        if [ -d "dist/${{ matrix.executable_name }}" ]; then
+          EXEC_PATH="dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}"
+          chmod +x "$EXEC_PATH"
+          echo "Running smoke test: $EXEC_PATH --version"
+          "$EXEC_PATH" --version || (echo "Smoke test failed" && exit 1)
+        else
+          echo "Build output directory not found"
+          exit 1
+        fi
+      env:
+        QT_QPA_PLATFORM: ${{ matrix.os == 'ubuntu-latest' && 'offscreen' || '' }}
+        DISPLAY: ":99"
         
-    - name: Test executable (Windows only)
+    - name: Smoke test executable (Windows)
       if: matrix.os == 'windows-latest'
       shell: pwsh
       run: |
-        Write-Host "Skipping Windows executable test due to timeout issues in CI"
-        Write-Host "The executable has been built successfully in the previous step"
-        exit 0
-      continue-on-error: true
-      timeout-minutes: 1
+        $exePath = "dist\\${{ matrix.executable_name }}\\${{ matrix.executable_name }}.exe"
+        if (!(Test-Path $exePath)) { Write-Error "Executable not found: $exePath"; exit 1 }
+        $out = & $exePath --version
+        Write-Host "Output: $out"
+        if ($out -notmatch "OpenSuperWhisper v") { Write-Error "Version output not found"; exit 1 }
+      timeout-minutes: 2
     
     - name: Verify build output and create distribution archive
       shell: bash
@@ -225,6 +243,28 @@ jobs:
         echo "Created distribution archive: OpenSuperWhisper.zip"
         ls -la *.zip
         echo "Build completed successfully"
+
+    - name: Smoke test executable (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      shell: bash
+      run: |
+        EXEC_PATH="dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}"
+        [ -f "$EXEC_PATH" ] || { echo "Missing $EXEC_PATH"; exit 1; }
+        out="$($EXEC_PATH --version)" || true
+        echo "Output: $out"
+        echo "$out" | grep -q "OpenSuperWhisper v" || { echo "Version output not found"; exit 1; }
+      timeout-minutes: 2
+
+    - name: Smoke test executable (macOS)
+      if: matrix.os == 'macos-latest'
+      shell: bash
+      run: |
+        EXEC_PATH="dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}"
+        [ -f "$EXEC_PATH" ] || { echo "Missing $EXEC_PATH"; exit 1; }
+        out="$($EXEC_PATH --version)" || true
+        echo "Output: $out"
+        echo "$out" | grep -q "OpenSuperWhisper v" || { echo "Version output not found"; exit 1; }
+      timeout-minutes: 2
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4

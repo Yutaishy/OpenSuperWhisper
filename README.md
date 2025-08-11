@@ -82,6 +82,8 @@ Choose your platform:
 **Setup:**
 1. Extract the ZIP file to your desired location
 2. Run the executable from the extracted folder
+   - macOS: First launch via right-click → Open to bypass Gatekeeper
+   - macOS: Allow Microphone and Accessibility (for global hotkey)
 3. Set your OpenAI API key via **Settings → Set OpenAI API Key...**
 4. Click **🎤 Record** and start speaking!
 
@@ -132,6 +134,11 @@ python run_app.py
 # OR run as Web API server
 python web_server.py
 ```
+
+### Platform Permissions
+- Windows: Microphone access on first use. If global hotkey fails, run as administrator once.
+- macOS: System Settings → Privacy & Security → Microphone/Accessibility → enable for OpenSuperWhisper.
+- Linux: Ensure `portaudio` is available; packaged on most distros. If not, install `portaudio19-dev`.
 
 ## 📋 System Requirements
 
