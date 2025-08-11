@@ -4,9 +4,11 @@
 
 | Version | Supported          | Notes                                    |
 | ------- | ------------------ | ---------------------------------------- |
-| 0.6.8+  | :white_check_mark: | SSL certificate fix for API connections  |
+| 0.6.14  | :white_check_mark: | Latest stable with real-time transcription |
+| 0.6.13  | :white_check_mark: | Docker support added                     |
+| 0.6.8-0.6.12 | :white_check_mark: | SSL certificate fix for API connections  |
 | 0.6.0-0.6.7 | :warning:      | May have SSL/TLS connection issues       |
-| 0.5.x   | :white_check_mark: | Stable but lacks newer features          |
+| 0.5.x   | :x:                | No longer supported                      |
 | < 0.5   | :x:                | No longer supported                      |
 
 ## Reporting a Vulnerability

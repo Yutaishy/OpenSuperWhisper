@@ -230,7 +230,7 @@ pytest tests/ --cov=OpenSuperWhisper
 ### Building Executable
 ```bash
 # Install development dependencies
-pip install -r requirements-dev.txt
+pip install -e ".[dev]"
 
 # Build single-file executable
 pyinstaller --onefile --windowed run_app.py --name OpenSuperWhisper

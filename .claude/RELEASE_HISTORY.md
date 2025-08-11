@@ -1,5 +1,50 @@
 # OpenSuperWhisper リリース履歴
 
+## v0.6.14 (2025-08-04) - Production Release
+
+### 主な成果
+- **CI/CDビルドエラーの完全解決**
+  - Dockerリポジトリ名の小文字化
+  - Ruffリントエラー543個を修正
+  - mypy型チェックエラーを解決
+- **実行ファイルビルドの復活**
+  - Windows/macOS/Linux全プラットフォーム対応
+  - Windowsテストハング問題を解決
+- **プロジェクト構造の最適化**
+  - 不要ファイルの整理
+  - ドキュメントの更新
+
+### 学んだ教訓
+1. **効率的なエラー修正フロー確立**
+   - 段階的修正（Docker→Ruff→mypy→ビルド）
+   - ghコマンドによる効率的な監視
+2. **タグ操作の重要性**
+   - ワークフロー修正後は必ずタグ更新
+   - `git tag -f` → `git push --force`
+3. **ノウハウの即座記録**
+   - プロジェクト固有は`.claude/docs/`
+   - 汎用技術は`~/.claude/docs/`
+
+---
+
+## v0.6.13 (2025-01-31) - Docker Distribution Release
+
+### 新機能
+- **完全なDocker対応**
+  - ghcr.io経由での配布
+  - マルチプラットフォーム対応（amd64/arm64）
+  - Web APIサーバーモード
+- **CI/CDパイプライン強化**
+  - テスト自動化
+  - Docker自動ビルド＆プッシュ
+
+### 技術的改善
+- FastAPIによるWeb API実装
+- 軽量なDockerイメージ（Python 3.12-slim）
+- ヘルスチェック機能
+
+---
+
 ## v0.6.12 (2025-01-30) - Critical Hotfix
 
 ### 問題と解決

@@ -34,7 +34,7 @@ def setup_environment():
 
     print("🚀 OpenSuperWhisper Web API Server")
     print("===================================")
-    print("Version: 0.6.13")
+    print("Version: 0.6.14")
     print(f"Host: {os.getenv('HOST', '0.0.0.0')}")
     print(f"Port: {os.getenv('PORT', '8000')}")
 

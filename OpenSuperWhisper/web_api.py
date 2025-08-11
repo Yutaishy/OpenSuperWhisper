@@ -18,7 +18,7 @@ from . import asr_api, formatter_api, logger
 app = FastAPI(
     title="OpenSuperWhisper API",
     description="Two-Stage Voice Transcription Pipeline with AI-Powered Text Formatting",
-    version="0.6.13"
+    version="0.6.14"
 )
 
 # Add CORS middleware
@@ -72,7 +72,7 @@ async def health_check() -> HealthResponse:
     """Health check endpoint"""
     return HealthResponse(
         status="healthy",
-        version="0.6.13",
+        version="0.6.14",
         available_models={
             "asr_models": [
                 "whisper-1",
