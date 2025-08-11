@@ -83,7 +83,8 @@ def main():
             '--hidden-import=PySide6.QtDBus',
             # Try to find libportaudio.so.2 in common locations
             '--collect-all=sounddevice',
-            '--collect-all=PySide6',  # Linux can handle collect-all
+            '--collect-all=PySide6',  # Include plugins/platforms
+            '--add-data=assets:assets',  # Include assets for icons and UI
         ])
         # Try to add portaudio library if it exists
         portaudio_paths = [
@@ -106,6 +107,8 @@ def main():
                 f'--icon={icon_path}',
                 '--osx-bundle-identifier=com.yutaishy.opensuperwhisper',
                 '--collect-all=sounddevice',
+                '--collect-all=PySide6',  # Include Qt plugins/platforms
+                '--add-data=assets:assets',  # Include assets for icons and UI
                 # Exclude problematic Qt3D modules that cause framework conflicts on macOS
                 '--exclude-module=PySide6.Qt3DAnimation',
                 '--exclude-module=PySide6.Qt3DCore',
@@ -153,6 +156,8 @@ def main():
             args.extend([
                 '--osx-bundle-identifier=com.yutaishy.opensuperwhisper',
                 '--collect-all=sounddevice',
+                '--collect-all=PySide6',
+                '--add-data=assets:assets',
                 # Exclude problematic Qt3D modules that cause framework conflicts on macOS
                 '--exclude-module=PySide6.Qt3DAnimation',
                 '--exclude-module=PySide6.Qt3DCore',
@@ -201,7 +206,7 @@ def main():
         args.extend([
             '--icon=assets/windows/osw.ico',
             '--collect-all=sounddevice',
-            '--collect-all=PySide6',  # Windows can handle collect-all
+            '--collect-all=PySide6',  # Include Qt plugins/platforms
             '--add-data=assets;assets',  # Include assets for Windows
         ])
         # Add win32 imports if available

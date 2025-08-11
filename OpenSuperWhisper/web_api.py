@@ -13,12 +13,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from . import asr_api, formatter_api, logger
+from . import __version__ as OSW_VERSION
 
 # Initialize FastAPI app
 app = FastAPI(
     title="OpenSuperWhisper API",
     description="Two-Stage Voice Transcription Pipeline with AI-Powered Text Formatting",
-    version="0.6.14"
+    version=OSW_VERSION
 )
 
 # Add CORS middleware
@@ -72,7 +73,7 @@ async def health_check() -> HealthResponse:
     """Health check endpoint"""
     return HealthResponse(
         status="healthy",
-        version="0.6.14",
+        version=OSW_VERSION,
         available_models={
             "asr_models": [
                 "whisper-1",
@@ -133,13 +134,16 @@ async def transcribe_audio(
         raise HTTPException(status_code=500, detail="OpenAI API key not configured")
 
     try:
-        # Save uploaded file to temporary location
+        # Save uploaded file to temporary location without loading into memory
         with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{file.filename}") as temp_file:
-            content = await file.read()
-            temp_file.write(content)
+            await file.seek(0)
+            # Stream copy to temp file to avoid memory spikes on large uploads
+            import shutil
+            shutil.copyfileobj(file.file, temp_file)
             temp_audio_path = temp_file.name
 
-        logger.logger.info(f"Processing uploaded file: {file.filename} ({len(content)} bytes)")
+        file_size = os.path.getsize(temp_audio_path)
+        logger.logger.info(f"Processing uploaded file: {file.filename} ({file_size} bytes)")
 
         # Stage 1: ASR Transcription
         logger.logger.info(f"Starting ASR with model: {asr_model}")

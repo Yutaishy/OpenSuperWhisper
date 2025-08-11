@@ -14,6 +14,9 @@ sys.path.insert(0, str(Path(__file__).parent))
 # Ensure OpenSuperWhisper module is importable
 sys.path.insert(0, str(Path(__file__).parent / 'OpenSuperWhisper'))
 
+from OpenSuperWhisper import __version__ as OSW_VERSION
+
+
 def setup_environment():
     """Setup environment for Docker deployment"""
 
@@ -34,7 +37,7 @@ def setup_environment():
 
     print("🚀 OpenSuperWhisper Web API Server")
     print("===================================")
-    print("Version: 0.6.14")
+    print(f"Version: {OSW_VERSION}")
     print(f"Host: {os.getenv('HOST', '0.0.0.0')}")
     print(f"Port: {os.getenv('PORT', '8000')}")
 
