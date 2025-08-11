@@ -10,7 +10,6 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License"></a>
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml/badge.svg" alt="CI/CD"></a>
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml/badge.svg" alt="Build"></a>
-  <img src="https://img.shields.io/badge/Tests-18%20Passing-brightgreen.svg" alt="Tests">
   <img src="https://img.shields.io/badge/Version-0.6.14-orange.svg" alt="Version">
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/pkgs/container/opensuperwhisper"><img src="https://img.shields.io/badge/Docker-Available-blue.svg" alt="Docker"></a>
 </p>
@@ -61,7 +60,7 @@ OpenSuperWhisper is a cross-platform desktop application that transforms speech 
 
 ### 📦 **Production Ready**
 - **All Platforms**: Directory-based distribution with all dependencies for maximum compatibility
-- **Comprehensive test suite** (18 tests, 100% core coverage)
+- **Cross-OS CI smoke tests** to validate build and executable startup on Windows, macOS, and Linux
 - **Professional error handling** and user feedback
 - **Cross-platform compatibility** (Windows, macOS, Linux)
 - **v0.6.8**: Fixed SSL certificate bundling for API connections
@@ -239,8 +238,11 @@ pytest tests/ --cov=OpenSuperWhisper
 # Install development dependencies
 pip install -e ".[dev]"
 
-# Build single-file executable
-pyinstaller --onefile --windowed run_app.py --name OpenSuperWhisper
+# Recommended: use the provided build script (onedir for all platforms)
+python build_executable.py OpenSuperWhisper
+
+# Or directly with PyInstaller (onedir mode)
+pyinstaller --onedir --windowed run_app.py --name OpenSuperWhisper
 ```
 
 ### Code Quality
