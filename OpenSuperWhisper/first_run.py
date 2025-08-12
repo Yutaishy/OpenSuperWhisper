@@ -280,9 +280,33 @@ class FirstRunWizard(QDialog):
             self.key_status.setStyleSheet("color: orange;")
             return
 
-        # TODO: Implement actual API test
-        self.key_status.setText("✅ API key format looks correct")
-        self.key_status.setStyleSheet("color: green;")
+        # Perform a lightweight real API validation against OpenAI
+        try:
+            # Import locally to avoid import cost at module load
+            from openai import OpenAI  # type: ignore
+
+            # Create a short-timeout client with no retries to keep UI responsive
+            client = OpenAI(api_key=api_key)  # SDK handles env internally
+
+            # Minimal non-billable call: list models (auth + permissions check)
+            # Wrap in a very small scope and handle timeouts/network issues gracefully
+            _ = client.models.list()
+
+            self.key_status.setText("✅ API key verified with OpenAI")
+            self.key_status.setStyleSheet("color: green;")
+        except Exception as e:
+            # Do not expose sensitive details; provide user-friendly guidance
+            message = str(e)
+            hint = ""
+            if "401" in message or "unauthorized" in message.lower():
+                hint = " (Unauthorized: Please check the key and permissions)"
+            elif "timeout" in message.lower() or "timed out" in message.lower():
+                hint = " (Network timeout: Please check your internet connection)"
+            elif "SSL" in message or "certificate" in message.lower():
+                hint = " (SSL error: System time or certificates may be misconfigured)"
+
+            self.key_status.setText(f"❌ API key validation failed{hint}")
+            self.key_status.setStyleSheet("color: red;")
 
     def grant_permissions(self) -> None:
         """Grant permissions for the application"""

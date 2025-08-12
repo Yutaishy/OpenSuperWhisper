@@ -9,9 +9,14 @@ import sys
 # Add paths
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-# Handle --version flag for CI/CD testing
+# Handle --version flag for CI/CD testing (source of truth from package)
 if len(sys.argv) > 1 and sys.argv[1] == '--version':
-    print("OpenSuperWhisper v0.6.14")
+    try:
+        from OpenSuperWhisper import __version__ as OSW_VERSION
+        print(f"OpenSuperWhisper v{OSW_VERSION}")
+    except Exception:
+        # Fallback to pyproject version if import fails
+        print("OpenSuperWhisper v0.6.14")
     sys.exit(0)
 
 def signal_handler(sig, frame):

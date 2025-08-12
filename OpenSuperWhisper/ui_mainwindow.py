@@ -1330,8 +1330,13 @@ class MainWindow(QMainWindow):
             logger.logger.info("Settings reset to defaults")
 
     def show_about(self) -> None:
-        about_text = """
-        <h3>OpenSuperWhisper v0.1.0</h3>
+        try:
+            from . import __version__ as OSW_VERSION
+        except Exception:
+            OSW_VERSION = "unknown"
+
+        about_text = f"""
+        <h3>OpenSuperWhisper v{OSW_VERSION}</h3>
         <p>Two-Stage Voice Transcription Tool</p>
         <p>A cross-platform voice transcription application that uses OpenAI's
         state-of-the-art models to transcribe audio and then polish the
