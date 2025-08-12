@@ -166,6 +166,103 @@ jobs:
       env:
         QT_QPA_PLATFORM: ${{ matrix.os == 'ubuntu-latest' && 'offscreen' || '' }}
         CI: true
+
+    - name: Inject macOS Info.plist permissions (optional)
+      if: matrix.os == 'macos-latest'
+      shell: bash
+      run: |
+        # Detect .app bundle if present (PyInstaller on macOS often outputs .app in onedir)
+        APP_PATH=""
+        if [ -d "dist/${{ matrix.executable_name }}.app" ]; then
+          APP_PATH="dist/${{ matrix.executable_name }}.app"
+        elif [ -d "dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}.app" ]; then
+          APP_PATH="dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}.app"
+        fi
+
+        if [ -n "$APP_PATH" ]; then
+          INFO_PLIST="$APP_PATH/Contents/Info.plist"
+          echo "Modifying Info.plist at: $INFO_PLIST"
+          /usr/libexec/PlistBuddy -c "Add :NSMicrophoneUsageDescription string OpenSuperWhisper requires microphone access to record audio for transcription." "$INFO_PLIST" || \
+          /usr/libexec/PlistBuddy -c "Set :NSMicrophoneUsageDescription OpenSuperWhisper requires microphone access to record audio for transcription." "$INFO_PLIST" || true
+          /usr/libexec/PlistBuddy -c "Add :NSAppleEventsUsageDescription string OpenSuperWhisper may request limited accessibility features for hotkeys." "$INFO_PLIST" || \
+          /usr/libexec/PlistBuddy -c "Set :NSAppleEventsUsageDescription OpenSuperWhisper may request limited accessibility features for hotkeys." "$INFO_PLIST" || true
+          plutil -p "$INFO_PLIST"
+        else
+          echo "No .app bundle detected; skipping Info.plist injection"
+        fi
+
+    - name: Codesign Windows executable (optional)
+      if: matrix.os == 'windows-latest' && secrets.WINDOWS_PFX_BASE64 && secrets.WINDOWS_PFX_PASSWORD
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $pfxPath = "$env:RUNNER_TEMP\codesign.pfx"
+        [IO.File]::WriteAllBytes($pfxPath, [Convert]::FromBase64String("${{ secrets.WINDOWS_PFX_BASE64 }}"))
+        $exePath = "dist\${{ matrix.executable_name }}\${{ matrix.executable_name }}.exe"
+        if (!(Test-Path $exePath)) { throw "Executable not found: $exePath" }
+        $signtool = "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\x64\\signtool.exe"
+        if (!(Test-Path $signtool)) { $signtool = "signtool.exe" }
+        & "$signtool" sign /f "$pfxPath" /p "${{ secrets.WINDOWS_PFX_PASSWORD }}" /tr "http://timestamp.digicert.com" /td SHA256 /fd SHA256 "$exePath"
+        Write-Host "Windows executable signed."
+
+    - name: Codesign macOS app (optional)
+      if: matrix.os == 'macos-latest' && (secrets.MACOS_CERT_BASE64 && secrets.MACOS_CERT_PASSWORD && secrets.MACOS_SIGNING_IDENTITY)
+      shell: bash
+      run: |
+        set -euo pipefail
+        APP_PATH=""
+        if [ -d "dist/${{ matrix.executable_name }}.app" ]; then
+          APP_PATH="dist/${{ matrix.executable_name }}.app"
+        elif [ -d "dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}.app" ]; then
+          APP_PATH="dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}.app"
+        fi
+
+        if [ -z "$APP_PATH" ]; then
+          echo "No .app bundle detected; skipping codesign"
+          exit 0
+        fi
+
+        KEYCHAIN="$RUNNER_TEMP/osw.keychain-db"
+        echo "Creating temporary keychain"
+        security create-keychain -p temp "$KEYCHAIN"
+        security set-keychain-settings -lut 21600 "$KEYCHAIN"
+        security unlock-keychain -p temp "$KEYCHAIN"
+        echo "Importing certificate"
+        echo "${{ secrets.MACOS_CERT_BASE64 }}" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+        security import "$RUNNER_TEMP/cert.p12" -k "$KEYCHAIN" -P "${{ secrets.MACOS_CERT_PASSWORD }}" -T /usr/bin/codesign -T /usr/bin/security
+        security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | sed 's/\"//g')
+        security find-identity -v -p codesigning
+
+        echo "Signing app bundle: $APP_PATH"
+        codesign --deep --force --options runtime --timestamp \
+          --sign "${{ secrets.MACOS_SIGNING_IDENTITY }}" "$APP_PATH"
+        codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+
+    - name: Notarize macOS app (optional)
+      if: matrix.os == 'macos-latest' && (secrets.MACOS_NOTARY_APPLE_ID && secrets.MACOS_NOTARY_TEAM_ID && secrets.MACOS_NOTARY_PASSWORD)
+      shell: bash
+      run: |
+        set -euo pipefail
+        APP_PATH=""
+        if [ -d "dist/${{ matrix.executable_name }}.app" ]; then
+          APP_PATH="dist/${{ matrix.executable_name }}.app"
+        elif [ -d "dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}.app" ]; then
+          APP_PATH="dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}.app"
+        fi
+        if [ -z "$APP_PATH" ]; then
+          echo "No .app bundle to notarize; skipping"
+          exit 0
+        fi
+        ZIP_PATH="$RUNNER_TEMP/${{ matrix.executable_name }}.zip"
+        /usr/bin/ditto -c -k --keepParent "$APP_PATH" "$ZIP_PATH"
+        echo "Submitting for notarization"
+        xcrun notarytool submit "$ZIP_PATH" \
+          --apple-id "${{ secrets.MACOS_NOTARY_APPLE_ID }}" \
+          --team-id "${{ secrets.MACOS_NOTARY_TEAM_ID }}" \
+          --password "${{ secrets.MACOS_NOTARY_PASSWORD }}" \
+          --wait
+        echo "Stapling ticket"
+        xcrun stapler staple -v "$APP_PATH" || true
     
     - name: Smoke test executable (non-Windows)
       if: matrix.os != 'windows-latest'
@@ -200,49 +297,62 @@ jobs:
       run: |
         ls -la dist/
         
-        # Check for onedir build (all platforms now use onedir mode)
-        if [ -d "dist/${{ matrix.executable_name }}" ]; then
-          # All platforms use onedir mode - folder with executable inside
-          echo "Found onedir build: dist/${{ matrix.executable_name }}/"
-          ls -la "dist/${{ matrix.executable_name }}/"
-          
-          # Windows executable has .exe extension, Unix doesn't
-          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            EXEC_PATH="dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}.exe"
-          else
-            EXEC_PATH="dist/${{ matrix.executable_name }}/${{ matrix.executable_name }}"
-          fi
-          
-          if [ -f "$EXEC_PATH" ]; then
-            echo "Found executable: $EXEC_PATH"
-            size=$(stat -c%s "$EXEC_PATH" 2>/dev/null || stat -f%z "$EXEC_PATH" 2>/dev/null || echo "0")
-            echo "Executable size: $size bytes"
+        # macOS: Prefer .app bundle if exists; otherwise use onedir folder
+        TARGET_DIR="dist/${{ matrix.executable_name }}"
+        MAC_APP="dist/${{ matrix.executable_name }}.app"
+        if [[ "${{ matrix.os }}" == "macos-latest" && -d "$MAC_APP" ]]; then
+          echo "Detected macOS app bundle: $MAC_APP"
+          /usr/bin/ditto -c -k --keepParent "$MAC_APP" "dist/OpenSuperWhisper.zip"
+        else
+          # Check for onedir build (all platforms now use onedir mode)
+          if [ -d "$TARGET_DIR" ]; then
+            echo "Found onedir build: $TARGET_DIR/"
+            ls -la "$TARGET_DIR/"
             
-            # Set execution permissions on Unix systems
-            if [[ "${{ matrix.os }}" != "windows-latest" ]]; then
-              chmod +x "$EXEC_PATH"
-              echo "Set execution permissions"
+            # Windows executable has .exe extension, Unix doesn't
+            if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+              EXEC_PATH="$TARGET_DIR/${{ matrix.executable_name }}.exe"
+            else
+              EXEC_PATH="$TARGET_DIR/${{ matrix.executable_name }}"
+            fi
+            
+            if [ -f "$EXEC_PATH" ]; then
+              echo "Found executable: $EXEC_PATH"
+              size=$(stat -c%s "$EXEC_PATH" 2>/dev/null || stat -f%z "$EXEC_PATH" 2>/dev/null || echo "0")
+              echo "Executable size: $size bytes"
+              
+              # Set execution permissions on Unix systems
+              if [[ "${{ matrix.os }}" != "windows-latest" ]]; then
+                chmod +x "$EXEC_PATH"
+                echo "Set execution permissions"
+              fi
+            else
+              echo "Error: Main executable not found at $EXEC_PATH"
+              exit 1
             fi
           else
-            echo "Error: Main executable not found at $EXEC_PATH"
+            echo "Error: No build output found!"
             exit 1
           fi
-        else
-          echo "Error: No build output found!"
-          exit 1
-        fi
-        
-        # Create ZIP archive for distribution
-        cd dist/
-        # All platforms use onedir mode - directory with executable
-        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-          powershell Compress-Archive -Path "${{ matrix.executable_name }}" -DestinationPath "OpenSuperWhisper.zip"
-        else
-          zip -r "OpenSuperWhisper.zip" "${{ matrix.executable_name }}/"
+          
+          # Create ZIP archive for distribution
+          cd dist/
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            powershell Compress-Archive -Path "${{ matrix.executable_name }}" -DestinationPath "OpenSuperWhisper.zip"
+          else
+            zip -r "OpenSuperWhisper.zip" "${{ matrix.executable_name }}/"
+          fi
         fi
         echo "Created distribution archive: OpenSuperWhisper.zip"
-        ls -la *.zip
+        ls -la dist/*.zip 2>/dev/null || ls -la *.zip
         echo "Build completed successfully"
+
+    - name: Generate SHA256 checksum
+      shell: bash
+      run: |
+        cd dist/
+        shasum -a 256 OpenSuperWhisper.zip > OpenSuperWhisper.zip.sha256 || sha256sum OpenSuperWhisper.zip > OpenSuperWhisper.zip.sha256
+        cat OpenSuperWhisper.zip.sha256
 
     - name: Smoke test executable (Linux)
       if: matrix.os == 'ubuntu-latest'
@@ -272,6 +382,7 @@ jobs:
         name: ${{ matrix.artifact_name }}
         path: |
           dist/OpenSuperWhisper.zip
+          dist/OpenSuperWhisper.zip.sha256
         retention-days: 7
 
   release:
