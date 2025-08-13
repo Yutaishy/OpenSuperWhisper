@@ -47,7 +47,8 @@ tmp/
 
 # Test and development
 archive/
-test_*.py
+# Exclude test files in root but not in tests/ directory
+/test_*.py
 debug_*.py
 check_*.py
 verify_*.py
