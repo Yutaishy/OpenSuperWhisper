@@ -15,8 +15,22 @@ if len(sys.argv) > 1 and sys.argv[1] == '--version':
         from OpenSuperWhisper import __version__ as OSW_VERSION
         print(f"OpenSuperWhisper v{OSW_VERSION}")
     except Exception:
-        # Fallback to pyproject version if import fails
-        print("OpenSuperWhisper v0.6.14")
+        # Fallbacks in order: installed package metadata -> pyproject.toml -> unknown
+        try:
+            from importlib.metadata import version as pkg_version  # type: ignore
+
+            print(f"OpenSuperWhisper v{pkg_version('opensuperwhisper')}")
+        except Exception:
+            try:
+                import tomllib  # Python 3.11+
+                from pathlib import Path
+
+                pyproject_text = Path('pyproject.toml').read_text(encoding='utf-8')
+                data = tomllib.loads(pyproject_text)
+                v = data.get('project', {}).get('version', 'unknown')
+                print(f"OpenSuperWhisper v{v}")
+            except Exception:
+                print("OpenSuperWhisper vunknown")
     sys.exit(0)
 
 def signal_handler(sig, frame):

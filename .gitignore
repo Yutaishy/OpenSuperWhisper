@@ -91,6 +91,9 @@ coverage.xml
 *.temp
 nul
 
+# Local session logs / dev notes
+250812_cursorcli-kiroku.md
+
 # Windows specific folders (should never be committed)
 %APPDATA%/
 %USERPROFILE%/
