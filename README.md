@@ -8,8 +8,10 @@
   <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.12+-blue.svg" alt="Python"></a>
   <a href="https://openai.com"><img src="https://img.shields.io/badge/OpenAI-Whisper%20%7C%20GPT-green.svg" alt="OpenAI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License"></a>
-  <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test.yml/badge.svg" alt="CI/CD"></a>
-  <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/build-release.yml/badge.svg" alt="Build"></a>
+  <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test-build.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/test-build.yml/badge.svg" alt="Test Build"></a>
+  <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/release.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/release.yml/badge.svg" alt="Release"></a>
+  <a href="https://github.com/Yutaishy/OpenSuperWhisper/releases/latest"><img src="https://img.shields.io/github/v/release/Yutaishy/OpenSuperWhisper?color=green" alt="Latest Release"></a>
+  <a href="https://github.com/Yutaishy/OpenSuperWhisper/releases"><img src="https://img.shields.io/github/downloads/Yutaishy/OpenSuperWhisper/total" alt="Downloads"></a>
   <img src="https://img.shields.io/badge/Version-0.6.14-orange.svg" alt="Version">
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/pkgs/container/opensuperwhisper"><img src="https://img.shields.io/badge/Docker-Available-blue.svg" alt="Docker"></a>
 </p>
