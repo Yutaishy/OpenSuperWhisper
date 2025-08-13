@@ -2,6 +2,29 @@
 
 ## [Unreleased]
 
+## [0.6.15] - 2025-08-13 (CI/CD Enhancement Release)
+
+### Added
+- **GitHub Actions CI/CD Pipeline**: Complete automated build and release system
+  - 🚀 Multi-platform builds (Windows, macOS Intel/ARM, Linux)
+  - 🔒 Code signing support for Windows and macOS
+  - 📊 SBOM generation with CycloneDX format
+  - 🔐 Build attestation for supply chain security
+  - 💬 Discord webhook notifications for releases
+  - ✅ Test build workflow for PR validation
+
+### Improved
+- **Build System**: Enhanced PyInstaller configuration
+  - Directory-based distribution for better compatibility
+  - Platform-specific optimizations
+  - Reduced false positive antivirus detections
+  - Better dependency bundling
+
+### Documentation
+- **CI/CD Guide**: Comprehensive documentation for release process
+- **Release Checklist**: Step-by-step release procedures
+- **Updated README**: CI/CD badges and download instructions
+
 ## [0.6.14] - 2025-08-03 (Production Release)
 
 ### Added

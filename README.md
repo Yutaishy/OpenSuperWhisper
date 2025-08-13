@@ -12,7 +12,7 @@
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/release.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/release.yml/badge.svg" alt="Release"></a>
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/releases/latest"><img src="https://img.shields.io/github/v/release/Yutaishy/OpenSuperWhisper?color=green" alt="Latest Release"></a>
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/releases"><img src="https://img.shields.io/github/downloads/Yutaishy/OpenSuperWhisper/total" alt="Downloads"></a>
-  <img src="https://img.shields.io/badge/Version-0.6.14-orange.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-0.6.15-orange.svg" alt="Version">
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/pkgs/container/opensuperwhisper"><img src="https://img.shields.io/badge/Docker-Available-blue.svg" alt="Docker"></a>
 </p>
 
