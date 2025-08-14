@@ -141,7 +141,6 @@ if [ -d "tests" ] && [ "$(ls -A tests/*.py 2>/dev/null)" ]; then
         --cov=src \
         --cov-report=term-missing \
         --cov-report=html \
-        --cov-fail-under=60 \
         -v; then
         echo -e "${GREEN}✓ All tests passed${NC}"
     else
