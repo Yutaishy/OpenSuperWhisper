@@ -140,8 +140,14 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: build-${{ matrix.os }}-${{ matrix.arch }}
-        path: dist/${{ matrix.os }}/${{ matrix.arch }}/*.{zip,tar.gz,sha256}
+        path: |
+          dist/${{ matrix.os }}/${{ matrix.arch }}/*.zip
+          dist/${{ matrix.os }}/${{ matrix.arch }}/*.tar.gz
+          dist/${{ matrix.os }}/${{ matrix.arch }}/*.sha256
+          dist/${{ matrix.os }}/${{ matrix.arch }}/**/*.zip
+          dist/${{ matrix.os }}/${{ matrix.arch }}/**/*.tar.gz
         retention-days: 7
+      if: always()
 
   # ==========================================
   # Dependency and Security Checks
