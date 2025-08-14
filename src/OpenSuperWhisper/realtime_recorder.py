@@ -30,15 +30,15 @@ class RealtimeRecorder:
         self.overlap_buffer: np.ndarray | None = None
 
         # Chunk timing parameters (in seconds)
-        self.MIN_CHUNK_DURATION = 60.0    # 1 minute minimum
+        self.MIN_CHUNK_DURATION = 60.0  # 1 minute minimum
         self.SILENCE_CHECK_START = 90.0  # Start checking silence at 1.5 minutes
         self.PRIORITY_SPLIT_TIME = 110.0  # Priority split at 1m50s
-        self.MAX_CHUNK_DURATION = 120.0   # Force split at 2 minutes
+        self.MAX_CHUNK_DURATION = 120.0  # Force split at 2 minutes
 
         # Silence detection parameters
-        self.SILENCE_THRESHOLD = 0.01     # Amplitude threshold for silence
-        self.MIN_SILENCE_DURATION = 1.5   # Minimum silence duration for split
-        self.SHORT_SILENCE_DURATION = 0.5 # Short silence for priority split
+        self.SILENCE_THRESHOLD = 0.01  # Amplitude threshold for silence
+        self.MIN_SILENCE_DURATION = 1.5  # Minimum silence duration for split
+        self.SHORT_SILENCE_DURATION = 0.5  # Short silence for priority split
 
         # Buffer for silence detection
         self.silence_buffer_size = int(2.5 * sample_rate)  # 2.5 seconds buffer
@@ -69,7 +69,9 @@ class RealtimeRecorder:
         if self.current_chunk:
             audio_data = self._combine_chunk_data()
             chunk_id = self.chunk_id
-            logger.logger.info(f"Final chunk {chunk_id} with {len(audio_data)/self.sample_rate:.2f}s")
+            logger.logger.info(
+                f"Final chunk {chunk_id} with {len(audio_data)/self.sample_rate:.2f}s"
+            )
             return (chunk_id, audio_data)
 
         return None
@@ -163,7 +165,7 @@ class RealtimeRecorder:
         recent_samples = audio_array[-required_samples:]
 
         # Calculate RMS (Root Mean Square) for better silence detection
-        rms = np.sqrt(np.mean(recent_samples ** 2))
+        rms = np.sqrt(np.mean(recent_samples**2))
 
         return bool(rms < self.SILENCE_THRESHOLD)
 
@@ -180,7 +182,7 @@ class RealtimeRecorder:
         overlap_durations = {
             "ja": 0.8,  # Japanese: consider phrases
             "en": 0.5,  # English: consider words
-            "default": 0.6
+            "default": 0.6,
         }
         return overlap_durations.get(language, overlap_durations["default"])
 
@@ -229,10 +231,7 @@ class RealtimeRecorder:
         return (current_chunk_id, chunk_data)
 
     def create_chunk_with_overlap(
-        self,
-        audio_data: np.ndarray,
-        start_idx: int,
-        end_idx: int
+        self, audio_data: np.ndarray, start_idx: int, end_idx: int
     ) -> tuple[np.ndarray, np.ndarray | None]:
         """
         Create chunk with overlap for context continuity
@@ -254,9 +253,11 @@ class RealtimeRecorder:
         # Add overlap at the end if not the last chunk
         if end_idx + overlap_samples <= len(audio_data):
             # Include overlap in current chunk
-            chunk_with_overlap = audio_data[start_idx:end_idx + overlap_samples]
+            chunk_with_overlap = audio_data[start_idx : end_idx + overlap_samples]
             # Overlap data for next chunk
-            next_overlap = audio_data[max(start_idx, end_idx - overlap_samples):end_idx + overlap_samples]
+            next_overlap = audio_data[
+                max(start_idx, end_idx - overlap_samples) : end_idx + overlap_samples
+            ]
             return chunk_with_overlap, next_overlap
         else:
             # Last chunk, no overlap needed
@@ -269,7 +270,9 @@ class RealtimeRecorder:
 
         return np.concatenate(self.current_chunk)
 
-    def _find_optimal_split_point(self, audio_data: np.ndarray, chunk_duration: float | None = None) -> int:
+    def _find_optimal_split_point(
+        self, audio_data: np.ndarray, chunk_duration: float | None = None
+    ) -> int:
         """
         Find optimal split point considering phoneme boundaries
 
@@ -297,7 +300,7 @@ class RealtimeRecorder:
             # Otherwise use 2 minutes as target
             target_samples = int(2.0 * self.sample_rate)
 
-        search_window = int(0.5 * self.sample_rate)   # ±0.5 seconds
+        search_window = int(0.5 * self.sample_rate)  # ±0.5 seconds
 
         # If audio is shorter than target, use full length
         if len(audio_data) <= target_samples:
@@ -312,9 +315,7 @@ class RealtimeRecorder:
         long_silence_samples = int(1.5 * self.sample_rate)
 
         best_silence_pos = self._find_silence_window(
-            audio_data[start_search:end_search],
-            long_silence_samples,
-            silence_threshold
+            audio_data[start_search:end_search], long_silence_samples, silence_threshold
         )
 
         if best_silence_pos >= 0:
@@ -325,7 +326,7 @@ class RealtimeRecorder:
         best_silence_pos = self._find_silence_window(
             audio_data[start_search:end_search],
             short_silence_samples,
-            silence_threshold
+            silence_threshold,
         )
 
         if best_silence_pos >= 0:
@@ -344,16 +345,17 @@ class RealtimeRecorder:
         # Fallback: Use target time
         return target_samples
 
-    def _find_silence_window(self, audio_data: np.ndarray, window_size: int,
-                           threshold: float) -> int:
+    def _find_silence_window(
+        self, audio_data: np.ndarray, window_size: int, threshold: float
+    ) -> int:
         """Find position of silence window of given size"""
         if len(audio_data) < window_size:
             return -1
 
         # Calculate RMS for sliding windows
         for i in range(len(audio_data) - window_size):
-            window = audio_data[i:i + window_size]
-            rms = np.sqrt(np.mean(window ** 2))
+            window = audio_data[i : i + window_size]
+            rms = np.sqrt(np.mean(window**2))
             if rms < threshold:
                 return i
 
@@ -366,12 +368,12 @@ class RealtimeRecorder:
         if len(audio_data) < window_size:
             return len(audio_data) // 2
 
-        min_rms = float('inf')
+        min_rms = float("inf")
         min_pos = 0
 
         for i in range(0, len(audio_data) - window_size, window_size // 2):
-            window = audio_data[i:i + window_size]
-            rms = np.sqrt(np.mean(window ** 2))
+            window = audio_data[i : i + window_size]
+            rms = np.sqrt(np.mean(window**2))
             if rms < min_rms:
                 min_rms = rms
                 min_pos = i + window_size // 2
@@ -387,14 +389,18 @@ class RealtimeRecorder:
         for offset in range(0, search_radius):
             # Check forward
             if center + offset < len(audio_data) - 1:
-                if (audio_data[center + offset] <= 0 and
-                    audio_data[center + offset + 1] > 0):
+                if (
+                    audio_data[center + offset] <= 0
+                    and audio_data[center + offset + 1] > 0
+                ):
                     return center + offset
 
             # Check backward
             if center - offset > 0:
-                if (audio_data[center - offset - 1] <= 0 and
-                    audio_data[center - offset] > 0):
+                if (
+                    audio_data[center - offset - 1] <= 0
+                    and audio_data[center - offset] > 0
+                ):
                     return center - offset
 
         return center
@@ -416,4 +422,3 @@ class RealtimeRecorder:
         end_time = start_time + chunk_duration
 
         return (start_time, end_time)
-

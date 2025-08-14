@@ -18,6 +18,7 @@ from . import asr_api, formatter_api, logger
 
 class ChunkStatus(Enum):
     """Status of chunk processing"""
+
     PENDING = "pending"
     PROCESSING = "processing"
     COMPLETED = "completed"
@@ -28,6 +29,7 @@ class ChunkStatus(Enum):
 @dataclass
 class ChunkResult:
     """Result of chunk processing"""
+
     chunk_id: int
     status: ChunkStatus
     raw_text: str | None = None
@@ -48,7 +50,7 @@ class ChunkProcessor:
         format_enabled: bool = True,
         format_prompt: str = "",
         style_guide: str = "",
-        retry_manager: Any = None
+        retry_manager: Any = None,
     ):
         """
         Initialize chunk processor
@@ -104,17 +106,11 @@ class ChunkProcessor:
 
         # Initialize result
         self.chunk_results[chunk_id] = ChunkResult(
-            chunk_id=chunk_id,
-            status=ChunkStatus.PENDING,
-            timestamp=time.time()
+            chunk_id=chunk_id, status=ChunkStatus.PENDING, timestamp=time.time()
         )
 
         # Submit for processing
-        future = self.executor.submit(
-            self._process_chunk_task,
-            chunk_id,
-            audio_data
-        )
+        future = self.executor.submit(self._process_chunk_task, chunk_id, audio_data)
 
         # Track future
         self.api_futures.append(future)
@@ -155,7 +151,7 @@ class ChunkProcessor:
             with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_file:
                 tmp_filename = tmp_file.name
                 # Write WAV file
-                with wave.open(tmp_file.name, 'wb') as wav_file:
+                with wave.open(tmp_file.name, "wb") as wav_file:
                     wav_file.setnchannels(1)  # Mono
                     wav_file.setsampwidth(2)  # 16-bit
                     wav_file.setframerate(16000)  # 16kHz
@@ -171,6 +167,7 @@ class ChunkProcessor:
                 # Clean up - with retry logic for Windows file locking
                 import os
                 import time
+
                 for i in range(5):
                     try:
                         if os.path.exists(tmp_filename):
@@ -180,7 +177,9 @@ class ChunkProcessor:
                         if i < 4:
                             time.sleep(0.5)  # Wait before retry
                         else:
-                            logger.logger.warning(f"Could not delete temp file {tmp_filename}: {e}")
+                            logger.logger.warning(
+                                f"Could not delete temp file {tmp_filename}: {e}"
+                            )
 
             # Check cancellation again
             if self.cancel_flag:
@@ -194,7 +193,7 @@ class ChunkProcessor:
                     raw_text,
                     self.format_prompt,
                     self.style_guide,
-                    model=self.chat_model
+                    model=self.chat_model,
                 )
                 result.formatted_text = formatted_text
 
@@ -241,7 +240,9 @@ class ChunkProcessor:
 
                 # Schedule retry if applicable
                 if self.retry_manager and result.error:
-                    retry_time = self.retry_manager.schedule_retry(chunk_id, result.error)
+                    retry_time = self.retry_manager.schedule_retry(
+                        chunk_id, result.error
+                    )
                     if retry_time:
                         logger.logger.info(f"Scheduled retry for chunk {chunk_id}")
 
@@ -333,7 +334,9 @@ class ChunkProcessor:
         # No overlap found
         return text1 + text2
 
-    def combine_results(self, results: list[ChunkResult] | None = None) -> tuple[str, str]:
+    def combine_results(
+        self, results: list[ChunkResult] | None = None
+    ) -> tuple[str, str]:
         """
         Combine all chunk results into final text
 
@@ -356,8 +359,7 @@ class ChunkProcessor:
                     if i > 0 and raw_texts:
                         # Remove duplicates with previous chunk
                         combined = self.remove_duplicate_text(
-                            raw_texts[-1],
-                            result.raw_text
+                            raw_texts[-1], result.raw_text
                         )
                         raw_texts[-1] = combined
                     else:
@@ -368,8 +370,7 @@ class ChunkProcessor:
                     if i > 0 and formatted_texts:
                         # Remove duplicates with previous chunk
                         combined = self.remove_duplicate_text(
-                            formatted_texts[-1],
-                            result.formatted_text
+                            formatted_texts[-1], result.formatted_text
                         )
                         formatted_texts[-1] = combined
                     else:
@@ -406,7 +407,9 @@ class ChunkProcessor:
                 if future:
                     retried.append(chunk_id)
             else:
-                logger.logger.warning(f"Cannot retry chunk {chunk_id} - audio data not available")
+                logger.logger.warning(
+                    f"Cannot retry chunk {chunk_id} - audio data not available"
+                )
                 self.retry_manager.remove_chunk(chunk_id)
 
         return retried
@@ -418,4 +421,3 @@ class ChunkProcessor:
             self.retry_manager.cancel_all_retries()
         self.executor.shutdown(wait=True)
         logger.logger.info("ChunkProcessor shutdown complete")
-

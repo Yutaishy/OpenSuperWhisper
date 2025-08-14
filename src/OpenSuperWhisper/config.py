@@ -16,8 +16,10 @@ KEY_API_KEY = "api/openai_key"
 KEY_PROMPT_PRESETS = "formatting/prompt_presets"
 KEY_CURRENT_PRESET = "formatting/current_preset"
 
+
 def save_setting(key: str, value: Any) -> None:
     settings.setValue(key, value)
+
 
 def load_setting(key: str, default: Any = None) -> Any:
     return settings.value(key, default)

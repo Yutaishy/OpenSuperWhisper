@@ -1,17 +1,18 @@
-
 import os
 
 from openai import OpenAI
 
 client = None
 
+
 def get_client() -> OpenAI:
     global client
     if client is None:
         # Set shorter timeouts for CI environments
-        timeout = 60.0 if os.getenv('CI') else 120.0
+        timeout = 60.0 if os.getenv("CI") else 120.0
         client = OpenAI(timeout=timeout)
     return client
+
 
 def transcribe_audio(audio_path: str, model: str = "whisper-1") -> str:
     """
@@ -25,9 +26,7 @@ def transcribe_audio(audio_path: str, model: str = "whisper-1") -> str:
         try:
             client = get_client()
             transcript = client.audio.transcriptions.create(
-                file=audio_file,
-                model=model,
-                response_format="text"
+                file=audio_file, model=model, response_format="text"
             )
         except Exception as e:
             raise Exception(f"ASR transcription failed: {e}") from e

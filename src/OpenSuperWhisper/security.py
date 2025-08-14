@@ -12,9 +12,12 @@ try:
     from cryptography.fernet import Fernet
     from cryptography.hazmat.primitives import hashes
     from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
     CRYPTOGRAPHY_AVAILABLE = True
 except ImportError:
-    logger.logger.warning("cryptography package not available - API key encryption disabled")
+    logger.logger.warning(
+        "cryptography package not available - API key encryption disabled"
+    )
     CRYPTOGRAPHY_AVAILABLE = False
 
 
@@ -22,7 +25,7 @@ class APIKeyManager:
     """Secure API key storage with encryption"""
 
     def __init__(self) -> None:
-        self.salt = b'opensuperwhisper_salt_v1'  # In production, use random salt per installation
+        self.salt = b"opensuperwhisper_salt_v1"  # In production, use random salt per installation
 
     def _get_key(self, password: str) -> bytes:
         """Derive encryption key from password"""
@@ -52,7 +55,9 @@ class APIKeyManager:
     def decrypt_api_key(self, encrypted_key: str, password: str) -> str | None:
         """Decrypt API key with password"""
         if not CRYPTOGRAPHY_AVAILABLE:
-            logger.logger.warning("Decryption not available - returning encrypted key as-is")
+            logger.logger.warning(
+                "Decryption not available - returning encrypted key as-is"
+            )
             return encrypted_key
         try:
             key = self._get_key(password)
@@ -71,7 +76,7 @@ class APIKeyManager:
             return False
         try:
             base64.urlsafe_b64decode(key_value.encode())
-            return len(key_value) > 100 and not key_value.startswith('sk-')
+            return len(key_value) > 100 and not key_value.startswith("sk-")
         except Exception:
             return False
 
@@ -82,7 +87,7 @@ def secure_key_check(api_key: str) -> bool:
         return False
 
     # Check for common API key patterns
-    if api_key.startswith('sk-'):
+    if api_key.startswith("sk-"):
         # OpenAI API key format
         if len(api_key) < 20:
             logger.logger.warning("API key appears too short")
@@ -101,9 +106,10 @@ def sanitize_for_logs(text: str) -> str:
 
     # Replace API keys with masked version
     import re
+
     patterns = [
-        (r'sk-[a-zA-Z0-9]{20,}', 'sk-***MASKED***'),
-        (r'Bearer [a-zA-Z0-9]{20,}', 'Bearer ***MASKED***'),
+        (r"sk-[a-zA-Z0-9]{20,}", "sk-***MASKED***"),
+        (r"Bearer [a-zA-Z0-9]{20,}", "Bearer ***MASKED***"),
         (r'"api_key":\s*"[^"]{10,}"', '"api_key": "***MASKED***"'),
     ]
 

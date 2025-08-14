@@ -9,19 +9,9 @@ import os
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QIcon
-from PySide6.QtWidgets import (
-    QCheckBox,
-    QDialog,
-    QFrame,
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QProgressBar,
-    QPushButton,
-    QTextEdit,
-    QVBoxLayout,
-    QWidget,
-)
+from PySide6.QtWidgets import (QCheckBox, QDialog, QFrame, QHBoxLayout, QLabel,
+                               QLineEdit, QProgressBar, QPushButton, QTextEdit,
+                               QVBoxLayout, QWidget)
 
 from . import config, logger
 
@@ -36,7 +26,7 @@ class FirstRunWizard(QDialog):
             self.create_welcome_step,
             self.create_api_key_step,
             self.create_permissions_step,
-            self.create_completion_step
+            self.create_completion_step,
         ]
         self.setup_ui()
         self.show_step(0)
@@ -48,7 +38,9 @@ class FirstRunWizard(QDialog):
         self.setWindowFlags(Qt.WindowType.Dialog | Qt.WindowType.WindowCloseButtonHint)
 
         # Set application icon
-        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "windows", "osw.ico")
+        icon_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), "assets", "windows", "osw.ico"
+        )
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
 
@@ -117,7 +109,8 @@ class FirstRunWizard(QDialog):
         intro = QTextEdit()
         intro.setReadOnly(True)
         intro.setMaximumHeight(200)
-        intro.setHtml("""
+        intro.setHtml(
+            """
         <h3>🎤 Transform Your Voice into Perfect Text</h3>
         <p>OpenSuperWhisper uses AI to transcribe and format your speech with professional quality.</p>
         <h4>✨ Key Features:</h4>
@@ -129,7 +122,8 @@ class FirstRunWizard(QDialog):
         </ul>
 
         <p>This wizard will help you set up OpenSuperWhisper in just a few steps.</p>
-        """)
+        """
+        )
         self.content_layout.addWidget(intro)
 
         # System requirements check
@@ -141,7 +135,7 @@ class FirstRunWizard(QDialog):
             ("✓ Python 3.12+", True),
             ("✓ Internet connection", True),
             ("⚠ OpenAI API key (next step)", False),
-            ("⚠ Microphone access", False)
+            ("⚠ Microphone access", False),
         ]
 
         for req, met in requirements:
@@ -158,12 +152,14 @@ class FirstRunWizard(QDialog):
         """API key configuration step"""
         self.header.setText("OpenAI API Key Setup")
 
-        info = QLabel("""
+        info = QLabel(
+            """
         📝 OpenSuperWhisper requires an OpenAI API key to function.
 
         🔗 Get your API key at: https://platform.openai.com/api-keys
         💡 Expected cost: ~$0.01-0.05 per minute of audio
-        """)
+        """
+        )
         info.setWordWrap(True)
         self.content_layout.addWidget(info)
 
@@ -196,7 +192,8 @@ class FirstRunWizard(QDialog):
         info = QTextEdit()
         info.setReadOnly(True)
         info.setMaximumHeight(150)
-        info.setHtml("""
+        info.setHtml(
+            """
         <h4>🔒 Privacy & Security Information</h4>
         <p>OpenSuperWhisper respects your privacy:</p>
         <ul>
@@ -204,7 +201,8 @@ class FirstRunWizard(QDialog):
             <li><b>API Key:</b> Stored locally on your computer only</li>
             <li><b>No Tracking:</b> No analytics or user data collection</li>
         </ul>
-        """)
+        """
+        )
         self.content_layout.addWidget(info)
 
         # Permissions checklist
@@ -233,7 +231,8 @@ class FirstRunWizard(QDialog):
 
         completion = QTextEdit()
         completion.setReadOnly(True)
-        completion.setHtml("""
+        completion.setHtml(
+            """
         <h3>🎉 OpenSuperWhisper is Ready!</h3>
         <h4>🚀 Quick Start Guide:</h4>
         <ol>
@@ -251,7 +250,8 @@ class FirstRunWizard(QDialog):
         </ul>
 
         <p><b>Ready to transform your voice into perfect text?</b></p>
-        """)
+        """
+        )
         self.content_layout.addWidget(completion)
 
         # Launch options
@@ -275,7 +275,7 @@ class FirstRunWizard(QDialog):
             self.key_status.setStyleSheet("color: red;")
             return
 
-        if not api_key.startswith('sk-'):
+        if not api_key.startswith("sk-"):
             self.key_status.setText("⚠️ API key should start with 'sk-'")
             self.key_status.setStyleSheet("color: orange;")
             return
@@ -321,7 +321,9 @@ class FirstRunWizard(QDialog):
             if not self.skip_key.isChecked():
                 api_key = self.api_key_input.text().strip()
                 if not api_key:
-                    self.key_status.setText("❌ Please enter an API key or check 'Skip for now'")
+                    self.key_status.setText(
+                        "❌ Please enter an API key or check 'Skip for now'"
+                    )
                     self.key_status.setStyleSheet("color: red;")
                     return
 

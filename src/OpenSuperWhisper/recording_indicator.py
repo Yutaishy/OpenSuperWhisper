@@ -33,22 +33,24 @@ class RecordingIndicator(QWidget):
         """Setup the indicator UI with modern design"""
         # Window flags for always-on-top overlay (platform-specific)
         flags = (
-            Qt.WindowType.FramelessWindowHint |
-            Qt.WindowType.WindowStaysOnTopHint |
-            Qt.WindowType.Tool
+            Qt.WindowType.FramelessWindowHint
+            | Qt.WindowType.WindowStaysOnTopHint
+            | Qt.WindowType.Tool
         )
 
         # Add platform-specific flags
-        if sys.platform.startswith('linux'):
+        if sys.platform.startswith("linux"):
             flags |= Qt.WindowType.X11BypassWindowManagerHint
-        elif sys.platform == 'win32':
+        elif sys.platform == "win32":
             # Additional Windows-specific flags for proper always-on-top behavior
             flags |= Qt.WindowType.WindowDoesNotAcceptFocus
 
         self.setWindowFlags(flags)
 
         # Set application icon
-        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "windows", "osw.ico")
+        icon_path = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), "assets", "windows", "osw.ico"
+        )
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
 
@@ -70,38 +72,44 @@ class RecordingIndicator(QWidget):
         # Recording dot indicator
         self.dot_label = QLabel("●")
         self.dot_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.dot_label.setStyleSheet("""
+        self.dot_label.setStyleSheet(
+            """
             QLabel {
                 color: #dc3545;
                 font-size: 16pt;
                 font-weight: bold;
             }
-        """)
+        """
+        )
 
         # Status text
         self.status_label = QLabel("Recording")
         self.status_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.status_label.setStyleSheet("""
+        self.status_label.setStyleSheet(
+            """
             QLabel {
                 color: #ffffff;
                 font-size: 12pt;
                 font-weight: 600;
                 font-family: 'Segoe UI', system-ui, sans-serif;
             }
-        """)
+        """
+        )
 
         layout.addWidget(self.dot_label)
         layout.addWidget(self.status_label)
         self.setLayout(layout)
 
         # Apply dark theme styling
-        self.setStyleSheet("""
+        self.setStyleSheet(
+            """
             QWidget {
                 background-color: rgba(26, 26, 26, 200);
                 border: 1px solid rgba(64, 64, 64, 180);
                 border-radius: 12px;
             }
-        """)
+        """
+        )
 
         # Mouse events for interaction
         self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
@@ -136,19 +144,23 @@ class RecordingIndicator(QWidget):
         logger.logger.debug("RecordingIndicator.show_recording() called")
         self.is_recording = True
         self.status_label.setText("Recording")
-        self.dot_label.setStyleSheet("""
+        self.dot_label.setStyleSheet(
+            """
             QLabel {
                 color: #dc3545;
                 font-size: 16pt;
                 font-weight: bold;
             }
-        """)
+        """
+        )
 
         # Show with fade-in animation
         self.setWindowOpacity(0.0)
         self.show()
         self.animate_fade_in()
-        logger.logger.debug(f"Indicator shown, visible: {self.isVisible()}, size: {self.size()}, pos: {self.pos()}")
+        logger.logger.debug(
+            f"Indicator shown, visible: {self.isVisible()}, size: {self.size()}, pos: {self.pos()}"
+        )
 
         # Start blinking animation
         self.blink_timer.start(1000)  # Blink every 1 second
@@ -158,13 +170,15 @@ class RecordingIndicator(QWidget):
         logger.logger.debug("RecordingIndicator.show_processing() called")
         self.blink_timer.stop()
         self.status_label.setText("Processing")
-        self.dot_label.setStyleSheet("""
+        self.dot_label.setStyleSheet(
+            """
             QLabel {
                 color: #ffc107;
                 font-size: 16pt;
                 font-weight: bold;
             }
-        """)
+        """
+        )
 
         # Show with fade-in if not already visible
         if not self.isVisible():
@@ -174,7 +188,9 @@ class RecordingIndicator(QWidget):
             self.animate_fade_in()
         else:
             logger.logger.debug("Processing indicator already visible, updating state")
-        logger.logger.debug(f"Processing indicator shown, visible: {self.isVisible()}, size: {self.size()}, pos: {self.pos()}")
+        logger.logger.debug(
+            f"Processing indicator shown, visible: {self.isVisible()}, size: {self.size()}, pos: {self.pos()}"
+        )
 
     def hide_recording(self) -> None:
         """Hide recording indicator with animation"""
@@ -186,13 +202,15 @@ class RecordingIndicator(QWidget):
 
         # Show completion state briefly
         self.status_label.setText("Completed")
-        self.dot_label.setStyleSheet("""
+        self.dot_label.setStyleSheet(
+            """
             QLabel {
                 color: #28a745;
                 font-size: 16pt;
                 font-weight: bold;
             }
-        """)
+        """
+        )
 
         # Hide after 2 seconds
         QTimer.singleShot(2000, self.animate_fade_out)
@@ -200,46 +218,54 @@ class RecordingIndicator(QWidget):
     def show_live_transcribing(self) -> None:
         """Show live transcribing state"""
         self.status_label.setText("Live Transcribing")
-        self.dot_label.setStyleSheet("""
+        self.dot_label.setStyleSheet(
+            """
             QLabel {
                 color: #17a2b8;
                 font-size: 16pt;
                 font-weight: bold;
             }
-        """)
+        """
+        )
 
     def show_processing_chunk(self, current: int, total: int) -> None:
         """Show processing chunk X/Y"""
         self.status_label.setText(f"Processing Chunk {current}/{total}")
-        self.dot_label.setStyleSheet("""
+        self.dot_label.setStyleSheet(
+            """
             QLabel {
                 color: #ffc107;
                 font-size: 16pt;
                 font-weight: bold;
             }
-        """)
+        """
+        )
 
     def show_finalizing(self) -> None:
         """Show finalizing state"""
         self.status_label.setText("Finalizing")
-        self.dot_label.setStyleSheet("""
+        self.dot_label.setStyleSheet(
+            """
             QLabel {
                 color: #6c757d;
                 font-size: 16pt;
                 font-weight: bold;
             }
-        """)
+        """
+        )
 
     def show_cancelled(self) -> None:
         """Show cancelled state"""
         self.status_label.setText("Cancelled")
-        self.dot_label.setStyleSheet("""
+        self.dot_label.setStyleSheet(
+            """
             QLabel {
                 color: #dc3545;
                 font-size: 16pt;
                 font-weight: bold;
             }
-        """)
+        """
+        )
 
         # Hide after 2 seconds
         QTimer.singleShot(2000, self.animate_fade_out)
@@ -247,13 +273,15 @@ class RecordingIndicator(QWidget):
     def show_cancelling(self) -> None:
         """Show cancelling state"""
         self.status_label.setText("Cancelling...")
-        self.dot_label.setStyleSheet("""
+        self.dot_label.setStyleSheet(
+            """
             QLabel {
                 color: #dc3545;
                 font-size: 16pt;
                 font-weight: bold;
             }
-        """)
+        """
+        )
 
     def toggle_blink(self) -> None:
         """Toggle dot visibility for blinking effect"""
@@ -263,22 +291,26 @@ class RecordingIndicator(QWidget):
         current_opacity = self.dot_label.styleSheet()
         if "color: #dc3545" in current_opacity:
             # Fade to dimmed red
-            self.dot_label.setStyleSheet("""
+            self.dot_label.setStyleSheet(
+                """
                 QLabel {
                     color: rgba(220, 53, 69, 100);
                     font-size: 16pt;
                     font-weight: bold;
                 }
-            """)
+            """
+            )
         else:
             # Back to bright red
-            self.dot_label.setStyleSheet("""
+            self.dot_label.setStyleSheet(
+                """
                 QLabel {
                     color: #dc3545;
                     font-size: 16pt;
                     font-weight: bold;
                 }
-            """)
+            """
+            )
 
     def animate_fade_in(self) -> None:
         """Fade-in animation"""
@@ -305,30 +337,36 @@ class RecordingIndicator(QWidget):
         """Handle click events on indicator"""
         if event.button() == Qt.MouseButton.LeftButton:
             # Emit signal to stop recording and restore main window
-            if self.parent_window is not None and hasattr(self.parent_window, 'restore_from_indicator'):
+            if self.parent_window is not None and hasattr(
+                self.parent_window, "restore_from_indicator"
+            ):
                 self.parent_window.restore_from_indicator()
         super().mousePressEvent(event)
 
     def enterEvent(self, event: Any) -> None:
         """Mouse hover effect"""
-        self.setStyleSheet("""
+        self.setStyleSheet(
+            """
             QWidget {
                 background-color: rgba(26, 26, 26, 240);
                 border: 1px solid rgba(0, 120, 212, 180);
                 border-radius: 12px;
             }
-        """)
+        """
+        )
         super().enterEvent(event)
 
     def leaveEvent(self, event: Any) -> None:
         """Mouse leave effect"""
-        self.setStyleSheet("""
+        self.setStyleSheet(
+            """
             QWidget {
                 background-color: rgba(26, 26, 26, 200);
                 border: 1px solid rgba(64, 64, 64, 180);
                 border-radius: 12px;
             }
-        """)
+        """
+        )
         super().leaveEvent(event)
 
 
@@ -336,11 +374,12 @@ class GlobalRecordingIndicator:
     """
     Singleton manager for the recording indicator
     """
+
     _instance = None
     _indicator = None
 
     @classmethod
-    def get_instance(cls) -> 'GlobalRecordingIndicator':
+    def get_instance(cls) -> "GlobalRecordingIndicator":
         """Get singleton instance"""
         if cls._instance is None:
             cls._instance = cls()
@@ -363,10 +402,14 @@ class GlobalRecordingIndicator:
         if self._indicator is None:
             app = QApplication.instance()
             if app is not None:
-                logger.logger.debug("Creating RecordingIndicator (delayed initialization)")
+                logger.logger.debug(
+                    "Creating RecordingIndicator (delayed initialization)"
+                )
                 self._indicator = RecordingIndicator()
             else:
-                logger.logger.debug("QApplication still not available for delayed initialization")
+                logger.logger.debug(
+                    "QApplication still not available for delayed initialization"
+                )
 
     def show_recording(self) -> None:
         """Show recording indicator"""

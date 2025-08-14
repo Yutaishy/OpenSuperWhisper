@@ -14,11 +14,13 @@ VK_SPACE = 0x20
 VK_LCONTROL = 0xA2
 VK_RCONTROL = 0xA3
 
+
 class DirectHotkeyMonitor(QObject):
     """
     Direct keyboard monitoring using GetAsyncKeyState polling
     More reliable than RegisterHotKey for some systems
     """
+
     hotkey_pressed = Signal(str)
 
     def __init__(self) -> None:
@@ -34,6 +36,7 @@ class DirectHotkeyMonitor(QObject):
         if sys.platform == "win32":
             try:
                 import ctypes
+
                 self.user32 = ctypes.windll.user32
                 self.api_available = True
                 pass  # Windows API available
@@ -71,9 +74,9 @@ class DirectHotkeyMonitor(QObject):
         try:
             # Check if Control is pressed (either left or right)
             ctrl_pressed = (
-                (self.user32.GetAsyncKeyState(VK_CONTROL) & 0x8000) or
-                (self.user32.GetAsyncKeyState(VK_LCONTROL) & 0x8000) or
-                (self.user32.GetAsyncKeyState(VK_RCONTROL) & 0x8000)
+                (self.user32.GetAsyncKeyState(VK_CONTROL) & 0x8000)
+                or (self.user32.GetAsyncKeyState(VK_LCONTROL) & 0x8000)
+                or (self.user32.GetAsyncKeyState(VK_RCONTROL) & 0x8000)
             )
 
             # Check if Space is pressed
@@ -91,8 +94,10 @@ class DirectHotkeyMonitor(QObject):
         except Exception:
             pass  # Error checking keys
 
+
 # Global instance
 _direct_monitor = None
+
 
 def get_direct_monitor() -> DirectHotkeyMonitor:
     """Get global direct monitor instance"""

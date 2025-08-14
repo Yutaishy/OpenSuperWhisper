@@ -24,6 +24,7 @@ class GlobalHotkeyManager(QObject):
     """
     Cross-platform global hotkey manager
     """
+
     # Signals
     hotkey_pressed = Signal(str)  # Emitted when registered hotkey is pressed
 
@@ -59,6 +60,7 @@ class GlobalHotkeyManager(QObject):
             # Windows API functions
             if WINDOWS_AVAILABLE:
                 import ctypes  # Re-import for type checker
+
                 self.user32 = ctypes.windll.user32  # type: ignore[attr-defined]
                 self.kernel32 = ctypes.windll.kernel32  # type: ignore[attr-defined]
 
@@ -76,7 +78,9 @@ class GlobalHotkeyManager(QObject):
         self.fallback_timer = QTimer()
         self.fallback_timer.timeout.connect(self.check_fallback_hotkeys)
 
-    def register_hotkey(self, hotkey_id: str, modifiers: list[str], key_code: int) -> bool:
+    def register_hotkey(
+        self, hotkey_id: str, modifiers: list[str], key_code: int
+    ) -> bool:
         """
         Register a global hotkey
 
@@ -90,18 +94,20 @@ class GlobalHotkeyManager(QObject):
         else:
             return self.register_fallback_hotkey(hotkey_id, modifiers, key_code)
 
-    def register_windows_hotkey(self, hotkey_id: str, modifiers: list[str], key_code: int) -> bool:
+    def register_windows_hotkey(
+        self, hotkey_id: str, modifiers: list[str], key_code: int
+    ) -> bool:
         """Register hotkey on Windows"""
         try:
             # Convert modifiers to Windows constants
             mod_flags = 0
-            if 'ctrl' in modifiers:
+            if "ctrl" in modifiers:
                 mod_flags |= self.MOD_CTRL
-            if 'alt' in modifiers:
+            if "alt" in modifiers:
                 mod_flags |= self.MOD_ALT
-            if 'shift' in modifiers:
+            if "shift" in modifiers:
                 mod_flags |= self.MOD_SHIFT
-            if 'win' in modifiers:
+            if "win" in modifiers:
                 mod_flags |= self.MOD_WIN
 
             # Get unique hotkey ID (use simpler ID generation)
@@ -118,7 +124,7 @@ class GlobalHotkeyManager(QObject):
                     None,  # Window handle (None for global)
                     hotkey_int_id,
                     mod_flags,
-                    key_code
+                    key_code,
                 )
             else:
                 result = False
@@ -134,7 +140,9 @@ class GlobalHotkeyManager(QObject):
                 return True
             else:
                 # Get last error for debugging
-                error_code = self.kernel32.GetLastError() if self.kernel32 is not None else 0
+                error_code = (
+                    self.kernel32.GetLastError() if self.kernel32 is not None else 0
+                )
                 print(f"Failed to register hotkey: {hotkey_id} (Error: {error_code})")
                 return False
 
@@ -142,12 +150,14 @@ class GlobalHotkeyManager(QObject):
             print(f"Windows hotkey registration error: {e}")
             return False
 
-    def register_fallback_hotkey(self, hotkey_id: str, modifiers: list[str], key_code: int) -> bool:
+    def register_fallback_hotkey(
+        self, hotkey_id: str, modifiers: list[str], key_code: int
+    ) -> bool:
         """Register hotkey using fallback method"""
         # Store for fallback monitoring
         self.registered_hotkeys[hotkey_id] = {
-            'modifiers': modifiers,
-            'key_code': key_code
+            "modifiers": modifiers,
+            "key_code": key_code,
         }
 
         if not self.is_monitoring:
@@ -192,6 +202,7 @@ class GlobalHotkeyManager(QObject):
                 return
             import ctypes  # Re-import for type checker
             from ctypes import wintypes  # Re-import for type checker
+
             msg = wintypes.MSG()
             while self.user32.PeekMessageW(ctypes.byref(msg), None, 0, 0, 1):
                 if msg.message == 0x0312:  # WM_HOTKEY
@@ -246,9 +257,7 @@ class GlobalHotkeyManager(QObject):
         for hotkey_id in list(self.registered_hotkeys.keys()):
             if isinstance(hotkey_id, int):
                 # Windows hotkey
-                self.unregister_windows_hotkey(
-                    self.registered_hotkeys[hotkey_id]
-                )
+                self.unregister_windows_hotkey(self.registered_hotkeys[hotkey_id])
             else:
                 # Fallback hotkey
                 self.unregister_fallback_hotkey(hotkey_id)
@@ -257,7 +266,9 @@ class GlobalHotkeyManager(QObject):
 
 
 # Convenience function to register common hotkeys
-def register_ctrl_space_hotkey(callback: Callable[[], None]) -> GlobalHotkeyManager | None:
+def register_ctrl_space_hotkey(
+    callback: Callable[[], None],
+) -> GlobalHotkeyManager | None:
     """
     Register Ctrl+Space as global recording hotkey
 
@@ -272,10 +283,6 @@ def register_ctrl_space_hotkey(callback: Callable[[], None]) -> GlobalHotkeyMana
     )
 
     # Register Ctrl+Space (key code 32 for space)
-    success = manager.register_hotkey(
-        "record_toggle",
-        ["ctrl"],
-        32
-    )
+    success = manager.register_hotkey("record_toggle", ["ctrl"], 32)
 
     return manager if success else None

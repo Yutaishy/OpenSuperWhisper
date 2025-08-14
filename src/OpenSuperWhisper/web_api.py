@@ -12,14 +12,14 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from . import asr_api, formatter_api, logger
 from . import __version__ as OSW_VERSION
+from . import asr_api, formatter_api, logger
 
 # Initialize FastAPI app
 app = FastAPI(
     title="OpenSuperWhisper API",
     description="Two-Stage Voice Transcription Pipeline with AI-Powered Text Formatting",
-    version=OSW_VERSION
+    version=OSW_VERSION,
 )
 
 # Add CORS middleware
@@ -31,6 +31,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Pydantic models for request/response
 class TranscriptionRequest(BaseModel):
     asr_model: str = "whisper-1"
@@ -39,16 +40,19 @@ class TranscriptionRequest(BaseModel):
     prompt: str | None = None
     style_guide: str | None = None
 
+
 class TranscriptionResponse(BaseModel):
     raw_text: str
     formatted_text: str | None = None
     processing_time: float
     models_used: dict[str, str]
 
+
 class HealthResponse(BaseModel):
     status: str
     version: str
     available_models: dict[str, list[str]]
+
 
 # Default formatting prompt
 DEFAULT_PROMPT = """# 役割
@@ -68,6 +72,7 @@ DEFAULT_PROMPT = """# 役割
 # 出力
 整形後の本文のみを出力する。前置き・後置き・ラベル・説明文は一切付さない。"""
 
+
 @app.get("/", response_model=HealthResponse)
 async def health_check() -> HealthResponse:
     """Health check endpoint"""
@@ -79,7 +84,7 @@ async def health_check() -> HealthResponse:
                 "whisper-1",
                 "gpt-4o-audio-preview",
                 "gpt-4o-transcribe",
-                "gpt-4o-mini-transcribe"
+                "gpt-4o-mini-transcribe",
             ],
             "chat_models": [
                 "gpt-4.1",
@@ -93,10 +98,11 @@ async def health_check() -> HealthResponse:
                 "o4-mini",
                 "o4-mini-high",
                 "o1",
-                "o1-mini"
-            ]
-        }
+                "o1-mini",
+            ],
+        },
     )
+
 
 @app.post("/transcribe", response_model=TranscriptionResponse)
 async def transcribe_audio(
@@ -105,7 +111,7 @@ async def transcribe_audio(
     apply_formatting: bool = True,
     chat_model: str = "gpt-4o-mini",
     prompt: str | None = None,
-    style_guide: str | None = None
+    style_guide: str | None = None,
 ) -> TranscriptionResponse:
     """
     Transcribe and optionally format audio file
@@ -122,12 +128,19 @@ async def transcribe_audio(
         TranscriptionResponse with raw and formatted text
     """
     import time
+
     start_time = time.time()
 
     # Validate file type
-    if not file.content_type or not file.content_type.startswith(('audio/', 'video/')):
-        if not file.filename or not any(file.filename.lower().endswith(ext) for ext in ['.wav', '.mp3', '.m4a', '.flac', '.ogg']):
-            raise HTTPException(status_code=400, detail="Unsupported file type. Please upload an audio file.")
+    if not file.content_type or not file.content_type.startswith(("audio/", "video/")):
+        if not file.filename or not any(
+            file.filename.lower().endswith(ext)
+            for ext in [".wav", ".mp3", ".m4a", ".flac", ".ogg"]
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail="Unsupported file type. Please upload an audio file.",
+            )
 
     # Check for API key
     if not os.getenv("OPENAI_API_KEY"):
@@ -135,15 +148,20 @@ async def transcribe_audio(
 
     try:
         # Save uploaded file to temporary location without loading into memory
-        with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{file.filename}") as temp_file:
+        with tempfile.NamedTemporaryFile(
+            delete=False, suffix=f"_{file.filename}"
+        ) as temp_file:
             await file.seek(0)
             # Stream copy to temp file to avoid memory spikes on large uploads
             import shutil
+
             shutil.copyfileobj(file.file, temp_file)
             temp_audio_path = temp_file.name
 
         file_size = os.path.getsize(temp_audio_path)
-        logger.logger.info(f"Processing uploaded file: {file.filename} ({file_size} bytes)")
+        logger.logger.info(
+            f"Processing uploaded file: {file.filename} ({file_size} bytes)"
+        )
 
         # Stage 1: ASR Transcription
         logger.logger.info(f"Starting ASR with model: {asr_model}")
@@ -158,10 +176,7 @@ async def transcribe_audio(
             logger.logger.info(f"Starting formatting with model: {chat_model}")
             formatting_prompt = prompt or DEFAULT_PROMPT
             formatted_text = formatter_api.format_text(
-                raw_text,
-                formatting_prompt,
-                style_guide or "",
-                model=chat_model
+                raw_text, formatting_prompt, style_guide or "", model=chat_model
             )
             models_used["formatter"] = chat_model
             logger.logger.info(f"Formatting completed: {formatted_text[:100]}...")
@@ -173,26 +188,29 @@ async def transcribe_audio(
             raw_text=raw_text,
             formatted_text=formatted_text,
             processing_time=processing_time,
-            models_used=models_used
+            models_used=models_used,
         )
 
     except Exception as e:
         logger.logger.error(f"Transcription error: {e}")
-        raise HTTPException(status_code=500, detail=f"Transcription failed: {str(e)}") from e
+        raise HTTPException(
+            status_code=500, detail=f"Transcription failed: {str(e)}"
+        ) from e
     finally:
         # Cleanup temporary file
         try:
-            if 'temp_audio_path' in locals():
+            if "temp_audio_path" in locals():
                 os.unlink(temp_audio_path)
         except Exception as e:
             logger.logger.warning(f"Failed to cleanup temp file: {e}")
+
 
 @app.post("/format-text")
 async def format_text_only(
     text: str,
     chat_model: str = "gpt-4o-mini",
     prompt: str | None = None,
-    style_guide: str | None = None
+    style_guide: str | None = None,
 ) -> dict[str, Any]:
     """
     Format text without transcription
@@ -214,14 +232,12 @@ async def format_text_only(
 
     try:
         import time
+
         start_time = time.time()
 
         formatting_prompt = prompt or DEFAULT_PROMPT
         formatted_text = formatter_api.format_text(
-            text,
-            formatting_prompt,
-            style_guide or "",
-            model=chat_model
+            text, formatting_prompt, style_guide or "", model=chat_model
         )
 
         processing_time = time.time() - start_time
@@ -230,12 +246,15 @@ async def format_text_only(
             "original_text": text,
             "formatted_text": formatted_text,
             "processing_time": processing_time,
-            "model_used": chat_model
+            "model_used": chat_model,
         }
 
     except Exception as e:
         logger.logger.error(f"Text formatting error: {e}")
-        raise HTTPException(status_code=500, detail=f"Text formatting failed: {str(e)}") from e
+        raise HTTPException(
+            status_code=500, detail=f"Text formatting failed: {str(e)}"
+        ) from e
+
 
 if __name__ == "__main__":
     import uvicorn

@@ -11,6 +11,7 @@ from PySide6.QtCore import QObject, QTimer, Signal
 # Try to import pynput for cross-platform key monitoring
 try:
     from pynput import keyboard
+
     PYNPUT_AVAILABLE = True
 except ImportError:
     PYNPUT_AVAILABLE = False
@@ -21,6 +22,7 @@ class SimpleHotkeyMonitor(QObject):
     """
     Simple hotkey monitor using pynput or fallback methods
     """
+
     hotkey_pressed = Signal(str)
 
     def __init__(self) -> None:
@@ -61,8 +63,7 @@ class SimpleHotkeyMonitor(QObject):
         """Start pynput-based monitoring"""
         try:
             self.listener = keyboard.Listener(
-                on_press=self.on_key_press,
-                on_release=self.on_key_release
+                on_press=self.on_key_press, on_release=self.on_key_release
             )
             if self.listener is not None:
                 self.listener.start()
@@ -102,12 +103,12 @@ class SimpleHotkeyMonitor(QObject):
     def get_key_name(self, key: Any) -> str | None:
         """Convert pynput key to string name"""
         try:
-            if hasattr(key, 'char') and key.char:
+            if hasattr(key, "char") and key.char:
                 return str(key.char).lower()
-            elif hasattr(key, 'name'):
+            elif hasattr(key, "name"):
                 return str(key.name).lower()
             else:
-                return str(key).lower().replace('key.', '')
+                return str(key).lower().replace("key.", "")
         except Exception:
             return None
 
@@ -119,13 +120,13 @@ class SimpleHotkeyMonitor(QObject):
 
         # Create combination string
         sorted_keys = sorted(self.current_keys)
-        '+'.join(sorted_keys)
+        "+".join(sorted_keys)
 
         pass  # Key monitoring
 
         # Check all possible combinations (order may vary)
         for registered_combo, hotkey_id in self.registered_hotkeys.items():
-            registered_keys = set(registered_combo.split('+'))
+            registered_keys = set(registered_combo.split("+"))
             pass  # Checking registered combination
             if registered_keys.issubset(self.current_keys):
                 pass  # Hotkey match found
@@ -139,6 +140,7 @@ class SimpleHotkeyMonitor(QObject):
         if not PYNPUT_AVAILABLE and sys.platform == "win32":
             try:
                 import ctypes
+
                 user32 = ctypes.windll.user32
 
                 # Check common key combinations manually
@@ -172,7 +174,7 @@ class SimpleHotkeyMonitor(QObject):
                 pass
             self.listener = None
 
-        if hasattr(self, 'poll_timer'):
+        if hasattr(self, "poll_timer"):
             self.poll_timer.stop()
 
     def unregister_all(self) -> None:
@@ -183,6 +185,7 @@ class SimpleHotkeyMonitor(QObject):
 
 # Global instance
 _hotkey_monitor = None
+
 
 def get_hotkey_monitor() -> SimpleHotkeyMonitor:
     """Get global hotkey monitor instance"""

@@ -14,18 +14,20 @@ from . import logger
 
 class RetryStrategy(Enum):
     """Retry strategies for different error types"""
-    IMMEDIATE = "immediate"          # Retry immediately
-    EXPONENTIAL = "exponential"      # Exponential backoff
-    FIXED_DELAY = "fixed_delay"      # Fixed delay between retries
-    NO_RETRY = "no_retry"           # Don't retry
+
+    IMMEDIATE = "immediate"  # Retry immediately
+    EXPONENTIAL = "exponential"  # Exponential backoff
+    FIXED_DELAY = "fixed_delay"  # Fixed delay between retries
+    NO_RETRY = "no_retry"  # Don't retry
 
 
 @dataclass
 class RetryConfig:
     """Configuration for retry behavior"""
-    max_retries: int = 1            # Maximum number of retries (as per requirements)
-    base_delay: float = 5.0         # Base delay in seconds
-    max_delay: float = 60.0         # Maximum delay in seconds
+
+    max_retries: int = 1  # Maximum number of retries (as per requirements)
+    base_delay: float = 5.0  # Base delay in seconds
+    max_delay: float = 60.0  # Maximum delay in seconds
     strategy: RetryStrategy = RetryStrategy.FIXED_DELAY
 
 
@@ -34,14 +36,26 @@ class RetryManager:
 
     # Error type to retry configuration mapping
     ERROR_RETRY_CONFIG = {
-        "Network timeout": RetryConfig(max_retries=1, base_delay=0.0, strategy=RetryStrategy.IMMEDIATE),
-        "Connection timed out": RetryConfig(max_retries=1, base_delay=0.0, strategy=RetryStrategy.IMMEDIATE),
-        "Rate limit": RetryConfig(max_retries=1, base_delay=60.0, strategy=RetryStrategy.FIXED_DELAY),
-        "API rate limit": RetryConfig(max_retries=1, base_delay=60.0, strategy=RetryStrategy.FIXED_DELAY),
-        "Network error": RetryConfig(max_retries=1, base_delay=5.0, strategy=RetryStrategy.FIXED_DELAY),
+        "Network timeout": RetryConfig(
+            max_retries=1, base_delay=0.0, strategy=RetryStrategy.IMMEDIATE
+        ),
+        "Connection timed out": RetryConfig(
+            max_retries=1, base_delay=0.0, strategy=RetryStrategy.IMMEDIATE
+        ),
+        "Rate limit": RetryConfig(
+            max_retries=1, base_delay=60.0, strategy=RetryStrategy.FIXED_DELAY
+        ),
+        "API rate limit": RetryConfig(
+            max_retries=1, base_delay=60.0, strategy=RetryStrategy.FIXED_DELAY
+        ),
+        "Network error": RetryConfig(
+            max_retries=1, base_delay=5.0, strategy=RetryStrategy.FIXED_DELAY
+        ),
         "Authentication": RetryConfig(max_retries=0, strategy=RetryStrategy.NO_RETRY),
         "API key": RetryConfig(max_retries=0, strategy=RetryStrategy.NO_RETRY),
-        "default": RetryConfig(max_retries=1, base_delay=10.0, strategy=RetryStrategy.FIXED_DELAY)
+        "default": RetryConfig(
+            max_retries=1, base_delay=10.0, strategy=RetryStrategy.FIXED_DELAY
+        ),
     }
 
     def __init__(self) -> None:
@@ -72,7 +86,9 @@ class RetryManager:
 
         # Check if retries exhausted
         if current_retries >= config.max_retries:
-            logger.logger.info(f"Chunk {chunk_id} exceeded max retries ({config.max_retries})")
+            logger.logger.info(
+                f"Chunk {chunk_id} exceeded max retries ({config.max_retries})"
+            )
             return False
 
         # Check retry strategy
@@ -158,7 +174,9 @@ class RetryManager:
     def remove_chunk(self, chunk_id: int) -> None:
         """Remove a chunk from retry queue (e.g., if successful)"""
         with self.retry_lock:
-            self.retry_queue = [(cid, rt) for cid, rt in self.retry_queue if cid != chunk_id]
+            self.retry_queue = [
+                (cid, rt) for cid, rt in self.retry_queue if cid != chunk_id
+            ]
             if chunk_id in self.retry_counts:
                 del self.retry_counts[chunk_id]
 
@@ -184,7 +202,7 @@ class RetryManager:
 
         elif config.strategy == RetryStrategy.EXPONENTIAL:
             # Exponential backoff: base_delay * 2^retry_count
-            delay = config.base_delay * (2 ** retry_count)
+            delay = config.base_delay * (2**retry_count)
             return float(min(delay, config.max_delay))
 
         return config.base_delay
@@ -196,6 +214,5 @@ class RetryManager:
                 "pending_retries": len(self.retry_queue),
                 "retry_counts": dict(self.retry_counts),
                 "is_active": self.is_active,
-                "queue": [(cid, rt - time.time()) for cid, rt in self.retry_queue]
+                "queue": [(cid, rt - time.time()) for cid, rt in self.retry_queue],
             }
-
