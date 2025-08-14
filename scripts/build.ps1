@@ -168,7 +168,7 @@ foreach ($import in $HiddenImports) {
 }
 
 # Run PyInstaller
-python -m PyInstaller $PyInstallerOpts run_app.py
+python -m PyInstaller $PyInstallerOpts src/run_app.py
 
 # Copy additional files
 Write-Host ""

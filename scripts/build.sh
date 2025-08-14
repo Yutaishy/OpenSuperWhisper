@@ -151,7 +151,7 @@ PYINSTALLER_OPTS+=(
 )
 
 # Run PyInstaller
-python -m PyInstaller "${PYINSTALLER_OPTS[@]}" run_app.py
+python -m PyInstaller "${PYINSTALLER_OPTS[@]}" src/run_app.py
 
 # Copy additional files
 echo ""
