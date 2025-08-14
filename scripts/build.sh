@@ -129,8 +129,10 @@ case "$OS_TARGET" in
     windows)
         PYINSTALLER_OPTS+=(
             "--icon=assets/windows/osw.ico"
-            "--version-file=version_info.txt"
         )
+        if [ -f "version_info.txt" ]; then
+            PYINSTALLER_OPTS+=("--version-file=version_info.txt")
+        fi
         ;;
     linux)
         PYINSTALLER_OPTS+=(
