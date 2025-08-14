@@ -12,7 +12,7 @@
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/release.yml"><img src="https://github.com/Yutaishy/OpenSuperWhisper/actions/workflows/release.yml/badge.svg" alt="Release"></a>
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/releases/latest"><img src="https://img.shields.io/github/v/release/Yutaishy/OpenSuperWhisper?color=green" alt="Latest Release"></a>
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/releases"><img src="https://img.shields.io/github/downloads/Yutaishy/OpenSuperWhisper/total" alt="Downloads"></a>
-  <img src="https://img.shields.io/badge/Version-0.6.15-orange.svg" alt="Version">
+  <img src="https://img.shields.io/badge/Version-0.7.0-orange.svg" alt="Version">
   <a href="https://github.com/Yutaishy/OpenSuperWhisper/pkgs/container/opensuperwhisper"><img src="https://img.shields.io/badge/Docker-Available-blue.svg" alt="Docker"></a>
 </p>
 
@@ -23,6 +23,21 @@ OpenSuperWhisper is a cross-platform desktop application that transforms speech 
 <p align="center">
   <img src="assets/social_preview_1280x640.jpg" alt="OpenSuperWhisper Preview" width="640" height="320">
 </p>
+
+## 📥 Download
+
+### Latest Release: v0.7.0
+
+| Platform | Download | Size |
+|----------|----------|------|
+| Windows (64-bit) | [opensuperwhisper-v0.7.0-windows-amd64.zip](https://github.com/Yutaishy/OpenSuperWhisper/releases/download/v0.7.0/opensuperwhisper-v0.7.0-windows-amd64.zip) | 72 MB |
+| Linux (64-bit) | [opensuperwhisper-v0.7.0-linux-amd64.tar.gz](https://github.com/Yutaishy/OpenSuperWhisper/releases/download/v0.7.0/opensuperwhisper-v0.7.0-linux-amd64.tar.gz) | 95 MB |
+| Linux (ARM64) | [opensuperwhisper-v0.7.0-linux-arm64.tar.gz](https://github.com/Yutaishy/OpenSuperWhisper/releases/download/v0.7.0/opensuperwhisper-v0.7.0-linux-arm64.tar.gz) | 95 MB |
+| macOS (Intel) | [opensuperwhisper-v0.7.0-darwin-amd64-source.tar.gz](https://github.com/Yutaishy/OpenSuperWhisper/releases/download/v0.7.0/opensuperwhisper-v0.7.0-darwin-amd64-source.tar.gz) | 64 KB |
+| macOS (Apple Silicon) | [opensuperwhisper-v0.7.0-darwin-arm64-source.tar.gz](https://github.com/Yutaishy/OpenSuperWhisper/releases/download/v0.7.0/opensuperwhisper-v0.7.0-darwin-arm64-source.tar.gz) | 64 KB |
+| Docker | `docker pull ghcr.io/yutaishy/opensuperwhisper:latest` | - |
+
+📖 **[Installation Guide](INSTALLATION.md)** | 🚀 **[Quick Start](#quick-start)** | 📋 **[Release Notes](https://github.com/Yutaishy/OpenSuperWhisper/releases/latest)**
 
 ## ✨ Key Features
 

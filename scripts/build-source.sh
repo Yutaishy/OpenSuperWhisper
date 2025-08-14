@@ -96,8 +96,14 @@ else
     echo "Created: ${DIST_NAME}.tar.gz"
 fi
 
-# Generate checksum
-sha256sum "${DIST_NAME}".* > "${DIST_NAME}.sha256"
+# Generate checksum (cross-platform)
+if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "${DIST_NAME}".* > "${DIST_NAME}.sha256"
+elif command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "${DIST_NAME}".* > "${DIST_NAME}.sha256"
+else
+    echo "Warning: No SHA256 tool found, skipping checksum generation"
+fi
 
 echo "Source distribution created successfully!"
 echo "Location: dist/${OS_TARGET}/${ARCH_TARGET}/${DIST_NAME}.*"
