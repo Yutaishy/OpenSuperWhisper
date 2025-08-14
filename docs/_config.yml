@@ -1,0 +1,83 @@
+# GitHub Pages Configuration for OpenSuperWhisper
+
+# Site settings
+title: OpenSuperWhisper
+description: Two-Stage Voice Transcription Pipeline with AI-Powered Text Formatting
+author: Yutaishy
+email: 
+url: "https://yutaishy.github.io"
+baseurl: "/OpenSuperWhisper"
+
+# Theme
+theme: jekyll-theme-cayman
+remote_theme: pages-themes/cayman@v0.2.0
+
+# Plugins
+plugins:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+
+# Kramdown settings
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: 'highlight'
+    block:
+      line_numbers: true
+
+# Collections
+collections:
+  docs:
+    output: true
+    permalink: /:collection/:name
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"
+  - scope:
+      path: ""
+      type: "docs"
+    values:
+      layout: "default"
+
+# Navigation
+navigation:
+  - title: Home
+    url: /
+  - title: Installation
+    url: https://github.com/Yutaishy/OpenSuperWhisper/blob/main/INSTALLATION.md
+  - title: API Docs
+    url: /API
+  - title: GitHub
+    url: https://github.com/Yutaishy/OpenSuperWhisper
+
+# Social
+github_username: Yutaishy
+repository: Yutaishy/OpenSuperWhisper
+
+# Analytics (optional - add your tracking ID)
+# google_analytics: UA-XXXXXXXXX-X
+
+# SEO
+tagline: Transform speech into polished text with AI
+logo: /assets/windows/osw.ico
+
+# Exclude from build
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .sass-cache
+  - .jekyll-cache
+  - .jekyll-metadata
