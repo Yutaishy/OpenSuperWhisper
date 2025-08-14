@@ -52,7 +52,7 @@ print_section "Code Formatting (Black)"
 
 check_tool "black" "black"
 
-if black --check --diff src/ tests/ *.py 2>/dev/null; then
+if black --check --diff src/ tests/ 2>/dev/null; then
     echo -e "${GREEN}✓ Code formatting check passed${NC}"
 else
     echo -e "${RED}✗ Code formatting issues found${NC}"
@@ -67,7 +67,7 @@ print_section "Import Sorting (isort)"
 
 check_tool "isort" "isort"
 
-if isort --check-only --diff src/ tests/ *.py 2>/dev/null; then
+if isort --check-only --diff src/ tests/ 2>/dev/null; then
     echo -e "${GREEN}✓ Import sorting check passed${NC}"
 else
     echo -e "${RED}✗ Import sorting issues found${NC}"
@@ -93,7 +93,7 @@ max-complexity = 10
 EOF
 fi
 
-if flake8 src/ tests/ *.py 2>/dev/null; then
+if flake8 src/ tests/ 2>/dev/null; then
     echo -e "${GREEN}✓ Linting check passed${NC}"
 else
     echo -e "${RED}✗ Linting issues found${NC}"

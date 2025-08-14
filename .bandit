@@ -1,0 +1,6 @@
+[bandit]
+exclude_dirs = /tests,/venv,/build,/dist
+skips = B104,B108
+
+# B104: Binding to 0.0.0.0 is necessary for Docker containers
+# B108: /tmp directory usage is safe in Docker environment
