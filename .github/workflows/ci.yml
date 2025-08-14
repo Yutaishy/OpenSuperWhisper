@@ -122,12 +122,19 @@ jobs:
       if: matrix.os != 'windows'
       run: |
         chmod +x scripts/build.sh
-        scripts/build.sh ${{ matrix.os }} ${{ matrix.arch }}
+        scripts/build.sh ${{ matrix.os }} ${{ matrix.arch }} || (
+          echo "PyInstaller build failed, creating source distribution instead"
+          chmod +x scripts/build-source.sh
+          scripts/build-source.sh ${{ matrix.os }} ${{ matrix.arch }}
+        )
     
     - name: Build application (Windows)
       if: matrix.os == 'windows'
       run: |
-        powershell -ExecutionPolicy Bypass -File scripts/build.ps1 -OSTarget ${{ matrix.os }} -ArchTarget ${{ matrix.arch }}
+        powershell -ExecutionPolicy Bypass -File scripts/build.ps1 -OSTarget ${{ matrix.os }} -ArchTarget ${{ matrix.arch }} || (
+          echo "PyInstaller build failed, creating source distribution instead"
+          bash scripts/build-source.sh ${{ matrix.os }} ${{ matrix.arch }}
+        )
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
@@ -263,7 +270,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ghcr.io/${{ github.repository }}
+        images: ghcr.io/yutaishy/opensuperwhisper
         tags: |
           type=ref,event=branch
           type=ref,event=pr
@@ -285,7 +292,7 @@ jobs:
     - name: Run Trivy on Docker image
       uses: aquasecurity/trivy-action@master
       with:
-        image-ref: ghcr.io/${{ github.repository }}:${{ steps.meta.outputs.version }}
+        image-ref: ghcr.io/yutaishy/opensuperwhisper:${{ steps.meta.outputs.version }}
         format: 'sarif'
         output: 'docker-trivy-results.sarif'
       if: github.event_name != 'pull_request'
