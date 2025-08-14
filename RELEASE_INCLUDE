@@ -1,0 +1,39 @@
+# Release Include List
+# Files and directories to include in release packages
+# Format: One path per line, relative to repository root
+
+# Core application
+src/
+run_app.py
+web_server.py
+
+# Configuration templates
+configs/*.example
+configs/*.template
+
+# Requirements
+requirements.txt
+requirements-docker.txt
+
+# Documentation (minimal)
+README.md
+LICENSE
+CHANGELOG.md
+
+# Docker support
+Dockerfile
+docker-compose.yml
+
+# Platform-specific assets
+assets/windows/osw.ico
+assets/web/favicon.ico
+assets/web/site.webmanifest
+
+# Startup scripts
+scripts/start.sh
+scripts/start.ps1
+scripts/start.bat
+
+# Essential data
+style_guides/example_style.json
+style_guides/example_style.yaml

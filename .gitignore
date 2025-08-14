@@ -1,12 +1,29 @@
+# ==========================================
+# Build outputs
+# ==========================================
+build/
+dist/
+*.exe
+*.app
+*.dmg
+*.pkg
+*.deb
+*.rpm
+*.AppImage
+*.snap
+*.msi
+*.tar.gz
+*.zip
+
+# ==========================================
 # Python
+# ==========================================
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -19,66 +36,79 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
 # Virtual environments
 venv/
 ENV/
 env/
 .venv
+.virtualenv
+pipenv
 
-# IDE
+# ==========================================
+# IDE and Editors
+# ==========================================
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
 
-# Project specific
-logs/
-*.log
-.env
-settings.json
-config.json
-*.wav
-*.mp3
-*.m4a
-temp/
-tmp/
-
-# Test and development
-archive/
-# Exclude test files in root but not in tests/ directory
-/test_*.py
-debug_*.py
-check_*.py
-verify_*.py
-
-# OS specific
+# ==========================================
+# OS Generated
+# ==========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 desktop.ini
-.DS_Store
+$RECYCLE.BIN/
 
-# Credentials
+# ==========================================
+# Logs and Debug
+# ==========================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# ==========================================
+# Environment and Config
+# ==========================================
+.env
+.env.local
+.env.*.local
+settings.json
+config.json
+*.conf
+
+# ==========================================
+# Security and Credentials
+# ==========================================
 *.key
 *.pem
+*.cert
+*.crt
 api_keys.json
 credentials.json
+secrets.yaml
+secrets.yml
 
-# Output files
-output/
-results/
-transcriptions/
-
-# Backup files
-*.bak
-*.backup
-
-# npm
-node_modules/
-npm-debug.log*
-package-lock.json
-
-# Coverage reports
+# ==========================================
+# Test and Coverage
+# ==========================================
 htmlcov/
 .coverage
 .coverage.*
@@ -86,16 +116,99 @@ htmlcov/
 coverage.xml
 *.cover
 .pytest_cache/
+.tox/
+nosetests.xml
+junit.xml
+test-results/
 
-# Temporary files
+# Test files in root (but not in tests/)
+/test_*.py
+/debug_*.py
+/check_*.py
+/verify_*.py
+
+# ==========================================
+# Dependencies
+# ==========================================
+node_modules/
+vendor/
+bower_components/
+
+# Lock files (uncomment if you want to exclude)
+# package-lock.json
+# yarn.lock
+# Pipfile.lock
+
+# ==========================================
+# Temporary and Cache
+# ==========================================
 *.tmp
 *.temp
+tmp/
+temp/
+.cache/
+*.cache
 nul
+
+# ==========================================
+# Output and Generated
+# ==========================================
+output/
+results/
+transcriptions/
+generated/
+
+# ==========================================
+# Media Files (large)
+# ==========================================
+*.wav
+*.mp3
+*.m4a
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.flac
+*.ogg
+
+# ==========================================
+# Archives
+# ==========================================
+*.7z
+*.rar
+*.tar.bz2
+
+# ==========================================
+# Backup
+# ==========================================
+*.bak
+*.backup
+*.old
+*~backup
+
+# ==========================================
+# Database
+# ==========================================
+*.db
+*.sqlite
+*.sqlite3
+*.mdb
+
+# ==========================================
+# Windows specific
+# ==========================================
+%APPDATA%/
+%LOCALAPPDATA%/
+%TEMP%/
+%USERPROFILE%/
+
+# ==========================================
+# Project specific cleanup
+# ==========================================
+archive/npm_cache/
+archive/windows_appdata/
+archive/temp_files/
+archive/old_logs/
 
 # Local session logs / dev notes
 250812_cursorcli-kiroku.md
-
-# Windows specific folders (should never be committed)
-%APPDATA%/
-%USERPROFILE%/
-%TEMP%/

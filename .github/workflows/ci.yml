@@ -1,0 +1,395 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '18'
+
+jobs:
+  # ==========================================
+  # Quality Checks
+  # ==========================================
+  quality:
+    name: Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Cache pip
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install black isort flake8 mypy bandit safety pytest pytest-cov
+    
+    - name: Run quality checks
+      run: |
+        chmod +x scripts/check.sh
+        scripts/check.sh
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+      if: always()
+
+  # ==========================================
+  # Build Matrix
+  # ==========================================
+  build:
+    name: Build ${{ matrix.os }}/${{ matrix.arch }}
+    needs: quality
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux builds
+          - os: linux
+            arch: amd64
+            runner: ubuntu-latest
+          - os: linux
+            arch: arm64
+            runner: ubuntu-latest
+            
+          # macOS builds
+          - os: darwin
+            arch: amd64
+            runner: macos-13  # Intel Mac
+          - os: darwin
+            arch: arm64
+            runner: macos-latest  # M1/M2 Mac
+            
+          # Windows builds
+          - os: windows
+            arch: amd64
+            runner: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Set up QEMU (for ARM builds)
+      if: matrix.arch == 'arm64' && matrix.os == 'linux'
+      uses: docker/setup-qemu-action@v3
+      with:
+        platforms: arm64
+    
+    - name: Cache dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/pip
+          venv
+        key: ${{ runner.os }}-${{ matrix.arch }}-build-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ matrix.arch }}-build-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+    
+    - name: Build application (Unix)
+      if: matrix.os != 'windows'
+      run: |
+        chmod +x scripts/build.sh
+        scripts/build.sh ${{ matrix.os }} ${{ matrix.arch }}
+    
+    - name: Build application (Windows)
+      if: matrix.os == 'windows'
+      run: |
+        powershell -ExecutionPolicy Bypass -File scripts/build.ps1 -OSTarget ${{ matrix.os }} -ArchTarget ${{ matrix.arch }}
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-${{ matrix.os }}-${{ matrix.arch }}
+        path: dist/${{ matrix.os }}/${{ matrix.arch }}/*.{zip,tar.gz,sha256}
+        retention-days: 7
+
+  # ==========================================
+  # Dependency and Security Checks
+  # ==========================================
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: quality
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+    
+    - name: Upload Trivy results to GitHub Security
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'
+      if: always()
+    
+    - name: SAST Scan with Semgrep
+      uses: returntocorp/semgrep-action@v1
+      with:
+        config: auto
+      if: github.event_name == 'pull_request'
+
+  # ==========================================
+  # Integration Tests
+  # ==========================================
+  integration:
+    name: Integration Tests ${{ matrix.os }}
+    needs: build
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+            runner: ubuntu-latest
+          - os: darwin
+            runner: macos-latest
+          - os: windows
+            runner: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-${{ matrix.os }}-amd64
+        path: test-dist
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Run smoke tests
+      run: |
+        python -m pip install pytest requests
+        pytest tests/test_integration.py -v
+      env:
+        TEST_DIST_PATH: test-dist
+    
+    - name: Dependency analysis (Linux)
+      if: matrix.os == 'linux'
+      run: |
+        cd test-dist
+        for file in $(find . -type f -executable); do
+          echo "Checking $file..."
+          ldd "$file" || true
+        done
+    
+    - name: Dependency analysis (macOS)
+      if: matrix.os == 'darwin'
+      run: |
+        cd test-dist
+        for file in $(find . -type f -perm +111); do
+          echo "Checking $file..."
+          otool -L "$file" || true
+        done
+    
+    - name: Dependency analysis (Windows)
+      if: matrix.os == 'windows'
+      run: |
+        cd test-dist
+        Get-ChildItem -Filter *.exe | ForEach-Object {
+          Write-Host "Checking $_..."
+          dumpbin /dependents $_.FullName
+        }
+
+  # ==========================================
+  # Docker Build
+  # ==========================================
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: quality
+    if: github.event_name != 'pull_request'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      if: github.event_name != 'pull_request'
+    
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ghcr.io/${{ github.repository }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha
+    
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        platforms: linux/amd64,linux/arm64
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    
+    - name: Run Trivy on Docker image
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ghcr.io/${{ github.repository }}:${{ steps.meta.outputs.version }}
+        format: 'sarif'
+        output: 'docker-trivy-results.sarif'
+      if: github.event_name != 'pull_request'
+    
+    - name: Upload Docker scan results
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'docker-trivy-results.sarif'
+      if: github.event_name != 'pull_request' && always()
+
+  # ==========================================
+  # Release
+  # ==========================================
+  release:
+    name: Create Release
+    needs: [build, integration, docker]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: release-artifacts
+    
+    - name: Prepare release assets
+      run: |
+        mkdir -p release-files
+        find release-artifacts -type f \( -name "*.zip" -o -name "*.tar.gz" -o -name "*.sha256" \) -exec cp {} release-files/ \;
+        cd release-files
+        sha256sum * > SHA256SUMS
+    
+    - name: Extract changelog
+      id: changelog
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/}
+        sed -n "/^## $VERSION/,/^## /p" CHANGELOG.md | sed '$d' > release-notes.md
+        echo "::set-output name=version::$VERSION"
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        body_path: release-notes.md
+        files: release-files/*
+        draft: false
+        prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-beta') || contains(github.ref, '-alpha') }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Update Docker tags
+      run: |
+        echo "Release ${{ steps.changelog.outputs.version }} created"
+        echo "Docker image: ghcr.io/${{ github.repository }}:${{ steps.changelog.outputs.version }}"
+
+  # ==========================================
+  # Notification
+  # ==========================================
+  notify:
+    name: Notify Results
+    needs: [quality, build, security, integration, docker]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Check job statuses
+      id: check
+      run: |
+        if [ "${{ needs.quality.result }}" == "failure" ] || \
+           [ "${{ needs.build.result }}" == "failure" ] || \
+           [ "${{ needs.integration.result }}" == "failure" ]; then
+          echo "::set-output name=status::failure"
+        else
+          echo "::set-output name=status::success"
+        fi
+    
+    - name: Create issue on failure
+      if: steps.check.outputs.status == 'failure' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const title = `CI/CD Pipeline Failed - ${new Date().toISOString().split('T')[0]}`;
+          const body = `
+          ## Pipeline Failure Report
+          
+          **Commit:** ${{ github.sha }}
+          **Branch:** ${{ github.ref }}
+          **Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          
+          ### Failed Jobs:
+          - Quality: ${{ needs.quality.result }}
+          - Build: ${{ needs.build.result }}
+          - Security: ${{ needs.security.result }}
+          - Integration: ${{ needs.integration.result }}
+          - Docker: ${{ needs.docker.result }}
+          
+          Please investigate and fix the issues.
+          `;
+          
+          github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: title,
+            body: body,
+            labels: ['ci-failure', 'bug']
+          });

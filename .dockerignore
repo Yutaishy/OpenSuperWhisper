@@ -1,123 +1,225 @@
+# ==========================================
 # Docker ignore file for OpenSuperWhisper
-# Exclude unnecessary files from Docker build context
+# Optimized for minimal build context size
+# ==========================================
 
-# Development files
+# ==========================================
+# Version Control
+# ==========================================
 .git/
 .gitignore
+.gitattributes
+.github/
+
+# ==========================================
+# Documentation
+# ==========================================
 *.md
-LICENSE
-CODE_OF_CONDUCT.md
-CONTRIBUTING.md
-SECURITY.md
-CHANGELOG.md
+!README.md  # Keep README for reference
+docs/
+LICENSE*
+CHANGELOG*
+CODE_OF_CONDUCT*
+CONTRIBUTING*
+SECURITY*
 
-# Python cache and build artifacts
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# Virtual environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# IDE and editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-Thumbs.db
-
-# Logs and temporary files
-logs/
-*.log
-*.tmp
-*.temp
-temp/
-tmp/
-
-# Test files and coverage
+# ==========================================
+# Development and Test
+# ==========================================
+tests/
+test/
+*_test.py
+*_spec.py
+test_*.py
+pytest.ini
 .coverage
+htmlcov/
 .pytest_cache/
 .tox/
 .nox/
 coverage.xml
 *.cover
-*.py,cover
 .hypothesis/
+250812_cursorcli-kiroku.md
 
-# Asset files not needed in Docker
-assets/
-brand/
-style_guides/
+# ==========================================
+# IDE and Editor
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.editorconfig
+.project
+.classpath
+.settings/
 
-# Platform-specific executables
-*.exe
-*.app
-*.dmg
-*.pkg
-
-# Development requirements (use requirements-docker.txt instead)
-requirements.txt
-
-# GUI-related files not needed for API server
-*.ui
-*.qrc
-
-# Test files
-tests/
-test_*.py
-*_test.py
-
-# Documentation
-docs/
-*.rst
-
-# Build scripts
+# ==========================================
+# Build Artifacts
+# ==========================================
+build/
+dist/
+*.egg-info/
+*.egg
+MANIFEST
+*.spec
 build_executable.py
 
-# Environment files (sensitive data)
-.env.local
-.env.production
-.env.development
+# ==========================================
+# Python Cache
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
 
-# Node.js (if any)
+# ==========================================
+# Virtual Environments
+# ==========================================
+venv/
+env/
+ENV/
+.venv
+.virtualenv
+pipenv
+env.bak/
+venv.bak/
+
+# ==========================================
+# Logs and Temporary
+# ==========================================
+logs/
+*.log
+tmp/
+temp/
+*.tmp
+*.temp
+*.cache
+nul
+
+# ==========================================
+# OS Generated
+# ==========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ==========================================
+# Archives and Backups
+# ==========================================
+archive/
+backup/
+*.bak
+*.backup
+*.old
+*.zip
+*.tar
+*.tar.gz
+*.tar.bz2
+*.rar
+*.7z
+
+# ==========================================
+# Secrets and Credentials
+# ==========================================
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.cert
+*.crt
+credentials.json
+secrets.yaml
+secrets.yml
+api_keys.json
+
+# ==========================================
+# CI/CD
+# ==========================================
+.travis.yml
+.gitlab-ci.yml
+azure-pipelines.yml
+.circleci/
+.appveyor.yml
+
+# ==========================================
+# Node.js (if applicable)
+# ==========================================
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+package-lock.json
+yarn.lock
 
-# Archives
-archive/
+# ==========================================
+# Media and Large Files
+# ==========================================
+*.mp4
+*.mp3
+*.wav
+*.avi
+*.mov
+*.mkv
+*.flac
+*.ogg
 
-# Development artifacts
+# ==========================================
+# Platform-specific
+# ==========================================
+*.exe
+*.dll
+*.app
+*.dmg
+*.pkg
+*.deb
+*.rpm
+*.AppImage
+*.snap
+*.msi
+
+# ==========================================
+# Windows specific
+# ==========================================
 %APPDATA%/
+%LOCALAPPDATA%/
+%TEMP%/
+%USERPROFILE%/
+
+# ==========================================
+# Project specific
+# ==========================================
 .claude/
-*.spec
+assets/
+brand/
+style_guides/
+entitlements.plist
 RELEASE_PREPARATION.md
 workflow-logs/
+
+# ==========================================
+# Database
+# ==========================================
+*.db
+*.sqlite
+*.sqlite3
+*.mdb
+
+# ==========================================
+# Keep only essential files for runtime
+# ==========================================
+!Dockerfile
+!docker-compose*.yml
+!.dockerignore
+!requirements-docker.txt
+!src/
+!web_server.py
+!run_app.py

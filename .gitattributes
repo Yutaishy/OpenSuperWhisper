@@ -1,0 +1,215 @@
+# ==========================================
+# Line ending normalization
+# ==========================================
+* text=auto eol=lf
+
+# Force LF for these files
+*.sh text eol=lf
+*.bash text eol=lf
+*.zsh text eol=lf
+*.fish text eol=lf
+
+# Force CRLF for Windows batch files
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# ==========================================
+# Programming languages
+# ==========================================
+*.py text diff=python
+*.pyx text diff=python
+*.pxd text diff=python
+*.pyi text diff=python
+
+*.js text
+*.jsx text
+*.ts text
+*.tsx text
+*.json text
+*.yaml text
+*.yml text
+*.toml text
+*.xml text
+*.html text diff=html
+*.css text diff=css
+*.scss text
+*.sass text
+
+*.c text diff=cpp
+*.cpp text diff=cpp
+*.cxx text diff=cpp
+*.cc text diff=cpp
+*.h text diff=cpp
+*.hpp text diff=cpp
+*.hxx text diff=cpp
+
+*.go text diff=golang
+*.rs text diff=rust
+*.java text diff=java
+*.kt text
+*.swift text
+*.m text
+*.mm text
+
+# ==========================================
+# Documentation
+# ==========================================
+*.md text diff=markdown
+*.markdown text diff=markdown
+*.rst text
+*.txt text
+README* text
+LICENSE* text
+CHANGELOG* text
+AUTHORS* text
+CONTRIBUTORS* text
+NOTICE* text
+TODO* text
+
+# ==========================================
+# Configuration
+# ==========================================
+.gitignore text
+.gitattributes text
+.editorconfig text
+.gitconfig text
+Dockerfile text
+docker-compose*.yml text
+Makefile text
+makefile text
+*.mk text
+*.make text
+
+# ==========================================
+# Binary files (no diff)
+# ==========================================
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text
+*.webp binary
+
+*.pdf binary
+*.doc binary
+*.docx binary
+*.xls binary
+*.xlsx binary
+
+*.zip binary
+*.tar binary
+*.tar.gz binary
+*.tar.bz2 binary
+*.gz binary
+*.bz2 binary
+*.7z binary
+*.rar binary
+
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+*.lib binary
+*.a binary
+*.o binary
+*.ko binary
+
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.eot binary
+
+*.mp3 binary
+*.mp4 binary
+*.wav binary
+*.flac binary
+*.ogg binary
+*.avi binary
+*.mov binary
+*.mkv binary
+
+*.db binary
+*.sqlite binary
+*.sqlite3 binary
+
+# ==========================================
+# Export ignore (exclude from release archives)
+# ==========================================
+# Development and test files
+tests/ export-ignore
+test/ export-ignore
+spec/ export-ignore
+features/ export-ignore
+*_test.py export-ignore
+*_spec.py export-ignore
+test_*.py export-ignore
+
+# Documentation sources
+docs/ export-ignore
+*.md export-ignore
+README.md !export-ignore
+LICENSE* !export-ignore
+CHANGELOG* !export-ignore
+
+# CI/CD
+.github/ export-ignore
+.gitlab/ export-ignore
+.travis.yml export-ignore
+.circleci/ export-ignore
+azure-pipelines.yml export-ignore
+.appveyor.yml export-ignore
+
+# Development config
+.editorconfig export-ignore
+.eslintrc* export-ignore
+.prettierrc* export-ignore
+.stylelintrc* export-ignore
+.pylintrc export-ignore
+.flake8 export-ignore
+tox.ini export-ignore
+.pre-commit-config.yaml export-ignore
+
+# Build and temporary
+build/ export-ignore
+dist/ export-ignore
+*.egg-info export-ignore
+__pycache__/ export-ignore
+*.pyc export-ignore
+.coverage export-ignore
+htmlcov/ export-ignore
+.pytest_cache/ export-ignore
+
+# IDE
+.vscode/ export-ignore
+.idea/ export-ignore
+
+# Archive and backup
+archive/ export-ignore
+backup/ export-ignore
+*.bak export-ignore
+*.backup export-ignore
+
+# Project specific
+/test_*.py export-ignore
+/debug_*.py export-ignore
+/check_*.py export-ignore
+/verify_*.py export-ignore
+250812_cursorcli-kiroku.md export-ignore
+
+# Development scripts
+scripts/dev/ export-ignore
+scripts/test/ export-ignore
+
+# Examples (uncomment if needed)
+# examples/ export-ignore
+# samples/ export-ignore
+
+# ==========================================
+# Git LFS tracking (if using LFS)
+# ==========================================
+# *.psd filter=lfs diff=lfs merge=lfs -text
+# *.zip filter=lfs diff=lfs merge=lfs -text
+# *.tar.gz filter=lfs diff=lfs merge=lfs -text
