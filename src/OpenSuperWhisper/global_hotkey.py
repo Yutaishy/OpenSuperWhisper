@@ -78,9 +78,7 @@ class GlobalHotkeyManager(QObject):
         self.fallback_timer = QTimer()
         self.fallback_timer.timeout.connect(self.check_fallback_hotkeys)
 
-    def register_hotkey(
-        self, hotkey_id: str, modifiers: list[str], key_code: int
-    ) -> bool:
+    def register_hotkey(self, hotkey_id: str, modifiers: list[str], key_code: int) -> bool:
         """
         Register a global hotkey
 
@@ -94,9 +92,7 @@ class GlobalHotkeyManager(QObject):
         else:
             return self.register_fallback_hotkey(hotkey_id, modifiers, key_code)
 
-    def register_windows_hotkey(
-        self, hotkey_id: str, modifiers: list[str], key_code: int
-    ) -> bool:
+    def register_windows_hotkey(self, hotkey_id: str, modifiers: list[str], key_code: int) -> bool:
         """Register hotkey on Windows"""
         try:
             # Convert modifiers to Windows constants
@@ -140,9 +136,7 @@ class GlobalHotkeyManager(QObject):
                 return True
             else:
                 # Get last error for debugging
-                error_code = (
-                    self.kernel32.GetLastError() if self.kernel32 is not None else 0
-                )
+                error_code = self.kernel32.GetLastError() if self.kernel32 is not None else 0
                 print(f"Failed to register hotkey: {hotkey_id} (Error: {error_code})")
                 return False
 
@@ -150,9 +144,7 @@ class GlobalHotkeyManager(QObject):
             print(f"Windows hotkey registration error: {e}")
             return False
 
-    def register_fallback_hotkey(
-        self, hotkey_id: str, modifiers: list[str], key_code: int
-    ) -> bool:
+    def register_fallback_hotkey(self, hotkey_id: str, modifiers: list[str], key_code: int) -> bool:
         """Register hotkey using fallback method"""
         # Store for fallback monitoring
         self.registered_hotkeys[hotkey_id] = {
@@ -278,9 +270,7 @@ def register_ctrl_space_hotkey(
     manager = GlobalHotkeyManager()
 
     # Connect signal to callback
-    manager.hotkey_pressed.connect(
-        lambda hotkey_id: callback() if hotkey_id == "record_toggle" else None
-    )
+    manager.hotkey_pressed.connect(lambda hotkey_id: callback() if hotkey_id == "record_toggle" else None)
 
     # Register Ctrl+Space (key code 32 for space)
     success = manager.register_hotkey("record_toggle", ["ctrl"], 32)

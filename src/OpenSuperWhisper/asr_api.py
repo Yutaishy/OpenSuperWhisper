@@ -25,9 +25,7 @@ def transcribe_audio(audio_path: str, model: str = "whisper-1") -> str:
     with open(audio_path, "rb") as audio_file:
         try:
             client = get_client()
-            transcript = client.audio.transcriptions.create(
-                file=audio_file, model=model, response_format="text"
-            )
+            transcript = client.audio.transcriptions.create(file=audio_file, model=model, response_format="text")
         except Exception as e:
             raise Exception(f"ASR transcription failed: {e}") from e
     return transcript.strip()

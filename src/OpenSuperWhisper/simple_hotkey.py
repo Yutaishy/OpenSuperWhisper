@@ -62,9 +62,7 @@ class SimpleHotkeyMonitor(QObject):
     def start_pynput_monitoring(self) -> None:
         """Start pynput-based monitoring"""
         try:
-            self.listener = keyboard.Listener(
-                on_press=self.on_key_press, on_release=self.on_key_release
-            )
+            self.listener = keyboard.Listener(on_press=self.on_key_press, on_release=self.on_key_release)
             if self.listener is not None:
                 self.listener.start()
             print("Started pynput keyboard monitoring")

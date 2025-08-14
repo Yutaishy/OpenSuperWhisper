@@ -69,9 +69,7 @@ class RealtimeRecorder:
         if self.current_chunk:
             audio_data = self._combine_chunk_data()
             chunk_id = self.chunk_id
-            logger.logger.info(
-                f"Final chunk {chunk_id} with {len(audio_data)/self.sample_rate:.2f}s"
-            )
+            logger.logger.info(f"Final chunk {chunk_id} with {len(audio_data)/self.sample_rate:.2f}s")
             return (chunk_id, audio_data)
 
         return None
@@ -207,9 +205,7 @@ class RealtimeRecorder:
         split_point = self._find_optimal_split_point(audio_data, chunk_duration)
 
         # Create chunk with overlap
-        chunk_data, next_start_data = self.create_chunk_with_overlap(
-            audio_data, 0, split_point
-        )
+        chunk_data, next_start_data = self.create_chunk_with_overlap(audio_data, 0, split_point)
 
         # Save current chunk info
         current_chunk_id = self.chunk_id
@@ -223,10 +219,7 @@ class RealtimeRecorder:
         if next_start_data is not None:
             self.current_chunk.append(next_start_data)
 
-        logger.logger.info(
-            f"Finalized chunk {current_chunk_id}: "
-            f"{len(chunk_data)/self.sample_rate:.2f}s of audio"
-        )
+        logger.logger.info(f"Finalized chunk {current_chunk_id}: " f"{len(chunk_data)/self.sample_rate:.2f}s of audio")
 
         return (current_chunk_id, chunk_data)
 
@@ -255,9 +248,7 @@ class RealtimeRecorder:
             # Include overlap in current chunk
             chunk_with_overlap = audio_data[start_idx : end_idx + overlap_samples]
             # Overlap data for next chunk
-            next_overlap = audio_data[
-                max(start_idx, end_idx - overlap_samples) : end_idx + overlap_samples
-            ]
+            next_overlap = audio_data[max(start_idx, end_idx - overlap_samples) : end_idx + overlap_samples]
             return chunk_with_overlap, next_overlap
         else:
             # Last chunk, no overlap needed
@@ -270,9 +261,7 @@ class RealtimeRecorder:
 
         return np.concatenate(self.current_chunk)
 
-    def _find_optimal_split_point(
-        self, audio_data: np.ndarray, chunk_duration: float | None = None
-    ) -> int:
+    def _find_optimal_split_point(self, audio_data: np.ndarray, chunk_duration: float | None = None) -> int:
         """
         Find optimal split point considering phoneme boundaries
 
@@ -345,9 +334,7 @@ class RealtimeRecorder:
         # Fallback: Use target time
         return target_samples
 
-    def _find_silence_window(
-        self, audio_data: np.ndarray, window_size: int, threshold: float
-    ) -> int:
+    def _find_silence_window(self, audio_data: np.ndarray, window_size: int, threshold: float) -> int:
         """Find position of silence window of given size"""
         if len(audio_data) < window_size:
             return -1
@@ -389,18 +376,12 @@ class RealtimeRecorder:
         for offset in range(0, search_radius):
             # Check forward
             if center + offset < len(audio_data) - 1:
-                if (
-                    audio_data[center + offset] <= 0
-                    and audio_data[center + offset + 1] > 0
-                ):
+                if audio_data[center + offset] <= 0 and audio_data[center + offset + 1] > 0:
                     return center + offset
 
             # Check backward
             if center - offset > 0:
-                if (
-                    audio_data[center - offset - 1] <= 0
-                    and audio_data[center - offset] > 0
-                ):
+                if audio_data[center - offset - 1] <= 0 and audio_data[center - offset] > 0:
                     return center - offset
 
         return center

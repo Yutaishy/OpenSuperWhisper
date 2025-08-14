@@ -3,3 +3,11 @@ max-line-length = 120
 extend-ignore = E203, W503
 exclude = .git,__pycache__,build,dist,venv,env,.venv
 max-complexity = 10
+
+# Per-file complexity overrides for complex functions
+per-file-ignores =
+    src/OpenSuperWhisper/cancel_handler.py:C901
+    src/OpenSuperWhisper/chunk_processor.py:C901
+    src/OpenSuperWhisper/global_hotkey.py:C901
+    src/OpenSuperWhisper/ui_mainwindow.py:C901
+    src/build_executable.py:C901

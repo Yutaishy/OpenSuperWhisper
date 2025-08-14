@@ -12,10 +12,23 @@ import sounddevice as sd
 import yaml
 from PySide6.QtCore import QThread, QTimer, Signal
 from PySide6.QtGui import QAction, QCloseEvent, QIcon
-from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QFileDialog,
-                               QHBoxLayout, QInputDialog, QLabel, QLineEdit,
-                               QMainWindow, QMessageBox, QPushButton,
-                               QTabWidget, QTextEdit, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (
+    QApplication,
+    QCheckBox,
+    QComboBox,
+    QFileDialog,
+    QHBoxLayout,
+    QInputDialog,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QMessageBox,
+    QPushButton,
+    QTabWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
 from . import asr_api, config, formatter_api, logger
 from .cancel_handler import CancelHandler
@@ -84,9 +97,7 @@ class TranscriptionWorker(QThread):
                 formatted_text = formatter_api.format_text(
                     raw_text, self.prompt, self.style_guide, model=self.chat_model
                 )
-                logger.logger.info(
-                    f"Formatted with {self.chat_model}: {formatted_text}"
-                )
+                logger.logger.info(f"Formatted with {self.chat_model}: {formatted_text}")
                 self.formatting_completed.emit(formatted_text)
 
         except Exception as e:
@@ -96,9 +107,7 @@ class TranscriptionWorker(QThread):
 
 class MainWindow(QMainWindow):
     # Signals for thread-safe GUI updates
-    chunk_update_signal = Signal(
-        int, str, str, str, str
-    )  # chunk_id, status, raw_text, formatted_text, error
+    chunk_update_signal = Signal(int, str, str, str, str)  # chunk_id, status, raw_text, formatted_text, error
 
     def __init__(self) -> None:
         super().__init__()
@@ -106,9 +115,7 @@ class MainWindow(QMainWindow):
         self.resize(800, 600)
 
         # Set application icon
-        icon_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), "assets", "windows", "osw.ico"
-        )
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "windows", "osw.ico")
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
 
@@ -132,9 +139,7 @@ class MainWindow(QMainWindow):
         self.realtime_mode = True  # Enable realtime mode by default
         self.realtime_recorder: RealtimeRecorder | None = None
         self.chunk_processor: ChunkProcessor | None = None
-        self.chunk_display_map: dict[int, dict[str, Any]] = (
-            {}
-        )  # chunk_id -> display info
+        self.chunk_display_map: dict[int, dict[str, Any]] = {}  # chunk_id -> display info
 
         # Connect signal for thread-safe updates
         self.chunk_update_signal.connect(self._handle_chunk_update_signal)
@@ -294,9 +299,7 @@ class MainWindow(QMainWindow):
         self.tab_widget.addTab(self.raw_text_edit, "Transcription")
 
         self.formatted_text_edit = QTextEdit()
-        self.formatted_text_edit.setPlaceholderText(
-            "Formatted text will appear here..."
-        )
+        self.formatted_text_edit.setPlaceholderText("Formatted text will appear here...")
         self.tab_widget.addTab(self.formatted_text_edit, "Formatted Text")
 
         layout.addWidget(self.tab_widget)
@@ -390,18 +393,10 @@ class MainWindow(QMainWindow):
         self.delete_preset_btn.clicked.connect(self.delete_preset)
 
         # Connect settings save signals
-        self.asr_model_combo.currentTextChanged.connect(
-            lambda text: config.save_setting(config.KEY_ASR_MODEL, text)
-        )
-        self.chat_model_combo.currentTextChanged.connect(
-            lambda text: config.save_setting(config.KEY_CHAT_MODEL, text)
-        )
-        self.post_format_toggle.toggled.connect(
-            lambda state: config.save_setting(config.KEY_POST_FORMAT, state)
-        )
-        self.auto_copy_toggle.toggled.connect(
-            lambda state: config.save_setting("auto_copy_clipboard", state)
-        )
+        self.asr_model_combo.currentTextChanged.connect(lambda text: config.save_setting(config.KEY_ASR_MODEL, text))
+        self.chat_model_combo.currentTextChanged.connect(lambda text: config.save_setting(config.KEY_CHAT_MODEL, text))
+        self.post_format_toggle.toggled.connect(lambda state: config.save_setting(config.KEY_POST_FORMAT, state))
+        self.auto_copy_toggle.toggled.connect(lambda state: config.save_setting("auto_copy_clipboard", state))
 
     def setup_menu(self) -> None:
         menubar = self.menuBar()
@@ -496,14 +491,10 @@ class MainWindow(QMainWindow):
             self.simple_hotkey_monitor.hotkey_pressed.connect(self.handle_global_hotkey)
 
             # Register Ctrl+Space
-            success = self.simple_hotkey_monitor.register_hotkey(
-                "global_record_toggle", "ctrl+space"
-            )
+            success = self.simple_hotkey_monitor.register_hotkey("global_record_toggle", "ctrl+space")
 
             if success:
-                logger.logger.info(
-                    "Global hotkey Ctrl+Space registered with fallback monitor"
-                )
+                logger.logger.info("Global hotkey Ctrl+Space registered with fallback monitor")
             else:
                 logger.logger.error("Fallback hotkey registration also failed")
 
@@ -844,9 +835,7 @@ class MainWindow(QMainWindow):
             # Legacy mode continues below
             # Trim recording to actual length
             if self.recording is None:
-                logger.logger.info(
-                    "Recording buffer is None; aborting with UI recovery"
-                )
+                logger.logger.info("Recording buffer is None; aborting with UI recovery")
                 self.show_error("Recording failed to start (no audio buffer).")
                 self.complete_processing()  # UI を必ず Ready に戻す
                 processing_completed = True
@@ -861,9 +850,7 @@ class MainWindow(QMainWindow):
                 # Keep some padding before first and after last significant audio
                 padding_samples = int(0.1 * self.fs)  # 100ms padding
                 first_index = max(0, significant_indices[0] - padding_samples)
-                last_index = min(
-                    len(recording) - 1, significant_indices[-1] + padding_samples
-                )
+                last_index = min(len(recording) - 1, significant_indices[-1] + padding_samples)
                 recording = recording[first_index : last_index + 1]
             else:
                 # Fallback to old method
@@ -897,16 +884,12 @@ class MainWindow(QMainWindow):
             # Validate WAV file
             file_size = os.path.getsize(wav_path)
             if file_size < 1000:  # Less than 1KB suggests empty or corrupted file
-                self.show_error(
-                    f"Recording failed: Audio file too small ({file_size} bytes)"
-                )
+                self.show_error(f"Recording failed: Audio file too small ({file_size} bytes)")
                 self.complete_processing()
                 processing_completed = True
                 return
 
-            logger.logger.info(
-                f"Audio file created: {file_size} bytes, duration: {len(recording)/self.fs:.2f}s"
-            )
+            logger.logger.info(f"Audio file created: {file_size} bytes, duration: {len(recording)/self.fs:.2f}s")
 
             # Start background transcription
             logger.logger.info("Starting transcription worker")
@@ -936,9 +919,7 @@ class MainWindow(QMainWindow):
             self.global_indicator.show_processing()
 
         # Create and configure worker
-        self.worker = TranscriptionWorker(
-            wav_path, selected_asr_model, should_format, chat_model, prompt, style_guide
-        )
+        self.worker = TranscriptionWorker(wav_path, selected_asr_model, should_format, chat_model, prompt, style_guide)
 
         # Connect signals
         self.worker.transcription_completed.connect(self.on_transcription_completed)
@@ -1044,9 +1025,7 @@ class MainWindow(QMainWindow):
         self.preset_combo.addItems(saved_presets.keys())
 
         # Load current preset
-        current_preset = config.load_setting(
-            config.KEY_CURRENT_PRESET, "Default Editor"
-        )
+        current_preset = config.load_setting(config.KEY_CURRENT_PRESET, "Default Editor")
         if current_preset in saved_presets:
             index = self.preset_combo.findText(current_preset)
             if index >= 0:
@@ -1067,9 +1046,7 @@ class MainWindow(QMainWindow):
 
     def save_preset(self) -> None:
         """Save current prompt as a new preset"""
-        preset_name, ok = QInputDialog.getText(
-            self, "Save Preset", "Enter preset name:", QLineEdit.EchoMode.Normal
-        )
+        preset_name, ok = QInputDialog.getText(self, "Save Preset", "Enter preset name:", QLineEdit.EchoMode.Normal)
 
         if ok and preset_name.strip():
             preset_name = preset_name.strip()
@@ -1102,9 +1079,7 @@ class MainWindow(QMainWindow):
 
             config.save_setting(config.KEY_CURRENT_PRESET, preset_name)
 
-            QMessageBox.information(
-                self, "Success", f"Preset '{preset_name}' saved successfully."
-            )
+            QMessageBox.information(self, "Success", f"Preset '{preset_name}' saved successfully.")
 
     def delete_preset(self) -> None:
         """Delete selected preset"""
@@ -1146,9 +1121,7 @@ class MainWindow(QMainWindow):
 
     def add_preset(self) -> None:
         """Add a new preset with custom name and prompt"""
-        preset_name, ok = QInputDialog.getText(
-            self, "Add New Preset", "Enter preset name:", QLineEdit.EchoMode.Normal
-        )
+        preset_name, ok = QInputDialog.getText(self, "Add New Preset", "Enter preset name:", QLineEdit.EchoMode.Normal)
 
         if ok and preset_name.strip():
             preset_name = preset_name.strip()
@@ -1188,25 +1161,19 @@ class MainWindow(QMainWindow):
                 self.prompt_text_edit.setPlainText(prompt_content)
                 config.save_setting(config.KEY_CURRENT_PRESET, preset_name)
 
-                QMessageBox.information(
-                    self, "Success", f"Preset '{preset_name}' added successfully."
-                )
+                QMessageBox.information(self, "Success", f"Preset '{preset_name}' added successfully.")
 
     def edit_preset(self) -> None:
         """Edit the name of the selected preset"""
         current_preset = self.preset_combo.currentText()
         if not current_preset:
-            QMessageBox.warning(
-                self, "No Preset Selected", "Please select a preset to edit."
-            )
+            QMessageBox.warning(self, "No Preset Selected", "Please select a preset to edit.")
             return
 
         # Don't allow editing default presets
         default_names = list(self.get_default_presets().keys())
         if current_preset in default_names:
-            QMessageBox.warning(
-                self, "Cannot Edit", f"Cannot edit default preset '{current_preset}'."
-            )
+            QMessageBox.warning(self, "Cannot Edit", f"Cannot edit default preset '{current_preset}'.")
             return
 
         new_name, ok = QInputDialog.getText(
@@ -1250,9 +1217,7 @@ class MainWindow(QMainWindow):
                 # Update current preset setting
                 config.save_setting(config.KEY_CURRENT_PRESET, new_name)
 
-                QMessageBox.information(
-                    self, "Success", f"Preset renamed to '{new_name}' successfully."
-                )
+                QMessageBox.information(self, "Success", f"Preset renamed to '{new_name}' successfully.")
 
     def complete_processing(self) -> None:
         """Complete the processing and update UI/indicators"""
@@ -1281,9 +1246,7 @@ class MainWindow(QMainWindow):
 
             # Log and show brief notification
             logger.logger.info(
-                f"Copied to clipboard: {text[:50]}..."
-                if len(text) > 50
-                else f"Copied to clipboard: {text}"
+                f"Copied to clipboard: {text[:50]}..." if len(text) > 50 else f"Copied to clipboard: {text}"
             )
 
             # Show temporary status update only if not in processing state
@@ -1353,9 +1316,7 @@ class MainWindow(QMainWindow):
             try:
                 with open(file_path, "w", encoding="utf-8") as f:
                     f.write(text_to_save)
-                QMessageBox.information(
-                    self, "Success", f"Transcription saved to {file_path}"
-                )
+                QMessageBox.information(self, "Success", f"Transcription saved to {file_path}")
                 logger.logger.info(f"Saved transcription to: {file_path}")
             except Exception as e:
                 self.show_error(f"Failed to save file:\n{e}")
@@ -1384,9 +1345,7 @@ class MainWindow(QMainWindow):
             # Reset window geometry
             self.resize(800, 600)
 
-            QMessageBox.information(
-                self, "Reset Complete", "Settings have been reset to defaults."
-            )
+            QMessageBox.information(self, "Reset Complete", "Settings have been reset to defaults.")
             logger.logger.info("Settings reset to defaults")
 
     def show_about(self) -> None:
@@ -1463,9 +1422,7 @@ class MainWindow(QMainWindow):
         if ok and api_key.strip():
             # Basic validation - OpenAI keys start with 'sk-'
             if not api_key.startswith("sk-"):
-                QMessageBox.warning(
-                    self, "Invalid API Key", "OpenAI API keys should start with 'sk-'"
-                )
+                QMessageBox.warning(self, "Invalid API Key", "OpenAI API keys should start with 'sk-'")
                 return
 
             # Save the API key
@@ -1474,9 +1431,7 @@ class MainWindow(QMainWindow):
             # Set environment variable for current session
             os.environ["OPENAI_API_KEY"] = api_key.strip()
 
-            QMessageBox.information(
-                self, "API Key Set", "OpenAI API key has been saved successfully."
-            )
+            QMessageBox.information(self, "API Key Set", "OpenAI API key has been saved successfully.")
             logger.logger.info("OpenAI API key updated via UI")
         elif ok:
             QMessageBox.warning(self, "Empty API Key", "Please enter a valid API key.")
@@ -1738,9 +1693,7 @@ class MainWindow(QMainWindow):
     def show_error(self, message: str) -> None:
         QMessageBox.critical(self, "Error", message)
 
-    def audio_callback(
-        self, indata: Any, frames: int, time_info: Any, status: Any
-    ) -> None:
+    def audio_callback(self, indata: Any, frames: int, time_info: Any, status: Any) -> None:
         """Callback for realtime audio stream"""
         if status:
             logger.logger.warning(f"Audio callback status: {status}")
@@ -1766,20 +1719,14 @@ class MainWindow(QMainWindow):
             logger.logger.info(f"on_chunk_completed called for chunk {chunk_id}")
             # Update display with results
             raw_text = result.raw_text if hasattr(result, "raw_text") else None
-            formatted_text = (
-                result.formatted_text if hasattr(result, "formatted_text") else None
-            )
+            formatted_text = result.formatted_text if hasattr(result, "formatted_text") else None
             logger.logger.info(
                 f"Updating display for chunk {chunk_id} with raw_text length: {len(raw_text) if raw_text else 0}"
             )
             self.update_chunk_display(chunk_id, "completed", raw_text, formatted_text)
 
             # Update recording indicator if needed
-            if (
-                hasattr(self, "recording_time")
-                and self.recording_time >= 60
-                and hasattr(self, "global_indicator")
-            ):
+            if hasattr(self, "recording_time") and self.recording_time >= 60 and hasattr(self, "global_indicator"):
                 if hasattr(self.global_indicator, "status_label"):
                     self.global_indicator.status_label.setText("Live Transcribing")
 
@@ -1793,9 +1740,7 @@ class MainWindow(QMainWindow):
     def on_chunk_error(self, chunk_id: int, result: Any) -> None:
         """Handle chunk processing error"""
         try:
-            error_msg = (
-                str(result.error) if hasattr(result, "error") else "Unknown error"
-            )
+            error_msg = str(result.error) if hasattr(result, "error") else "Unknown error"
             self.update_chunk_display(chunk_id, "error", error=error_msg)
 
             # Show error in status (but don't interrupt recording)
@@ -1808,10 +1753,7 @@ class MainWindow(QMainWindow):
             logger.logger.error(f"Chunk {chunk_id} error: {error_msg}")
 
             # For critical errors, check if we should continue
-            if (
-                "プロセスはファイルにアクセスできません" in error_msg
-                or "WinError" in error_msg
-            ):
+            if "プロセスはファイルにアクセスできません" in error_msg or "WinError" in error_msg:
                 # Schedule retry or continue processing
                 if not self.is_recording:
                     QTimer.singleShot(1000, self.check_realtime_completion)
@@ -1832,18 +1774,14 @@ class MainWindow(QMainWindow):
     ) -> None:
         """Update UI with chunk status and results - called from worker thread"""
         # Emit signal to handle in main thread
-        self.chunk_update_signal.emit(
-            chunk_id, status, raw_text or "", formatted_text or "", error or ""
-        )
+        self.chunk_update_signal.emit(chunk_id, status, raw_text or "", formatted_text or "", error or "")
 
     def _handle_chunk_update_signal(
         self, chunk_id: int, status: str, raw_text: str, formatted_text: str, error: str
     ) -> None:
         """Handle chunk update in main thread"""
         try:
-            logger.logger.info(
-                f"_handle_chunk_update_signal start - chunk_id: {chunk_id}, status: {status}"
-            )
+            logger.logger.info(f"_handle_chunk_update_signal start - chunk_id: {chunk_id}, status: {status}")
 
             # Store chunk info without complex processing
             if not hasattr(self, "chunk_display_map"):
@@ -1859,18 +1797,14 @@ class MainWindow(QMainWindow):
 
             # Simple display update without complex formatting
             if status == "completed" and raw_text:
-                logger.logger.info(
-                    f"Updating raw_text_edit with text: {raw_text[:50]}..."
-                )
+                logger.logger.info(f"Updating raw_text_edit with text: {raw_text[:50]}...")
                 if hasattr(self, "raw_text_edit"):
                     self.raw_text_edit.setPlainText(raw_text)
 
                 if formatted_text and hasattr(self, "formatted_text_edit"):
                     self.formatted_text_edit.setPlainText(formatted_text)
 
-            logger.logger.info(
-                f"_handle_chunk_update_signal end - chunk_id: {chunk_id}"
-            )
+            logger.logger.info(f"_handle_chunk_update_signal end - chunk_id: {chunk_id}")
         except Exception as e:
             logger.logger.error(f"Error in _handle_chunk_update_signal: {e}")
             import traceback
@@ -1908,34 +1842,23 @@ class MainWindow(QMainWindow):
                 raw_display_parts.append(raw_part)
 
                 # Formatted text display
-                if chunk_info.get("status") == "completed" and chunk_info.get(
-                    "formatted_text"
-                ):
+                if chunk_info.get("status") == "completed" and chunk_info.get("formatted_text"):
                     formatted_display_parts.append(chunk_info["formatted_text"])
                 elif chunk_info.get("status") == "error":
                     formatted_display_parts.append("[エラー: 取得失敗]")
 
             # Add current recording indicator
             if hasattr(self, "is_recording") and self.is_recording:
-                current_time = (
-                    self.recording_time if hasattr(self, "recording_time") else 0
-                )
-                raw_display_parts.append(
-                    f"[{self.format_time(current_time)}-録音中] 🎤 録音中...\n"
-                )
+                current_time = self.recording_time if hasattr(self, "recording_time") else 0
+                raw_display_parts.append(f"[{self.format_time(current_time)}-録音中] 🎤 録音中...\n")
 
             # Update text edits
             if hasattr(self, "raw_text_edit"):
                 self.raw_text_edit.setPlainText("\n".join(raw_display_parts))
 
-            if (
-                hasattr(self, "post_format_toggle")
-                and self.post_format_toggle.isChecked()
-            ):
+            if hasattr(self, "post_format_toggle") and self.post_format_toggle.isChecked():
                 if hasattr(self, "formatted_text_edit"):
-                    self.formatted_text_edit.setPlainText(
-                        "\n".join(formatted_display_parts)
-                    )
+                    self.formatted_text_edit.setPlainText("\n".join(formatted_display_parts))
 
             # Scroll to bottom
             if hasattr(self, "raw_text_edit"):
@@ -1966,9 +1889,7 @@ class MainWindow(QMainWindow):
         try:
             logger.logger.info("check_realtime_completion called")
             if not hasattr(self, "chunk_processor") or not self.chunk_processor:
-                logger.logger.warning(
-                    "chunk_processor not found, completing processing"
-                )
+                logger.logger.warning("chunk_processor not found, completing processing")
                 self.complete_realtime_processing()
                 return
 
@@ -1986,9 +1907,7 @@ class MainWindow(QMainWindow):
             else:
                 # Update status to show progress
                 if pending_count > 0 and hasattr(self, "recording_status"):
-                    self.recording_status.setText(
-                        f"処理中... (残り{pending_count}チャンク)"
-                    )
+                    self.recording_status.setText(f"処理中... (残り{pending_count}チャンク)")
                 # Check again in 1 second
                 QTimer.singleShot(1000, self.check_realtime_completion)
         except Exception as e:
@@ -2010,9 +1929,7 @@ class MainWindow(QMainWindow):
             # Combine all results
             if hasattr(self, "chunk_processor") and self.chunk_processor:
                 try:
-                    raw_combined, formatted_combined = (
-                        self.chunk_processor.combine_results()
-                    )
+                    raw_combined, formatted_combined = self.chunk_processor.combine_results()
 
                     # Show final results without timestamps
                     if hasattr(self, "raw_text_edit"):
@@ -2026,10 +1943,7 @@ class MainWindow(QMainWindow):
                             self.formatted_text_edit.setPlainText(formatted_combined)
 
                     # Auto-copy if enabled
-                    if (
-                        hasattr(self, "auto_copy_toggle")
-                        and self.auto_copy_toggle.isChecked()
-                    ):
+                    if hasattr(self, "auto_copy_toggle") and self.auto_copy_toggle.isChecked():
                         clipboard = QApplication.clipboard()
                         if (
                             hasattr(self, "post_format_toggle")
@@ -2088,9 +2002,7 @@ class MainWindow(QMainWindow):
             # Try to use global hotkey manager first
             if hasattr(self, "hotkey_manager") and self.hotkey_manager:
                 # ESC key code is 27
-                success = self.hotkey_manager.register_hotkey(
-                    "cancel_recording", [], 27  # No modifiers, just ESC
-                )
+                success = self.hotkey_manager.register_hotkey("cancel_recording", [], 27)  # No modifiers, just ESC
                 if success:
                     logger.logger.info("Registered ESC key for cancellation")
                     return
@@ -2187,9 +2099,7 @@ class MainWindow(QMainWindow):
 
                 # Update status
                 if hasattr(self, "recording_status"):
-                    self.recording_status.setText(
-                        f"Retrying {len(failed_chunks)} failed chunks..."
-                    )
+                    self.recording_status.setText(f"Retrying {len(failed_chunks)} failed chunks...")
 
                 # Retry each failed chunk (max 1 retry as per requirements)
                 for chunk_id in failed_chunks:

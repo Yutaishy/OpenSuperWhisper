@@ -5,6 +5,7 @@ Safe version of OpenSuperWhisper with proper error handling
 import os
 import signal
 import sys
+from typing import Any
 
 # Add paths
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -18,8 +19,7 @@ if len(sys.argv) > 1 and sys.argv[1] == "--version":
     except Exception:
         # Fallbacks in order: installed package metadata -> pyproject.toml -> unknown
         try:
-            from importlib.metadata import \
-                version as pkg_version  # type: ignore
+            from importlib.metadata import version as pkg_version  # type: ignore
 
             print(f"OpenSuperWhisper v{pkg_version('opensuperwhisper')}")
         except Exception:
@@ -36,7 +36,7 @@ if len(sys.argv) > 1 and sys.argv[1] == "--version":
     sys.exit(0)
 
 
-def signal_handler(sig, frame):
+def signal_handler(sig: int, frame: Any) -> None:
     print("\nApplication interrupted, exiting gracefully...")
     sys.exit(0)
 

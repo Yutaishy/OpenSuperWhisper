@@ -15,9 +15,7 @@ def get_client() -> OpenAI:
     return client
 
 
-def format_text(
-    raw_text: str, prompt: str, style_guide: str = "", model: str = "gpt-4o-mini"
-) -> str:
+def format_text(raw_text: str, prompt: str, style_guide: str = "", model: str = "gpt-4o-mini") -> str:
     """
     Use OpenAI Chat Completion API to format/polish the raw transcript text.
     :param raw_text: The raw transcript string from ASR.
@@ -38,9 +36,7 @@ def format_text(
     if prompt:
         system_instructions += f"Instructions: {prompt}\n"
     else:
-        system_instructions += (
-            "Instructions: Fix grammar and punctuation, and format the text clearly.\n"
-        )
+        system_instructions += "Instructions: Fix grammar and punctuation, and format the text clearly.\n"
 
     system_message = {"role": "system", "content": system_instructions}
     user_message = {
@@ -87,18 +83,14 @@ def format_text(
     import re
 
     # Remove opening and closing TRANSCRIPT tags (case insensitive)
-    formatted_text = re.sub(
-        r"<TRANSCRIPT[^>]*>", "", formatted_text, flags=re.IGNORECASE
-    )
+    formatted_text = re.sub(r"<TRANSCRIPT[^>]*>", "", formatted_text, flags=re.IGNORECASE)
     formatted_text = re.sub(r"</TRANSCRIPT>", "", formatted_text, flags=re.IGNORECASE)
 
     # Also remove any standalone "TRANSCRIPT" text that might appear
     formatted_text = re.sub(r"\bTRANSCRIPT\b", "", formatted_text, flags=re.IGNORECASE)
 
     # Clean up any extra whitespace or newlines
-    formatted_text = re.sub(
-        r"\n\s*\n", "\n", formatted_text
-    )  # Remove multiple newlines
+    formatted_text = re.sub(r"\n\s*\n", "\n", formatted_text)  # Remove multiple newlines
     formatted_text = formatted_text.strip()
 
     return formatted_text

@@ -7,6 +7,7 @@ Docker container entry point for the Web API server
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 # Add the current directory to Python path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -17,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent / "OpenSuperWhisper"))
 from OpenSuperWhisper import __version__ as OSW_VERSION  # noqa: E402
 
 
-def setup_environment():
+def setup_environment() -> None:
     """Setup environment for Docker deployment"""
 
     # Set default values for environment variables
@@ -50,11 +51,7 @@ def setup_environment():
         print()
     else:
         api_key = os.getenv("OPENAI_API_KEY", "")
-        masked_key = (
-            api_key[:10] + "*" * (len(api_key) - 14) + api_key[-4:]
-            if len(api_key) > 14
-            else "sk-***"
-        )
+        masked_key = api_key[:10] + "*" * (len(api_key) - 14) + api_key[-4:] if len(api_key) > 14 else "sk-***"
         print(f"✅ OpenAI API Key: {masked_key}")
 
     print("\n📚 Available Endpoints:")
@@ -65,7 +62,7 @@ def setup_environment():
     print("===================================\n")
 
 
-def main():
+def main() -> None:
     """Main entry point"""
 
     # Setup environment
@@ -88,16 +85,16 @@ def main():
             from gunicorn.app.wsgiapp import WSGIApplication
 
             class StandaloneApplication(WSGIApplication):
-                def __init__(self, app, options=None):
+                def __init__(self, app: Any, options: dict[str, Any] | None = None) -> None:
                     self.options = options or {}
                     self.application = app
                     super().__init__()
 
-                def load_config(self):
+                def load_config(self) -> None:
                     for key, value in self.options.items():
                         self.cfg.set(key.lower(), value)
 
-                def load(self):
+                def load(self) -> Any:
                     return self.application
 
             options = {

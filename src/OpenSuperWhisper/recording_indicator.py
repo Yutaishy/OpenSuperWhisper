@@ -32,11 +32,7 @@ class RecordingIndicator(QWidget):
     def setup_ui(self) -> None:
         """Setup the indicator UI with modern design"""
         # Window flags for always-on-top overlay (platform-specific)
-        flags = (
-            Qt.WindowType.FramelessWindowHint
-            | Qt.WindowType.WindowStaysOnTopHint
-            | Qt.WindowType.Tool
-        )
+        flags = Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool
 
         # Add platform-specific flags
         if sys.platform.startswith("linux"):
@@ -48,9 +44,7 @@ class RecordingIndicator(QWidget):
         self.setWindowFlags(flags)
 
         # Set application icon
-        icon_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), "assets", "windows", "osw.ico"
-        )
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "windows", "osw.ico")
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
 
@@ -158,9 +152,7 @@ class RecordingIndicator(QWidget):
         self.setWindowOpacity(0.0)
         self.show()
         self.animate_fade_in()
-        logger.logger.debug(
-            f"Indicator shown, visible: {self.isVisible()}, size: {self.size()}, pos: {self.pos()}"
-        )
+        logger.logger.debug(f"Indicator shown, visible: {self.isVisible()}, size: {self.size()}, pos: {self.pos()}")
 
         # Start blinking animation
         self.blink_timer.start(1000)  # Blink every 1 second
@@ -337,9 +329,7 @@ class RecordingIndicator(QWidget):
         """Handle click events on indicator"""
         if event.button() == Qt.MouseButton.LeftButton:
             # Emit signal to stop recording and restore main window
-            if self.parent_window is not None and hasattr(
-                self.parent_window, "restore_from_indicator"
-            ):
+            if self.parent_window is not None and hasattr(self.parent_window, "restore_from_indicator"):
                 self.parent_window.restore_from_indicator()
         super().mousePressEvent(event)
 
@@ -402,14 +392,10 @@ class GlobalRecordingIndicator:
         if self._indicator is None:
             app = QApplication.instance()
             if app is not None:
-                logger.logger.debug(
-                    "Creating RecordingIndicator (delayed initialization)"
-                )
+                logger.logger.debug("Creating RecordingIndicator (delayed initialization)")
                 self._indicator = RecordingIndicator()
             else:
-                logger.logger.debug(
-                    "QApplication still not available for delayed initialization"
-                )
+                logger.logger.debug("QApplication still not available for delayed initialization")
 
     def show_recording(self) -> None:
         """Show recording indicator"""

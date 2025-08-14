@@ -134,8 +134,7 @@ async def transcribe_audio(
     # Validate file type
     if not file.content_type or not file.content_type.startswith(("audio/", "video/")):
         if not file.filename or not any(
-            file.filename.lower().endswith(ext)
-            for ext in [".wav", ".mp3", ".m4a", ".flac", ".ogg"]
+            file.filename.lower().endswith(ext) for ext in [".wav", ".mp3", ".m4a", ".flac", ".ogg"]
         ):
             raise HTTPException(
                 status_code=400,
@@ -148,9 +147,7 @@ async def transcribe_audio(
 
     try:
         # Save uploaded file to temporary location without loading into memory
-        with tempfile.NamedTemporaryFile(
-            delete=False, suffix=f"_{file.filename}"
-        ) as temp_file:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{file.filename}") as temp_file:
             await file.seek(0)
             # Stream copy to temp file to avoid memory spikes on large uploads
             import shutil
@@ -159,9 +156,7 @@ async def transcribe_audio(
             temp_audio_path = temp_file.name
 
         file_size = os.path.getsize(temp_audio_path)
-        logger.logger.info(
-            f"Processing uploaded file: {file.filename} ({file_size} bytes)"
-        )
+        logger.logger.info(f"Processing uploaded file: {file.filename} ({file_size} bytes)")
 
         # Stage 1: ASR Transcription
         logger.logger.info(f"Starting ASR with model: {asr_model}")
@@ -175,9 +170,7 @@ async def transcribe_audio(
         if apply_formatting and raw_text.strip():
             logger.logger.info(f"Starting formatting with model: {chat_model}")
             formatting_prompt = prompt or DEFAULT_PROMPT
-            formatted_text = formatter_api.format_text(
-                raw_text, formatting_prompt, style_guide or "", model=chat_model
-            )
+            formatted_text = formatter_api.format_text(raw_text, formatting_prompt, style_guide or "", model=chat_model)
             models_used["formatter"] = chat_model
             logger.logger.info(f"Formatting completed: {formatted_text[:100]}...")
 
@@ -193,9 +186,7 @@ async def transcribe_audio(
 
     except Exception as e:
         logger.logger.error(f"Transcription error: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Transcription failed: {str(e)}"
-        ) from e
+        raise HTTPException(status_code=500, detail=f"Transcription failed: {str(e)}") from e
     finally:
         # Cleanup temporary file
         try:
@@ -236,9 +227,7 @@ async def format_text_only(
         start_time = time.time()
 
         formatting_prompt = prompt or DEFAULT_PROMPT
-        formatted_text = formatter_api.format_text(
-            text, formatting_prompt, style_guide or "", model=chat_model
-        )
+        formatted_text = formatter_api.format_text(text, formatting_prompt, style_guide or "", model=chat_model)
 
         processing_time = time.time() - start_time
 
@@ -251,9 +240,7 @@ async def format_text_only(
 
     except Exception as e:
         logger.logger.error(f"Text formatting error: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Text formatting failed: {str(e)}"
-        ) from e
+        raise HTTPException(status_code=500, detail=f"Text formatting failed: {str(e)}") from e
 
 
 if __name__ == "__main__":

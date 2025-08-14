@@ -57,15 +57,12 @@ class CancelHandler(QObject):
         msg_box.setWindowTitle("処理のキャンセル")
         msg_box.setText("処理済みの結果を保存しますか？")
         msg_box.setInformativeText(
-            "録音と処理を停止します。\n"
-            "処理済みのテキストを保存することも、すべて破棄することもできます。"
+            "録音と処理を停止します。\n" "処理済みのテキストを保存することも、すべて破棄することもできます。"
         )
 
         # Add buttons
         save_btn = msg_box.addButton("保存する", QMessageBox.ButtonRole.AcceptRole)
-        discard_btn = msg_box.addButton(
-            "破棄する", QMessageBox.ButtonRole.DestructiveRole
-        )
+        discard_btn = msg_box.addButton("破棄する", QMessageBox.ButtonRole.DestructiveRole)
         cancel_btn = msg_box.addButton("キャンセル", QMessageBox.ButtonRole.RejectRole)
 
         msg_box.setDefaultButton(save_btn)
@@ -134,9 +131,7 @@ class CancelHandler(QObject):
                 # Stop new processing but keep existing results
                 if processor:
                     processor.cancel_flag = True
-                    logger.logger.info(
-                        "New processing stopped, keeping existing results"
-                    )
+                    logger.logger.info("New processing stopped, keeping existing results")
 
                 # Wait for current processing to complete
                 if ui_callback:

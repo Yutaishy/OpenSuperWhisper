@@ -105,9 +105,7 @@ class ChunkProcessor:
         self.processing_chunks[chunk_id] = audio_data
 
         # Initialize result
-        self.chunk_results[chunk_id] = ChunkResult(
-            chunk_id=chunk_id, status=ChunkStatus.PENDING, timestamp=time.time()
-        )
+        self.chunk_results[chunk_id] = ChunkResult(chunk_id=chunk_id, status=ChunkStatus.PENDING, timestamp=time.time())
 
         # Submit for processing
         future = self.executor.submit(self._process_chunk_task, chunk_id, audio_data)
@@ -177,9 +175,7 @@ class ChunkProcessor:
                         if i < 4:
                             time.sleep(0.5)  # Wait before retry
                         else:
-                            logger.logger.warning(
-                                f"Could not delete temp file {tmp_filename}: {e}"
-                            )
+                            logger.logger.warning(f"Could not delete temp file {tmp_filename}: {e}")
 
             # Check cancellation again
             if self.cancel_flag:
@@ -240,9 +236,7 @@ class ChunkProcessor:
 
                 # Schedule retry if applicable
                 if self.retry_manager and result.error:
-                    retry_time = self.retry_manager.schedule_retry(
-                        chunk_id, result.error
-                    )
+                    retry_time = self.retry_manager.schedule_retry(chunk_id, result.error)
                     if retry_time:
                         logger.logger.info(f"Scheduled retry for chunk {chunk_id}")
 
@@ -304,10 +298,7 @@ class ChunkProcessor:
         Returns:
             List of ChunkResult ordered by chunk_id
         """
-        return [
-            self.chunk_results[chunk_id]
-            for chunk_id in sorted(self.chunk_results.keys())
-        ]
+        return [self.chunk_results[chunk_id] for chunk_id in sorted(self.chunk_results.keys())]
 
     def remove_duplicate_text(self, text1: str, text2: str) -> str:
         """
@@ -334,9 +325,7 @@ class ChunkProcessor:
         # No overlap found
         return text1 + text2
 
-    def combine_results(
-        self, results: list[ChunkResult] | None = None
-    ) -> tuple[str, str]:
+    def combine_results(self, results: list[ChunkResult] | None = None) -> tuple[str, str]:
         """
         Combine all chunk results into final text
 
@@ -358,9 +347,7 @@ class ChunkProcessor:
                 if result.raw_text:
                     if i > 0 and raw_texts:
                         # Remove duplicates with previous chunk
-                        combined = self.remove_duplicate_text(
-                            raw_texts[-1], result.raw_text
-                        )
+                        combined = self.remove_duplicate_text(raw_texts[-1], result.raw_text)
                         raw_texts[-1] = combined
                     else:
                         raw_texts.append(result.raw_text)
@@ -369,9 +356,7 @@ class ChunkProcessor:
                 if result.formatted_text:
                     if i > 0 and formatted_texts:
                         # Remove duplicates with previous chunk
-                        combined = self.remove_duplicate_text(
-                            formatted_texts[-1], result.formatted_text
-                        )
+                        combined = self.remove_duplicate_text(formatted_texts[-1], result.formatted_text)
                         formatted_texts[-1] = combined
                     else:
                         formatted_texts.append(result.formatted_text)
@@ -407,9 +392,7 @@ class ChunkProcessor:
                 if future:
                     retried.append(chunk_id)
             else:
-                logger.logger.warning(
-                    f"Cannot retry chunk {chunk_id} - audio data not available"
-                )
+                logger.logger.warning(f"Cannot retry chunk {chunk_id} - audio data not available")
                 self.retry_manager.remove_chunk(chunk_id)
 
         return retried

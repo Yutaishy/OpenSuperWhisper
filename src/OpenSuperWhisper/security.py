@@ -15,9 +15,7 @@ try:
 
     CRYPTOGRAPHY_AVAILABLE = True
 except ImportError:
-    logger.logger.warning(
-        "cryptography package not available - API key encryption disabled"
-    )
+    logger.logger.warning("cryptography package not available - API key encryption disabled")
     CRYPTOGRAPHY_AVAILABLE = False
 
 
@@ -55,9 +53,7 @@ class APIKeyManager:
     def decrypt_api_key(self, encrypted_key: str, password: str) -> str | None:
         """Decrypt API key with password"""
         if not CRYPTOGRAPHY_AVAILABLE:
-            logger.logger.warning(
-                "Decryption not available - returning encrypted key as-is"
-            )
+            logger.logger.warning("Decryption not available - returning encrypted key as-is")
             return encrypted_key
         try:
             key = self._get_key(password)

@@ -36,26 +36,14 @@ class RetryManager:
 
     # Error type to retry configuration mapping
     ERROR_RETRY_CONFIG = {
-        "Network timeout": RetryConfig(
-            max_retries=1, base_delay=0.0, strategy=RetryStrategy.IMMEDIATE
-        ),
-        "Connection timed out": RetryConfig(
-            max_retries=1, base_delay=0.0, strategy=RetryStrategy.IMMEDIATE
-        ),
-        "Rate limit": RetryConfig(
-            max_retries=1, base_delay=60.0, strategy=RetryStrategy.FIXED_DELAY
-        ),
-        "API rate limit": RetryConfig(
-            max_retries=1, base_delay=60.0, strategy=RetryStrategy.FIXED_DELAY
-        ),
-        "Network error": RetryConfig(
-            max_retries=1, base_delay=5.0, strategy=RetryStrategy.FIXED_DELAY
-        ),
+        "Network timeout": RetryConfig(max_retries=1, base_delay=0.0, strategy=RetryStrategy.IMMEDIATE),
+        "Connection timed out": RetryConfig(max_retries=1, base_delay=0.0, strategy=RetryStrategy.IMMEDIATE),
+        "Rate limit": RetryConfig(max_retries=1, base_delay=60.0, strategy=RetryStrategy.FIXED_DELAY),
+        "API rate limit": RetryConfig(max_retries=1, base_delay=60.0, strategy=RetryStrategy.FIXED_DELAY),
+        "Network error": RetryConfig(max_retries=1, base_delay=5.0, strategy=RetryStrategy.FIXED_DELAY),
         "Authentication": RetryConfig(max_retries=0, strategy=RetryStrategy.NO_RETRY),
         "API key": RetryConfig(max_retries=0, strategy=RetryStrategy.NO_RETRY),
-        "default": RetryConfig(
-            max_retries=1, base_delay=10.0, strategy=RetryStrategy.FIXED_DELAY
-        ),
+        "default": RetryConfig(max_retries=1, base_delay=10.0, strategy=RetryStrategy.FIXED_DELAY),
     }
 
     def __init__(self) -> None:
@@ -86,9 +74,7 @@ class RetryManager:
 
         # Check if retries exhausted
         if current_retries >= config.max_retries:
-            logger.logger.info(
-                f"Chunk {chunk_id} exceeded max retries ({config.max_retries})"
-            )
+            logger.logger.info(f"Chunk {chunk_id} exceeded max retries ({config.max_retries})")
             return False
 
         # Check retry strategy
@@ -174,9 +160,7 @@ class RetryManager:
     def remove_chunk(self, chunk_id: int) -> None:
         """Remove a chunk from retry queue (e.g., if successful)"""
         with self.retry_lock:
-            self.retry_queue = [
-                (cid, rt) for cid, rt in self.retry_queue if cid != chunk_id
-            ]
+            self.retry_queue = [(cid, rt) for cid, rt in self.retry_queue if cid != chunk_id]
             if chunk_id in self.retry_counts:
                 del self.retry_counts[chunk_id]
 

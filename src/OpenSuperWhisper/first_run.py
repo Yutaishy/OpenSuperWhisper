@@ -9,9 +9,19 @@ import os
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont, QIcon
-from PySide6.QtWidgets import (QCheckBox, QDialog, QFrame, QHBoxLayout, QLabel,
-                               QLineEdit, QProgressBar, QPushButton, QTextEdit,
-                               QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (
+    QCheckBox,
+    QDialog,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QProgressBar,
+    QPushButton,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
 
 from . import config, logger
 
@@ -38,9 +48,7 @@ class FirstRunWizard(QDialog):
         self.setWindowFlags(Qt.WindowType.Dialog | Qt.WindowType.WindowCloseButtonHint)
 
         # Set application icon
-        icon_path = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), "assets", "windows", "osw.ico"
-        )
+        icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "windows", "osw.ico")
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
 
@@ -321,9 +329,7 @@ class FirstRunWizard(QDialog):
             if not self.skip_key.isChecked():
                 api_key = self.api_key_input.text().strip()
                 if not api_key:
-                    self.key_status.setText(
-                        "❌ Please enter an API key or check 'Skip for now'"
-                    )
+                    self.key_status.setText("❌ Please enter an API key or check 'Skip for now'")
                     self.key_status.setStyleSheet("color: red;")
                     return
 
