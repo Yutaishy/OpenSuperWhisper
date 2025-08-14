@@ -115,13 +115,14 @@ if ($venvActivate) {
 Write-Host "Installing dependencies..." -ForegroundColor Yellow
 pip install -q --upgrade pip
 pip install -q -r requirements.txt
+pip install -q pyinstaller
 
 # Build Python application with PyInstaller
 Write-Host ""
 Write-Host "Building executable..." -ForegroundColor Yellow
 
 $PyInstallerOpts = @(
-    "--name=$AppName$BinaryExt",
+    "--name=${AppName}${BinaryExt}",
     "--onefile",
     "--windowed",
     "--clean",

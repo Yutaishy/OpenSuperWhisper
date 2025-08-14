@@ -75,7 +75,8 @@ COPY --from=builder --chown=appuser:appuser /opt/venv /opt/venv
 COPY --chown=appuser:appuser src/OpenSuperWhisper/ ./OpenSuperWhisper/
 COPY --chown=appuser:appuser src/web_server.py .
 COPY --chown=appuser:appuser src/run_app.py .
-COPY --chown=appuser:appuser configs/ ./configs/
+# configs directory is optional - uncomment if you have configuration files
+# COPY --chown=appuser:appuser configs/ ./configs/
 
 # Create necessary directories with proper permissions
 RUN mkdir -p /app/logs /app/cache /tmp/opensuperwhisper && \

@@ -98,6 +98,7 @@ fi
 echo -e "${YELLOW}Installing dependencies...${NC}"
 pip install -q --upgrade pip
 pip install -q -r requirements.txt
+pip install -q pyinstaller
 
 # Build Python application with PyInstaller
 echo ""
