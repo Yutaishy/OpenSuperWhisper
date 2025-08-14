@@ -250,7 +250,9 @@ if __name__ == "__main__":
     logger.logger.info("Starting OpenSuperWhisper Web API Server")
 
     # Get configuration from environment variables
-    host = os.getenv("HOST", "0.0.0.0")
+    # Note: 0.0.0.0 is required for Docker containers to be accessible from outside
+    # In production, use a reverse proxy with proper security configurations
+    host = os.getenv("HOST", "0.0.0.0")  # nosec B104 - Required for Docker deployment
     port = int(os.getenv("PORT", "8000"))
 
     # Check for required API key

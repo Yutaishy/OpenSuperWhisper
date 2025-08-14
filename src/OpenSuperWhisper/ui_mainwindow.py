@@ -10,7 +10,7 @@ from typing import Any
 import numpy as np
 import sounddevice as sd
 import yaml
-from PySide6.QtCore import QThread, QTimer, Signal
+from PySide6.QtCore import QThread, QTimer, Signal, Qt
 from PySide6.QtGui import QAction, QCloseEvent, QIcon
 from PySide6.QtWidgets import (
     QApplication,
@@ -30,7 +30,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from . import asr_api, config, formatter_api, logger
+from . import __version__, asr_api, config, formatter_api, logger
 from .cancel_handler import CancelHandler
 from .chunk_processor import ChunkProcessor
 from .direct_hotkey import DirectHotkeyMonitor, get_direct_monitor
@@ -40,6 +40,7 @@ from .realtime_recorder import RealtimeRecorder
 from .recording_indicator import GlobalRecordingIndicator
 from .retry_manager import RetryManager
 from .simple_hotkey import SimpleHotkeyMonitor, get_hotkey_monitor
+from .updater import AutoUpdater, UpdateChannel
 
 DEFAULT_PROMPT = """# 役割
 あなたは「編集専用」の書籍編集者である。以下の <TRANSCRIPT> ... </TRANSCRIPT> に囲まれた本文だけを機械的に整形する。
@@ -171,6 +172,18 @@ class MainWindow(QMainWindow):
 
         # Show first run wizard if needed (delayed to ensure UI is ready)
         QTimer.singleShot(500, self.check_first_run)
+        
+        # Initialize auto-updater
+        self.updater = AutoUpdater(
+            current_version=__version__,
+            channel=UpdateChannel.STABLE,
+            check_interval_hours=24,
+            auto_download=False,
+            auto_install=False
+        )
+        
+        # Check for updates on startup (delayed)
+        QTimer.singleShot(3000, self.check_for_updates_silent)
 
     def initialize_realtime_components(self) -> None:
         """Initialize realtime transcription components"""
@@ -441,6 +454,10 @@ class MainWindow(QMainWindow):
         about_action = QAction("About", self)
         about_action.triggered.connect(self.show_about)
         help_menu.addAction(about_action)
+        
+        check_updates_action = QAction("Check for Updates...", self)
+        check_updates_action.triggered.connect(self.check_for_updates_manual)
+        help_menu.addAction(check_updates_action)
 
         help_menu.addSeparator()
 
@@ -1349,13 +1366,8 @@ class MainWindow(QMainWindow):
             logger.logger.info("Settings reset to defaults")
 
     def show_about(self) -> None:
-        try:
-            from . import __version__ as OSW_VERSION
-        except Exception:
-            OSW_VERSION = "unknown"
-
         about_text = f"""
-        <h3>OpenSuperWhisper v{OSW_VERSION}</h3>
+        <h3>OpenSuperWhisper v{__version__}</h3>
         <p>Two-Stage Voice Transcription Tool</p>
         <p>A cross-platform voice transcription application that uses OpenAI's
         state-of-the-art models to transcribe audio and then polish the
@@ -2121,6 +2133,122 @@ class MainWindow(QMainWindow):
             import traceback
 
             logger.logger.error(traceback.format_exc())
+    
+    def check_for_updates_silent(self) -> None:
+        """Check for updates silently on startup"""
+        try:
+            update_info = self.updater.check_for_updates(force=False)
+            if update_info:
+                # Show non-intrusive notification
+                self.recording_status.setText(f"Update available: v{update_info.version}")
+                logger.logger.info(f"Update available: v{update_info.version}")
+        except Exception as e:
+            logger.logger.error(f"Silent update check failed: {e}")
+    
+    def check_for_updates_manual(self) -> None:
+        """Manually check for updates with user feedback"""
+        try:
+            # Show checking dialog
+            msg_box = QMessageBox(self)
+            msg_box.setWindowTitle("Checking for Updates")
+            msg_box.setText("Checking for updates...")
+            msg_box.setStandardButtons(QMessageBox.StandardButton.NoButton)
+            msg_box.show()
+            QApplication.processEvents()
+            
+            # Check for updates
+            update_info = self.updater.check_for_updates(force=True)
+            msg_box.close()
+            
+            if update_info:
+                # Show update dialog
+                update_msg = f"""
+                <h3>Update Available!</h3>
+                <p><b>Current Version:</b> v{self.updater.current_version}</p>
+                <p><b>New Version:</b> v{update_info.version}</p>
+                <p><b>Release Name:</b> {update_info.name}</p>
+                <br>
+                <p>Would you like to download the update?</p>
+                """
+                
+                reply = QMessageBox.question(
+                    self,
+                    "Update Available",
+                    update_msg,
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+                )
+                
+                if reply == QMessageBox.StandardButton.Yes:
+                    self.download_update(update_info)
+            else:
+                QMessageBox.information(
+                    self,
+                    "No Updates",
+                    f"You are running the latest version (v{self.updater.current_version})"
+                )
+                
+        except Exception as e:
+            logger.logger.error(f"Manual update check failed: {e}")
+            QMessageBox.warning(
+                self,
+                "Update Check Failed",
+                f"Failed to check for updates:\n{str(e)}"
+            )
+    
+    def download_update(self, update_info) -> None:
+        """Download and install update"""
+        try:
+            # Create progress dialog
+            from PySide6.QtWidgets import QProgressDialog
+            
+            progress = QProgressDialog("Downloading update...", "Cancel", 0, 100, self)
+            progress.setWindowTitle("Downloading Update")
+            progress.setWindowModality(Qt.WindowModal)
+            progress.show()
+            
+            def update_progress(percent, downloaded, total):
+                progress.setValue(int(percent))
+                size_mb = total / (1024 * 1024)
+                down_mb = downloaded / (1024 * 1024)
+                progress.setLabelText(f"Downloading... {down_mb:.1f}/{size_mb:.1f} MB")
+                QApplication.processEvents()
+                
+                if progress.wasCanceled():
+                    return False
+                return True
+            
+            # Download update
+            download_path = self.updater.download_update(update_info, update_progress)
+            progress.close()
+            
+            if download_path:
+                # Ask to install
+                reply = QMessageBox.question(
+                    self,
+                    "Download Complete",
+                    "Update downloaded successfully.\nWould you like to install it now?\n\n"
+                    "The application will restart after installation.",
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+                )
+                
+                if reply == QMessageBox.StandardButton.Yes:
+                    # Install update (will exit application)
+                    self.updater.install_update(download_path)
+                else:
+                    QMessageBox.information(
+                        self,
+                        "Update Ready",
+                        f"Update downloaded to:\n{download_path}\n\n"
+                        "You can install it manually later."
+                    )
+            
+        except Exception as e:
+            logger.logger.error(f"Update download failed: {e}")
+            QMessageBox.warning(
+                self,
+                "Download Failed",
+                f"Failed to download update:\n{str(e)}"
+            )
 
 
 if __name__ == "__main__":

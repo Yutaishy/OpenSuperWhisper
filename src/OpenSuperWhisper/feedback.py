@@ -146,7 +146,8 @@ class FeedbackManager:
         timestamp = datetime.now().isoformat()
         machine_id = platform.node()
         session_str = f"{timestamp}_{machine_id}"
-        return hashlib.md5(session_str.encode()).hexdigest()[:16]
+        # Use SHA256 instead of MD5 for better security
+        return hashlib.sha256(session_str.encode()).hexdigest()[:16]
         
     def _get_anonymous_user_id(self) -> str:
         """Get or create anonymous user ID"""
